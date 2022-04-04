@@ -1,2 +1,9 @@
+*.asv
+*.mat
+*.vtk
+*.log
+Results/
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
 .vscode/
 __pycache__/

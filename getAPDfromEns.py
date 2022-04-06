@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import time
 from tqdm import tqdm
 from shutil import copyfile
-
+import random
 
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
@@ -22,6 +22,15 @@ for i in tqdm(range(args.timeStart, args.timeEnd)):
     tmp = np.array(data[4:]).astype(float)
     if i == args.timeStart: v = np.zeros((tmp.shape[0], args.timeEnd - args.timeStart))
     v[:, i-args.timeStart] = tmp
+
+#Plot some curves
+fig, ax = plt.subplots()
+for i in range(10):
+    plotIdx = random.randint(0,v.shape[0])
+    ax.plot(v[plotIdx,:], label=plotIdx)
+ax.legend()
+ax.set_title("10 Vm signals")
+plt.show()
 
 diff = np.diff(v, axis=1)
 upstrokeIdxs = np.argmax(diff, axis=1)

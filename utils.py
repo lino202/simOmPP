@@ -3,6 +3,7 @@ from scipy.spatial.distance import cdist
 import cv2
 from scipy.ndimage import label, median_filter
 import matplotlib.pyplot as plt
+import matplotlib.colors
 
 def isMemberIdxsRowWise(arr1, arr2, tol = 1E-6, showMem=False):
     if showMem: 
@@ -56,3 +57,30 @@ def calculateBoxPlotParams(data):
     upWhisker = data[data<=upQuart+1.5*iqr].max()
     lowWhisker = data[data>=lowQuart-1.5*iqr].min()
     return median, lowQuart, upQuart, lowWhisker, upWhisker
+
+
+def vector_to_rgb(angle, absolute, max_abs):
+    """Get the rgb value for the given `angle` and the `absolute` value
+
+    Parameters
+    ----------
+    angle : float
+        The angle in radians
+    absolute : float
+        The absolute value of the gradient
+    
+    Returns
+    -------
+    array_like
+        The rgb value as a tuple with values [0..1]
+    """
+    # normalize angle
+    if not np.isnan(angle):
+        angle = angle % (2 * np.pi)
+        if angle < 0:
+            angle += 2 * np.pi
+
+        return matplotlib.colors.hsv_to_rgb((angle / 2 / np.pi, absolute / max_abs, absolute / max_abs))
+    else:
+        return np.array([0,0,0])
+

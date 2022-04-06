@@ -15,6 +15,7 @@ parser.add_argument('--blockDown',type=int, required=True)
 parser.add_argument('--blockUp',type=int, required=True)
 parser.add_argument('--apdtype',type=int, required=True)
 parser.add_argument('--blockPlot',action='store_true')
+parser.add_argument('--outType', type=str, required=True)
 args = parser.parse_args()
 
 #LOAD
@@ -61,9 +62,14 @@ print("Useful Data: mean-std {0:.2f} +/- {1:.2f}".format(np.mean(apds), np.std(a
 print("\t median {0}, lowQuart {1}, upQuart {2}, lowWhisker {3}, upWhisker {4}".format(boxplotData[0], boxplotData[1], boxplotData[2], boxplotData[3], boxplotData[4]))
 
 fig, axs = plt.subplots(1,2)
+plt.subplots_adjust(wspace=0.4)
 axs[0].hist(apds)
 axs[1].boxplot(apds)
-plt.savefig(os.path.join(("/").join(args.filePath.split("/")[:-1]),'apd{}map_metrics.png'.format(args.apdtype)))
+axs[0].set_ylabel("Frequencies")
+axs[0].set_xlabel("APD{} [ms]".format(args.apdtype))
+axs[1].set_xlabel("Samples")
+axs[1].set_ylabel("APD{} [ms]".format(args.apdtype))
+plt.savefig(os.path.join(("/").join(args.filePath.split("/")[:-1]),'apd{}map_metrics.{}'.format(args.apdtype, args.outType)))
 plt.show(block=args.blockPlot)
 
 
@@ -76,6 +82,6 @@ cbar = plt.colorbar(ax=[ax], ticks=np.round(np.linspace( np.nanmin(clearImg),np.
 cbar.ax.tick_params(labelsize=20)
 cbar.ax.facecolor = 'r'
 cbar.set_label('APD{} [ms]'.format(args.apdtype), fontsize=20)
-plt.savefig(os.path.join(("/").join(args.filePath.split("/")[:-1]),'apd{}map.png'.format(args.apdtype)))
+plt.savefig(os.path.join(("/").join(args.filePath.split("/")[:-1]),'apd{}map.{}'.format(args.apdtype, args.outType)))
 plt.show(block=args.blockPlot)
 

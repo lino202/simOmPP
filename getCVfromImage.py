@@ -2,11 +2,9 @@ import os
 import numpy as np
 import argparse
 import matplotlib.pyplot as plt 
-import time
 import scipy.io
 from utils import meanFilter, cleanMap, keepBigIsland, calculateBoxPlotParams, vector_to_rgb
 import copy
-from scipy.ndimage import generic_filter
 
 np.seterr(divide='raise', invalid='raise')
 

@@ -9,7 +9,7 @@ parser.add_argument('--latPath',type=str, required=True, help='path to data')
 args = parser.parse_args()
 
 path = args.latPath.split("lat.ens")[0]
-copyfile (args.latPath, os.path.join(path, "latOri.ens"))
+copyfile(args.latPath, os.path.join(path, "latOri.ens"))
 
 with open(args.latPath, "r") as f:
     data = f.readlines()

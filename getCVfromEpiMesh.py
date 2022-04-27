@@ -10,19 +10,29 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
 parser.add_argument('--resultsMesh',type=str, required=True)
-parser.add_argument('--cleanMesh',type=str, required=True)
+parser.add_argument('--cleanMesh',type=str)
+parser.add_argument('--cellType',type=str, required=True)
+parser.add_argument('--spaceUnit',type=str, required=True)
+parser.add_argument('--alreadyClean',action='store_true')
 args = parser.parse_args()
 
-cleanMesh = meshio.read(os.path.join(args.dataPath, args.cleanMesh))
 resultsMesh = meshio.read(os.path.join(args.dataPath, args.resultsMesh))
-points = cleanMesh.points
-cells = cleanMesh.cells_dict["triangle"]
-idxs = isMemberIdxsRowWise(points, resultsMesh.points)
-ats = resultsMesh.point_data["LAT"][idxs]
+if not args.alreadyClean:
+    cleanMesh = meshio.read(os.path.join(args.dataPath, args.cleanMesh))
+    points = cleanMesh.points
+    cells = cleanMesh.cells_dict[args.cellType]
+    idxs = isMemberIdxsRowWise(points, resultsMesh.points)
+    ats = resultsMesh.point_data["LAT"][idxs]
+else:
+    points = resultsMesh.points
+    cells = resultsMesh.cells_dict[args.cellType]
+    ats = resultsMesh.point_data["LAT"]
 
 # Analize per point
 cvMag = np.zeros(ats.shape)
 cvDirs = np.zeros((ats.shape[0],3))
+cvMag[:] = np.nan
+cvDirs[:] = np.nan
 for i in tqdm(range(points.shape[0])):
     #Get connections
     nodeConns = np.unique(cells[(cells == i).nonzero()[0]])        #nodes connected
@@ -36,10 +46,7 @@ for i in tqdm(range(points.shape[0])):
     nodeCVs[:] = np.nan
     np.divide(dists, times, out=nodeCVs, where=times != 0.)
     
-    if np.isnan(nodeCVs).all():
-        cvMag[i] = np.nan
-        cvDirs[i,:] = np.nan
-    else:
+    if not np.isnan(nodeCVs).all():
         #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
         dirs = points[nodeConns,:] - points[[i],:]  
         dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
@@ -48,16 +55,16 @@ for i in tqdm(range(points.shape[0])):
         if np.linalg.norm(resVector) != 0.0:
             cvMag[i] = np.linalg.norm(resVector)
             cvDirs[i,:] = resVector / np.linalg.norm(resVector)
-        else:
-            cvMag[i] = np.nan
-            cvDirs[i,:] = np.nan
-        
 
 totDir = np.nanmean(cvDirs, axis=0)
 totDir = totDir / np.linalg.norm(totDir)
 print("The CV direction is {} \n".format(totDir))
 
-cvMag = cvMag * 100
+if args.spaceUnit == "mm":
+    cvMag = cvMag * 100
+elif args.spaceUnit == "cm":
+    cvMag = cvMag * 1000
+else: raise ValueError("Wrong space unit")
 cvMag = cvMag[~np.isnan(cvMag)]
 boxplotData = calculateBoxPlotParams(cvMag)
 print("Useful Data: mean-std {0:.2f} +/- {1:.2f}".format(np.mean(cvMag), np.std(cvMag)))

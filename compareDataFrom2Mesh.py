@@ -2,6 +2,7 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+csfont = {'fontname':'Times New Roman'}
 
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath1',type=str, required=True, help='path to data')
@@ -10,6 +11,7 @@ parser.add_argument('--nameData1',type=str, required=True)
 parser.add_argument('--nameData2',type=str, required=True)
 parser.add_argument('--histSteps',type=int, required=True)
 parser.add_argument('--outPath',type=str, required=True)
+parser.add_argument('--outType',type=str, required=True)
 args = parser.parse_args()
 
 with open(args.dataPath1, "r") as f:
@@ -26,17 +28,18 @@ dataMin = np.min(np.array([np.min(data1), np.min(data2)]))
 dataMax = np.max(np.array([np.max(data1), np.max(data2)]))
 bins = np.linspace(dataMin, dataMax, args.histSteps)
 fig, ax = plt.subplots()
-ax.hist(data1, bins, alpha=0.5, label=args.nameData1)
-ax.hist(data2, bins, alpha=0.5, label=args.nameData2)
+ax.hist(data1, bins, alpha=0.5, label=args.nameData1, color = (0.2039,0.2039, 0.2039), ec = (0.2039,0.2039, 0.2039))
+ax.hist(data2, bins, alpha=0.5, label=args.nameData2, color = (0.3334,0.6667, 1.0), ec = (0.3334,0.6667, 1.0))
 ax.set_ylabel("Frequency")
 ax.set_xlabel("AT [ms]")
 ax.legend(loc='upper right')
-plt.savefig(os.path.join(args.outPath,'endo_intramyo_comparison_hists.png'))
+# ax.axis("off")
+plt.savefig(os.path.join(args.outPath,'endo_intramyo_comparison_hists.{}'.format(args.outType)), transparent=False)
 plt.show()
 
 data = [data1, data2]
 fig, ax = plt.subplots()
 ax.boxplot(data, labels=[args.nameData1, args.nameData2])
-ax.set_ylabel("AT [ms]")
-plt.savefig(os.path.join(args.outPath,'endo_intramyo_comparison_boxs.png'))
+ax.set_ylabel("AT [ms]", **csfont)
+plt.savefig(os.path.join(args.outPath,'endo_intramyo_comparison_boxs.{}'.format(args.outType)), transparent=True)
 plt.show()

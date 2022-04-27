@@ -9,16 +9,20 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
 parser.add_argument('--resultsMesh',type=str, required=True)
-parser.add_argument('--cleanMesh',type=str, required=True)
+parser.add_argument('--cleanMesh',type=str)
 parser.add_argument('--apdtype',type=int, required=True)
+parser.add_argument('--alreadyClean',action='store_true')
 args = parser.parse_args()
 
-cleanMesh = meshio.read(os.path.join(args.dataPath, args.cleanMesh))
 resultsMesh = meshio.read(os.path.join(args.dataPath, args.resultsMesh))
-points = cleanMesh.points
-cells = cleanMesh.cells_dict["triangle"]
-idxs = isMemberIdxsRowWise(points, resultsMesh.points)
-apds = resultsMesh.point_data["APD{}".format(args.apdtype)][idxs]
+
+if not args.alreadyClean:
+    cleanMesh = meshio.read(os.path.join(args.dataPath, args.cleanMesh))
+    points = cleanMesh.points
+    idxs = isMemberIdxsRowWise(points, resultsMesh.points)
+    apds = resultsMesh.point_data["APD{}".format(args.apdtype)][idxs]
+else:
+    apds = resultsMesh.point_data["APD{}".format(args.apdtype)]
 
 apds = apds[~np.isnan(apds)]
 boxplotData = calculateBoxPlotParams(apds)

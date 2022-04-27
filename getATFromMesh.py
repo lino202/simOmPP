@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
+parser.add_argument('--resPath',type=str, required=True, help='path to data')
 args = parser.parse_args()
 
-with open(os.path.join(args.dataPath, "tissue", "lat.ens"), "r") as f:
+with open(os.path.join(args.dataPath, "lat.ens"), "r") as f:
     data = f.readlines()
 
 lats = np.array(data[4:]).astype(int)
@@ -26,5 +27,5 @@ axs[0].set_ylabel("Frequencies")
 axs[0].set_xlabel("AT [ms]")
 axs[1].set_xlabel("Samples")
 axs[1].set_ylabel("AT [ms]")
-plt.savefig(os.path.join(args.dataPath,'AT_metrics.png'))
+plt.savefig(os.path.join(args.resPath,'AT_metrics.png'))
 plt.show()

@@ -13,7 +13,6 @@ parser.add_argument('--solutionPrefix',type=str, required=True)
 parser.add_argument('--animationPrefix',type=str, required=True)
 parser.add_argument('--timeStart',type=int, required=True)
 parser.add_argument('--timeEnd',type=int, required=True)
-parser.add_argument('--apd',type=int, required=True)
 args = parser.parse_args()
 
 print("Reading .ens solutions")
@@ -36,36 +35,24 @@ ax.set_title("10 Vm signals")
 plt.show()
 
 diff = np.diff(v, axis=1)
-upstrokeIdxs = np.argmax(diff, axis=1)
-
-peakIdxs = np.argmax(v, axis=1)
-peaks    = np.max(v, axis=1)
-baselinelvls = np.array([np.min(v[i,peakIdxs[i]:]) for i in range(v.shape[0])])
-
-Voi = baselinelvls + (1 - (args.apd/100)) * (peaks - baselinelvls)
-tin = np.array([(v[i,peakIdxs[i]:]<Voi[i]).nonzero()[0][0] for i in range(v.shape[0])])
-tin = tin + peakIdxs
-
-if (tin >= upstrokeIdxs).all():
-    APD = tin - upstrokeIdxs 
-else: 
-    raise ValueError("Max derivate time greater than x repolarization")
+upstrokeIdxs = np.argmax(diff, axis=1)   # ATs
+ATs = upstrokeIdxs
     
-with open(os.path.join(args.dataPath, "apd{}.ens".format(args.apd)), 'w') as f:
+with open(os.path.join(args.dataPath, "lat.ens"), 'w') as f:
     f.write("Ensight Model Post Process\n")
     f.write("part\n")
     f.write(" 1\n")
     f.write("coordinates\n")
 
-    for i in range(APD.shape[0]):
-        f.write("{0:d}\n".format(APD[i]))
+    for i in range(ATs.shape[0]):
+        f.write("{0:d}\n".format(ATs[i]))
 
 #Adjust .case for seeing new apd data
 with open(os.path.join(args.dataPath, "{}.case".format(args.animationPrefix)), 'r') as f:
     data = f.readlines()
 
 copyfile (os.path.join(args.dataPath, "{}.case".format(args.animationPrefix)), os.path.join(args.dataPath, "{}Ori.case".format(args.animationPrefix)))
-scalarNewData = "scalar per node: APD{0} apd{1}.ens\n".format(args.apd, args.apd)
+scalarNewData = "scalar per node: LAT lat.ens\n"
 for i in range(len(data)):
     if "TIME" in data[i]:
         newdata = data[:i-1]

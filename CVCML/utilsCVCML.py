@@ -45,9 +45,6 @@ def getLocalCV(activationMap, baylyNeighbourhood):
     # IN:
     # activationMap - activation map from which a vector field is obtained.
     # baylyNeighbourhood - distance around a point that is considered when fitting the Bayly polynomial.
-    # varargin{1} - if defined, gives maximum length of an arrow (the longer ones are discarded).
-    #  varargin{2} - if defined, contains the index of figure in which the CV field is drawn.
-    # varargin{3} - if defined, the output path of storage of varargin{1}.
     # OUT:
     # xyuv - a n-by-4 matrix, where n is number of pixels and columns correspond
     # to x,y,u,v:  x,y gives indices of row and column, with u,v
@@ -75,15 +72,23 @@ def getLocalCV(activationMap, baylyNeighbourhood):
         whereNeighbours = np.where((distances>=0)&(distances <=baylyNeighbourhood))[1]
         locationsNeighbours = Z[whereNeighbours,:]
         neighbourActivationTimes = activationTimes[whereNeighbours]
-        sf = polyfit22(locationsNeighbours[:,0],locationsNeighbours[:,1],neighbourActivationTimes)
         x = np.arange(min(locationsNeighbours[:,0]), max(locationsNeighbours[:,0])+1)
         y = np.arange(min(locationsNeighbours[:,1]), max(locationsNeighbours[:,1])+1)
-        coeffs = sf[0]
         x = thisPoint[0]
         y = thisPoint[1]
-        dx = coeffs[1] + 2*coeffs[3]*x + coeffs[4]*y
-        dy = coeffs[2] + 2*coeffs[5]*y + coeffs[4]*x
-        xyuv[iPoint, :] = [x, y, dx/(dx*dx+dy*dy), dy/(dx*dx + dy*dy)]
+        if not np.isnan(neighbourActivationTimes).all():
+            noNanATidxs = ~np.isnan(neighbourActivationTimes)
+            sf = polyfit22(locationsNeighbours[noNanATidxs,0],locationsNeighbours[noNanATidxs,1],neighbourActivationTimes[noNanATidxs])
+            coeffs = sf[0]
+            dx = coeffs[1] + 2*coeffs[3]*x + coeffs[4]*y
+            dy = coeffs[2] + 2*coeffs[5]*y + coeffs[4]*x
+            if dx!=0 or dy!=0:
+                xyuv[iPoint, :] = [x, y, dx/(dx*dx+dy*dy), dy/(dx*dx + dy*dy)]
+            else:
+                xyuv[iPoint, :] = [x, y, np.nan, np.nan]
+        else:
+            xyuv[iPoint, :] = [x, y, np.nan, np.nan]
+
 
     return xyuv
 

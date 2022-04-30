@@ -42,7 +42,7 @@ else:
 
 
 # CV-----------------------------------------------
-print("Starting calculation of th CVs-----------------")
+print("Starting calculation of the local CVs-----------------")
 xyuv = getLocalCV(actMap, args.baylyDist)
 
 CVvectors = np.zeros(xyuv[:,-2:].shape)
@@ -68,11 +68,12 @@ CVDirsImg[positions[:,0], positions[:,1], 1] = CVversors[:,1]
 totMag = np.nanmean(CVmagnitudes)
 totDir = np.nanmean(CVversors, axis=0)
 totDir = totDir / np.linalg.norm(totDir)
-print("The CV magnitude is {}  cm/s".format(totMag))
-print("The CV direction versor is {} ".format(totDir))
+print("The mean CV magnitude is {}  cm/s".format(totMag))
+print("The mean CV direction versor is {} ".format(totDir))
 totDir = np.nanmean(CVvectors, axis=0)
-totDir = totDir / np.linalg.norm(totDir)
-print("The CV direction vector is {} ".format(totDir))
+print("The mean CVxy vector is {} ".format(totDir))
+totDir = np.nanmean(np.abs(CVvectors), axis=0)
+print("The meanAbs CVxy vector is {} ".format(totDir))
 
 # CV PLOTS ---------------------------------------------
 # CV Magnitude
@@ -114,7 +115,7 @@ else:
     plt.show(block=True)
 
 # CV vectors
-fig = plt.figure(figsize=(15, 15), dpi=100)
+fig = plt.figure()
 ax = fig.add_subplot(111)
 Q = plt.quiver(positions[:,1], np.abs(positions[:,0]-actMap.shape[0]), CVvectors[:,0], CVvectors[:,1], CVmagnitudes, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
 plt.scatter(positions[:,1], positions[:,0], color='k', s=0.01)

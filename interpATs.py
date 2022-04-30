@@ -24,4 +24,6 @@ elif args.interpType == "rbf":
     ats2 = RBFInterpolator(points1, values, neighbors=100)(points2)
 
 mesh2.point_data["LAT"] = ats2 - np.min(ats2)
-mesh2.write(args.outPath.split(".")[0] + "_{}.vtk".format(args.interpType) )
+fileOutName = args.outPath.split(".")[0] + "_{}.vtk".format(args.interpType)
+mesh2.write(fileOutName)
+# meshio.vtk.write(fileOutName, mesh2, binary=False) #Debugging

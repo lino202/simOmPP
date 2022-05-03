@@ -3,14 +3,15 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt 
 import scipy.io
-from utilsCVCML import vector_to_rgb, getLocalCV, plotHistAndBoxPlot
+from utils import vector_to_rgb, getLocalCvVanilla, getLocalCvBayly, plotHistAndBoxPlot
 
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--filePath',type=str, required=True, help='path to data including .mat with actmap in ms')
 parser.add_argument('--pixRes',type=float, required=True, help='pixel resolution in cm')
-parser.add_argument('--baylyDist', type=float, required=True, help='distance of Bayly paper in px')
-parser.add_argument('--baylyMaxCV', type=float, required=True, help='max CV in cm/s, this supplant the time window in the paper')
+parser.add_argument('--maxDist', type=float, required=True, help='distance of Bayly paper in px')
+parser.add_argument('--maxCV', type=float, required=True, help='max CV in cm/s, this supplant the time window in the paper')
+parser.add_argument('--calcMethod', type=str, required=True, help='bayly or vanilla')
 parser.add_argument('--scaleVectors', type=int, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
 parser.add_argument('--outPath', type=str, required=True, help='path to the folder for saving images, if 0 images are plotted and not saved')
 parser.add_argument('--outType', type=str, required=True, help='png or pdf')
@@ -33,8 +34,6 @@ else:
 
 # AT------------------------------------------
 lats = actMap[~np.isnan(actMap)]
-print("There are {} different lats: {}".format(len(np.unique(lats)), np.unique(lats)))
-print("The Range of the LAT is: {:.2f}".format(np.max(lats) - np.min(lats)))
 if args.outPath != "0":
     plotHistAndBoxPlot(lats, "AT [ms]", path=os.path.join(args.outPath, "atmap_metrics.{}".format(args.outType)))
 else:
@@ -42,19 +41,22 @@ else:
 
 
 # CV-----------------------------------------------
-print("Starting calculation of the local CVs-----------------")
-xyuv = getLocalCV(actMap, args.baylyDist)
+print("Starting calculation of the local CVs with method {}".format(args.calcMethod))
+if args.calcMethod == "bayly": xyuv = getLocalCvBayly(actMap, args.maxDist)
+elif args.calcMethod == "vanilla": xyuv = getLocalCvVanilla(actMap, args.maxDist)
+else: raise ValueError("Wrong calculation method")
+
 
 CVvectors = np.zeros(xyuv[:,-2:].shape)
 CVvectors[:,0] = xyuv[:,3]
 CVvectors[:,1] = -1*xyuv[:,2]
-positions = np.array(xyuv[:,:2]-1).astype(int)
+positions = xyuv[:,:2].astype(int)
 CVmagnitudes = np.linalg.norm(CVvectors, axis=1)
 CVversors = CVvectors / np.expand_dims(CVmagnitudes, axis=1)
 
 # Add units and get rid of CVs which are too long
 CVmagnitudes = CVmagnitudes * args.pixRes * 1000                # Only valid for conversion to cm/s if ATs are in ms and pixRes in cm
-idxs2Nan = np.where(CVmagnitudes>args.baylyMaxCV)
+idxs2Nan = np.where(CVmagnitudes>args.maxCV)
 CVmagnitudes[idxs2Nan] = np.nan
 CVversors[idxs2Nan,:] = np.nan
 CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors

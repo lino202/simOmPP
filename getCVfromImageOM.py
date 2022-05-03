@@ -4,7 +4,7 @@ import argparse
 import matplotlib.pyplot as plt 
 import scipy.io
 from utils import meanFilter, cleanMap, keepBigIsland, vector_to_rgb
-from CVCML.utilsCVCML import getLocalCV, plotHistAndBoxPlot
+from utils import getLocalCvBayly, getLocalCvVanilla, plotHistAndBoxPlot
 import copy
 
 np.seterr(divide='raise', invalid='raise')
@@ -15,8 +15,9 @@ parser.add_argument('--cleanProcess',type=int, required=True)
 parser.add_argument('--blockDown',type=int, required=True)
 parser.add_argument('--blockUp',type=int, required=True)
 parser.add_argument('--pixRes',type=float, required=True, help='pixel resolution in cm')
-parser.add_argument('--baylyDist', type=float, required=True, help='distance of Bayly paper in px')
+parser.add_argument('--maxDist', type=float, required=True, help='distance of Bayly paper in px')
 parser.add_argument('--maxCV', type=float, required=True, help='max CV in cm/s')
+parser.add_argument('--calcMethod', type=str, required=True, help='bayly or vanilla')
 parser.add_argument('--scaleVectors', type=int, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
 parser.add_argument('--outPath', type=str, required=True, help='path to the folder for saving images, if 0 images are plotted and not saved')
 parser.add_argument('--outType', type=str, required=True, help='png or pdf')
@@ -64,26 +65,27 @@ plt.savefig(os.path.join(args.outPath, "atmap.{}".format(args.outType))) if args
 
 # CV-----------------------------------------------
 print("Starting calculation of the local CVs with method {}".format(args.calcMethod))
-if args.calcMethod == "bayly": xyuv = getLocalCV(clearImg, args.baylyDist)
-elif args.calcMethod == "vanilla": xyuv = getLocalCV(clearImg)
+if args.calcMethod == "bayly": xyuv = getLocalCvBayly(clearImg, args.maxDist)
+elif args.calcMethod == "vanilla": xyuv = getLocalCvVanilla(clearImg, args.maxDist)
 else: raise ValueError("Wrong calculation method")
 
 CVvectors = np.zeros(xyuv[:,-2:].shape)
 CVvectors[:,0] = xyuv[:,3]
 CVvectors[:,1] = -1*xyuv[:,2]
-positions = np.array(xyuv[:,:2]-1).astype(int)
+positions = xyuv[:,:2].astype(int)
 CVmagnitudes = np.linalg.norm(CVvectors, axis=1)
 CVversors = CVvectors / np.expand_dims(CVmagnitudes, axis=1)
 
 # Add units and get rid of CVs which are too long
-CVmagnitudes = CVmagnitudes * args.pixRes * 100                # Only valid for conversion to cm/s if ATs are in ms and pixRes in cm
-idxs2Nan = np.where(CVmagnitudes>args.baylyMaxCV)
+CVmagnitudes = CVmagnitudes * args.pixRes * 1000               # Only valid for conversion to cm/s if ATs are in ms and pixRes in cm
+idxs2Nan = np.where(CVmagnitudes>args.maxCV)
 CVmagnitudes[idxs2Nan] = np.nan
 CVversors[idxs2Nan,:] = np.nan
 CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
 
 CVMagImg = np.zeros(actMap.shape)
 CVMagImg[positions[:,0], positions[:,1]] = CVmagnitudes
+CVMagImg[CVMagImg==0] = np.nan
 CVDirsImg = np.zeros((actMap.shape[0], actMap.shape[1], 2))
 CVDirsImg[positions[:,0], positions[:,1], 0] = CVversors[:,0]
 CVDirsImg[positions[:,0], positions[:,1], 1] = CVversors[:,1]
@@ -127,7 +129,7 @@ plt.savefig(os.path.join(args.outPath, "cvDirs.{}".format(args.outType))) if arg
 fig = plt.figure(figsize=(8, 8), dpi=100)
 ax = fig.add_subplot(111)
 Q = plt.quiver(positions[:,1], np.abs(positions[:,0]-actMap.shape[0]), CVvectors[:,0], CVvectors[:,1], CVmagnitudes, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
-plt.scatter(positions[:,1], positions[:,0], color='k', s=0.01)
+# plt.scatter(positions[:,1], positions[:,0], color='k', s=0.01)
 cbar = plt.colorbar(Q, ticks=np.linspace(np.nanmin(CVmagnitudes), np.nanmax(CVmagnitudes),6), location="right", pad=0.02, shrink=0.9)
 cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; plt.axis('off')
 cbar.set_label('CV vectors [cm/s]', fontsize=20)

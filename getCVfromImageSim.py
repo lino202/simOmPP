@@ -77,6 +77,19 @@ print("The mean CVxy vector is {} ".format(totDir))
 totDir = np.nanmean(np.abs(CVvectors), axis=0)
 print("The meanAbs CVxy vector is {} ".format(totDir))
 
+
+array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
+if args.outPath != "0":
+    plotHistAndBoxPlot(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
+else:
+    plotHistAndBoxPlot(array, "CVx [cm/s]")
+
+array = CVvectors[:,1][~np.isnan(CVvectors[:,1])]
+if args.outPath != "0":
+    plotHistAndBoxPlot(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
+else:
+    plotHistAndBoxPlot(array, "CVy [cm/s]")
+
 # CV PLOTS ---------------------------------------------
 # CV Magnitude
 fig = plt.figure()

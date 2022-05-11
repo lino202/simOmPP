@@ -6,6 +6,7 @@ import scipy.io
 from utils import meanFilter, cleanMap, keepBigIsland, vector_to_rgb
 from utils import getLocalCvBayly, getLocalCvVanilla, plotHistAndBoxPlot
 import copy
+from roipoly import RoiPoly
 
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
@@ -18,7 +19,7 @@ parser.add_argument('--pixRes',type=float, required=True, help='pixel resolution
 parser.add_argument('--maxDist', type=float, required=True, help='distance of Bayly paper in px')
 parser.add_argument('--maxCV', type=float, required=True, help='max CV in cm/s')
 parser.add_argument('--calcMethod', type=str, required=True, help='bayly or vanilla')
-parser.add_argument('--scaleVectors', type=int, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
+parser.add_argument('--scaleVectors', type=float, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
 parser.add_argument('--outPath', type=str, required=True, help='path to the folder for saving images, if 0 images are plotted and not saved')
 parser.add_argument('--outType', type=str, required=True, help='png or pdf')
 args = parser.parse_args()
@@ -26,8 +27,16 @@ args = parser.parse_args()
 #LOAD and CLEAN -------------------------------------------------------------------
 actMap = scipy.io.loadmat(args.filePath)[args.atMapName]
 plt.figure(); plt.imshow(actMap) 
+my_roi = RoiPoly(color='r') # draw new ROI in red color
 plt.show(block=False) if args.outPath != "0" else plt.show(block=True)
 actMap = np.nan_to_num(actMap) 
+
+try:
+    mask = my_roi.get_mask(actMap)
+    actMap = actMap * mask.astype(int)
+except IndexError:
+    pass
+
 
 if args.cleanProcess==0: newActMap = copy.deepcopy(actMap)
 elif args.cleanProcess==1: newActMap = cleanMap(actMap.astype('uint8'))
@@ -38,6 +47,8 @@ plt.show(block=False) if args.outPath != "0" else plt.show(block=True)
 
 #KEEP BIGGEST ISLAND---------------------------------------------------
 _, clearImg, imgMin, imgMax = keepBigIsland(newActMap, show=False if args.outPath != "0" else True)
+
+
 
 #PREPARE FOR PLOT AND DELETE OUTLIERS-------------------------------------------
 clearImg = clearImg.astype(float)
@@ -94,9 +105,24 @@ totMag = np.nanmean(CVmagnitudes)
 totDir = np.nanmean(CVversors, axis=0)
 totDir = totDir / np.linalg.norm(totDir)
 print("The mean CV magnitude is {}  cm/s".format(totMag))
+print("The median CV magnitude is {}  cm/s".format(np.nanmedian(CVmagnitudes)))
 print("The mean CV direction versor is {} ".format(totDir))
 totDir = np.nanmean(CVvectors, axis=0)
 print("The mean CVxy vector is {} ".format(totDir))
+totDir = np.nanmean(np.abs(CVvectors), axis=0)
+print("The meanAbs CVxy vector is {} ".format(totDir))
+
+array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
+if args.outPath != "0":
+    plotHistAndBoxPlot(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
+else:
+    plotHistAndBoxPlot(array, "CVx [cm/s]")
+
+array = CVvectors[:,1][~np.isnan(CVvectors[:,1])]
+if args.outPath != "0":
+    plotHistAndBoxPlot(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
+else:
+    plotHistAndBoxPlot(array, "CVy [cm/s]")
 
 # CV PLOTS ---------------------------------------------
 # CV Magnitude
@@ -121,17 +147,17 @@ lengths = np.sqrt(np.square(U) + np.square(V))
 max_abs = np.ones(angles.shape)*np.nanmax(lengths)
 c = np.array(list(map(vector_to_rgb, angles.flatten(), lengths.flatten(), max_abs.flatten())))
 fig, ax = plt.subplots()
-q = ax.quiver(X, Y, U, V, color=c)
+q = ax.quiver(X, Y, U, V, color=c, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
 ax.set_ylim(ax.get_ylim()[1], ax.get_ylim()[0]); plt.axis('off'); ax.set_title('Versors mapped by colors')
 plt.savefig(os.path.join(args.outPath, "cvDirs.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 
 # CV vectors
-fig = plt.figure(figsize=(8, 8), dpi=100)
-ax = fig.add_subplot(111)
-Q = plt.quiver(positions[:,1], np.abs(positions[:,0]-actMap.shape[0]), CVvectors[:,0], CVvectors[:,1], CVmagnitudes, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
-# plt.scatter(positions[:,1], positions[:,0], color='k', s=0.01)
-cbar = plt.colorbar(Q, ticks=np.linspace(np.nanmin(CVmagnitudes), np.nanmax(CVmagnitudes),6), location="right", pad=0.02, shrink=0.9)
-cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; plt.axis('off')
-cbar.set_label('CV vectors [cm/s]', fontsize=20)
-plt.savefig(os.path.join(args.outPath, "cvVectors.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
+# fig = plt.figure(figsize=(8, 8), dpi=100)
+# ax = fig.add_subplot(111)
+# Q = plt.quiver(positions[:,1], np.abs(positions[:,0]-actMap.shape[0]), CVvectors[:,0], CVvectors[:,1], CVmagnitudes, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
+# # plt.scatter(positions[:,1], positions[:,0], color='k', s=0.01)
+# cbar = plt.colorbar(Q, ticks=np.linspace(np.nanmin(CVmagnitudes), np.nanmax(CVmagnitudes),6), location="right", pad=0.02, shrink=0.9)
+# cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; plt.axis('off')
+# cbar.set_label('CV vectors [cm/s]', fontsize=20)
+# plt.savefig(os.path.join(args.outPath, "cvVectors.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 

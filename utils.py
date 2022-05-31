@@ -146,16 +146,16 @@ def getLocalCvBayly(img, maxDist):
             sf, cond = polyfit22(locationsNeighbours[noNanATidxs,0],locationsNeighbours[noNanATidxs,1], noNanATs)
             coeffs = sf[0]
             # Check fitting
-            SST =  np.sum((noNanATs - np.mean(noNanATs))**2)
-            SSE = sf[1]
-            R2  =  1 - (SSE/SST)                      
-            linearAprox = coeffs[1]*locationsNeighbours[noNanATidxs,0] + coeffs[2]*locationsNeighbours[noNanATidxs,1] + coeffs[0] 
-            SSE = np.sum((noNanATs - linearAprox)**2)
-            R2lin = 1 - (SSE/SST)
+            # SST =  np.sum((noNanATs - np.mean(noNanATs))**2)
+            # SSE = sf[1]
+            # R2  =  1 - (SSE/SST)                      
+            # linearAprox = coeffs[1]*locationsNeighbours[noNanATidxs,0] + coeffs[2]*locationsNeighbours[noNanATidxs,1] + coeffs[0] 
+            # SSE = np.sum((noNanATs - linearAprox)**2)
+            # R2lin = 1 - (SSE/SST)
 
             dx = coeffs[1] + 2*coeffs[3]*x + coeffs[4]*y
             dy = coeffs[2] + 2*coeffs[5]*y + coeffs[4]*x
-            if ((dx!=0 or dy!=0) and (R2 > 0.5)): #and (R2lin>0.05)
+            if ((dx!=0 or dy!=0) ): #and (R2lin>0.05) and (R2 > 0.5)
                 xyuv[iPoint, :] = [x, y, dx/(dx*dx+dy*dy), dy/(dx*dx + dy*dy)]
             else:
                 xyuv[iPoint, :] = [x, y, np.nan, np.nan]

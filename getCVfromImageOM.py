@@ -147,7 +147,7 @@ lengths = np.sqrt(np.square(U) + np.square(V))
 max_abs = np.ones(angles.shape)*np.nanmax(lengths)
 c = np.array(list(map(vector_to_rgb, angles.flatten(), lengths.flatten(), max_abs.flatten())))
 fig, ax = plt.subplots()
-q = ax.quiver(X, Y, U, V, color=c, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
+q = ax.quiver(X, Y, U, -V, color=c, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
 ax.set_ylim(ax.get_ylim()[1], ax.get_ylim()[0]); plt.axis('off'); ax.set_title('Versors mapped by colors')
 plt.savefig(os.path.join(args.outPath, "cvDirs.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 

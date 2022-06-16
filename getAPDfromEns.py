@@ -43,14 +43,22 @@ peaks    = np.max(v, axis=1)
 baselinelvls = np.array([np.min(v[i,peakIdxs[i]:]) for i in range(v.shape[0])])
 
 Voi = baselinelvls + (1 - (args.apd/100)) * (peaks - baselinelvls)
-tin = np.array([(v[i,peakIdxs[i]:]<Voi[i]).nonzero()[0][0] for i in range(v.shape[0])])
-tin = tin + peakIdxs
+tin = np.ones(v.shape[0]) * np.nan
+for i in tqdm(range(v.shape[0])):
+    try:
+        tin[i] = (v[i,peakIdxs[i]:]<Voi[i]).nonzero()[0][0] 
+    except IndexError:
+        pass
 
-if (tin >= upstrokeIdxs).all():
-    APD = tin - upstrokeIdxs 
-else: 
-    raise ValueError("Max derivate time greater than x repolarization")
+tin = tin + peakIdxs
+# APD = np.ones(v.shape[0]) * np.nan
+# if (tin[~np.isnan(tin)] >= upstrokeIdxs[~np.isnan(tin)]).all():
+#     APD[~np.isnan(tin)] = tin[~np.isnan(tin)] - upstrokeIdxs[~np.isnan(tin)] 
+# else: 
+#     raise ValueError("Max derivate time greater than x repolarization")
     
+APD = tin - upstrokeIdxs
+APD[APD<0] = np.nan
 with open(os.path.join(args.dataPath, "apd{}.ens".format(args.apd)), 'w') as f:
     f.write("Ensight Model Post Process\n")
     f.write("part\n")
@@ -58,7 +66,7 @@ with open(os.path.join(args.dataPath, "apd{}.ens".format(args.apd)), 'w') as f:
     f.write("coordinates\n")
 
     for i in range(APD.shape[0]):
-        f.write("{0:d}\n".format(APD[i]))
+        f.write("{0:f}\n".format(APD[i]))
 
 #Adjust .case for seeing new apd data
 with open(os.path.join(args.dataPath, "{}.case".format(args.animationPrefix)), 'r') as f:

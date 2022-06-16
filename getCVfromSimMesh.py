@@ -92,6 +92,7 @@ else:
 
 
 #Save
+ats = ats - np.nanmin(ats)
 point_data = {"ATs": ats, "CVMag": CVmagnitudes, "CVversors": CVversors}
 meshOut = meshio.Mesh(points, cells, point_data=point_data)
 if args.outPath != "0":

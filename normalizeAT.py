@@ -14,7 +14,7 @@ copyfile(args.latPath, os.path.join(path, "latOri.ens"))
 with open(args.latPath, "r") as f:
     data = f.readlines()
 
-lats = np.array(data[4:]).astype(int)
+lats = np.array(data[4:]).astype(float)
 lats = lats - np.nanmin(lats)
 
 with open(args.latPath, "w") as f:
@@ -24,9 +24,9 @@ with open(args.latPath, "w") as f:
     f.write("coordinates\n")
 
     for i in tqdm(range(lats.shape[0])):
-        f.write("{0:d}\n".format(lats[i]))
+        f.write("{0:f}\n".format(lats[i]))
 
-print("max AT is : {0:d}".format(np.nanmax(lats)) )
+print("max AT is : {0:f}".format(np.nanmax(lats)) )
 
 
     

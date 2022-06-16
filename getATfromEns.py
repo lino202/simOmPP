@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
 parser.add_argument('--solutionPrefix',type=str, required=True)
 parser.add_argument('--animationPrefix',type=str, required=True)
+parser.add_argument('--method',type=str, required=True)
 parser.add_argument('--timeStart',type=int, required=True)
 parser.add_argument('--timeEnd',type=int, required=True)
 args = parser.parse_args()
@@ -34,10 +35,18 @@ ax.legend()
 ax.set_title("10 Vm signals")
 plt.show()
 
-diff = np.diff(v, axis=1)
-upstrokeIdxs = np.argmax(diff, axis=1)   # ATs
-ATs = upstrokeIdxs
-    
+ATs = np.ones(v.shape[0]) * np.nan
+if args.method == "upstroke":
+    diff = np.diff(v, axis=1)
+    upstrokeIdxs = np.argmax(diff, axis=1)   # ATs
+    ATs = upstrokeIdxs
+elif  args.method == "zero-cross":
+    for i in tqdm(range(v.shape[0])):
+        try:
+            ATs[i] = np.where(np.diff(np.sign(v[i])))[0][0]
+        except IndexError: pass
+else: raise ValueError("Wrong method")
+
 with open(os.path.join(args.dataPath, "lat.ens"), 'w') as f:
     f.write("Ensight Model Post Process\n")
     f.write("part\n")
@@ -45,7 +54,7 @@ with open(os.path.join(args.dataPath, "lat.ens"), 'w') as f:
     f.write("coordinates\n")
 
     for i in range(ATs.shape[0]):
-        f.write("{0:d}\n".format(ATs[i]))
+        f.write("{0:f}\n".format(ATs[i]))
 
 #Adjust .case for seeing new apd data
 with open(os.path.join(args.dataPath, "{}.case".format(args.animationPrefix)), 'r') as f:

@@ -13,7 +13,7 @@ args = parser.parse_args()
 with open(os.path.join(args.dataPath, "lat.ens"), "r") as f:
     data = f.readlines()
 
-lats = np.array(data[4:]).astype(int)
+lats = np.array(data[4:]).astype(float)
 lats = lats[~np.isnan(lats)]
 boxplotData = calculateBoxPlotParams(lats)
 print("Useful Data: mean-std {0:.2f} +/- {1:.2f}".format(np.mean(lats), np.std(lats)))

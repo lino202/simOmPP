@@ -8,6 +8,9 @@ from utils import getLocalCvBayly, getLocalCvVanilla, plotHistAndBoxPlot
 import copy
 from roipoly import RoiPoly
 
+
+print("Hola Aida!")
+
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--filePath',type=str, required=True, help='path to data')

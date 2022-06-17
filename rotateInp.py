@@ -30,3 +30,8 @@ meshOut.write("{}.inp".format(args.outPath))
 
 meshOut = meshio.Mesh(rotPoints, mesh.cells, point_data=point_data)
 meshOut.write("{}.vtk".format(args.outPath))
+
+objPoints = np.zeros((rotPoints.shape[0],3))
+objPoints[:,:2] = rotPoints
+meshOut = meshio.Mesh(objPoints, mesh.cells)
+meshOut.write("{}.obj".format(args.outPath))

@@ -76,6 +76,14 @@ totDir = np.nanmean(CVvectors, axis=0)
 print("The mean CVxy vector is {} ".format(totDir))
 totDir = np.nanmean(np.abs(CVvectors), axis=0)
 print("The meanAbs CVxy vector is {} ".format(totDir))
+totDir = np.nanmax(CVvectors, axis=0)
+print("CVmax is {}".format(totDir))
+totDir = np.nanmin(CVvectors, axis=0)
+print("CVmin is {}".format(totDir))
+totDir = np.nanmax(np.abs(CVvectors), axis=0)
+print("CVmaxAbs is {}".format(totDir))
+totDir = np.nanmin(np.abs(CVvectors), axis=0)
+print("CVminAbs is {}".format(totDir))
 
 
 array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]

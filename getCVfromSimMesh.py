@@ -4,8 +4,7 @@ import numpy as np
 import argparse
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
-from utils import calculateBoxPlotParams, isMemberIdxsRowWise, getLocalCvVanillaMesh, getLocalCvBaylyMesh, plotHistAndBoxPlot
-import matplotlib.pyplot as plt
+from utils import calculateBoxPlotParams, isMemberIdxsRowWise, getLocalCvVanillaMesh, getLocalCvBaylyMesh, plotHistAndBoxPlotSeaBorn
 
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
@@ -54,41 +53,36 @@ CVmagnitudes[idxs2Nan] = np.nan
 CVversors[idxs2Nan,:] = np.nan
 CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
 
-totMag = np.nanmean(CVmagnitudes)
-print("The mean CV magnitude is {}  cm/s".format(totMag))
+print("The mean CV magnitude is {}  cm/s".format(np.nanmean(CVmagnitudes)))
 print("The median CV magnitude is {}  cm/s".format(np.nanmedian(CVmagnitudes)))
 totDir = np.nanmean(CVversors, axis=0)
 totDir = totDir / np.linalg.norm(totDir)
 print("The mean CV direction versor is {} ".format(totDir))
-totDir = np.nanmean(CVvectors, axis=0)
-print("The mean CVxyz vector is {} ".format(totDir))
-totDir = np.nanmean(np.abs(CVvectors), axis=0)
-print("The meanAbs CVxyz vector is {} ".format(totDir))
+print("The mean CVxyz vector is {} ".format(np.nanmean(CVvectors, axis=0)))
+print("The meanAbs CVxyz vector is {} ".format(np.nanmean(np.abs(CVvectors), axis=0)))
 
 array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
 if args.outPath != "0":
-    plotHistAndBoxPlot(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(array, "CVx [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]")
 
 array = CVvectors[:,1][~np.isnan(CVvectors[:,1])]
 if args.outPath != "0":
-    plotHistAndBoxPlot(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(array, "CVy [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]")
 
 array = CVvectors[:,2][~np.isnan(CVvectors[:,2])]
 if args.outPath != "0":
-    plotHistAndBoxPlot(array, "CVz [cm/s]", path=os.path.join(args.outPath, "cvz_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVz [cm/s]", path=os.path.join(args.outPath, "cvz_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(array, "CVz [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVz [cm/s]")
 
 if args.outPath != "0":
-    plotHistAndBoxPlot(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]")
-
-
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]")
 
 
 #Save

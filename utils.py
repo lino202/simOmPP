@@ -6,6 +6,7 @@ from scipy.ndimage import label, median_filter
 import matplotlib.pyplot as plt
 import matplotlib.colors
 from tqdm import tqdm
+import seaborn as sns
 
 def isMemberIdxsRowWise(arr1, arr2, tol = 1E-6, showMem=False):
     if showMem: 
@@ -296,3 +297,17 @@ def getLocalCvBaylyMesh(points, ats, maxDist):
             xyzuvw[i, -3:] = [np.nan, np.nan, np.nan]
 
     return xyzuvw
+
+
+def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
+
+    sns.set(style="ticks")
+    f, (ax_box, ax_hist) = plt.subplots(2, sharex=True, gridspec_kw={"height_ratios": (.15, .85)})
+    sns.boxplot(x=array, ax=ax_box)
+    sns.histplot(x=array, ax=ax_hist)
+    ax_box.set(yticks=[])
+    ax_hist.set_ylabel("Frequencies")
+    ax_hist.set_xlabel(arrayName)
+    sns.despine(ax=ax_hist)
+    sns.despine(ax=ax_box, left=True)
+    plt.savefig(path) if path else plt.show(block=True)

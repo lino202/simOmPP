@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt 
 import scipy.io
-from utils import vector_to_rgb, getLocalCvVanilla, getLocalCvBayly, plotHistAndBoxPlot
+from utils import vector_to_rgb, getLocalCvVanilla, getLocalCvBayly, plotHistAndBoxPlotSeaBorn
 
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
@@ -21,7 +21,7 @@ args = parser.parse_args()
 actMap = scipy.io.loadmat(args.filePath)['actmap']
 fig = plt.figure()
 ax = fig.add_subplot(111)
-plt.imshow(actMap)
+plt.imshow(actMap, cmap='viridis')
 plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(actMap),np.nanmax(actMap),6), location="right", pad=0.02, shrink=0.9)
 cbar.ax.tick_params(labelsize=20)
@@ -35,9 +35,9 @@ else:
 # AT------------------------------------------
 lats = actMap[~np.isnan(actMap)]
 if args.outPath != "0":
-    plotHistAndBoxPlot(lats, "AT [ms]", path=os.path.join(args.outPath, "atmap_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(lats, "AT [ms]", path=os.path.join(args.outPath, "atmap_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(lats, "AT [ms]")
+    plotHistAndBoxPlotSeaBorn(lats, "AT [ms]")
 
 
 # CV-----------------------------------------------
@@ -63,14 +63,21 @@ CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
 
 CVMagImg = np.zeros(actMap.shape)
 CVMagImg[positions[:,0], positions[:,1]] = CVmagnitudes
+
+CVxMagImg = np.zeros(actMap.shape)
+CVxMagImg[positions[:,0], positions[:,1]] = CVvectors[:,0]
+CVyMagImg = np.zeros(actMap.shape)
+CVyMagImg[positions[:,0], positions[:,1]] = CVvectors[:,1]
+
 CVDirsImg = np.zeros((actMap.shape[0], actMap.shape[1], 2))
 CVDirsImg[positions[:,0], positions[:,1], 0] = CVversors[:,0]
 CVDirsImg[positions[:,0], positions[:,1], 1] = CVversors[:,1]
 
-totMag = np.nanmean(CVmagnitudes)
+
 totDir = np.nanmean(CVversors, axis=0)
 totDir = totDir / np.linalg.norm(totDir)
-print("The mean CV magnitude is {}  cm/s".format(totMag))
+print("The mean CV magnitude is {}  cm/s".format(np.nanmean(CVmagnitudes)))
+print("The median CV magnitude is {}  cm/s".format(np.nanmedian(CVmagnitudes)))
 print("The mean CV direction versor is {} ".format(totDir))
 totDir = np.nanmean(CVvectors, axis=0)
 print("The mean CVxy vector is {} ".format(totDir))
@@ -88,35 +95,35 @@ print("CVminAbs is {}".format(totDir))
 
 array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
 if args.outPath != "0":
-    plotHistAndBoxPlot(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(array, "CVx [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]")
 
 array = CVvectors[:,1][~np.isnan(CVvectors[:,1])]
 if args.outPath != "0":
-    plotHistAndBoxPlot(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(array, "CVy [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]")
 
 # CV PLOTS ---------------------------------------------
 # CV Magnitude
 fig = plt.figure()
 ax = fig.add_subplot(111)
-plt.imshow(CVMagImg, vmin=np.nanmin(CVMagImg), vmax=np.nanmax(CVMagImg))
+plt.imshow(CVMagImg, vmin=np.nanmin(CVMagImg), vmax=np.nanmax(CVMagImg), cmap='viridis')
 plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(CVMagImg),np.nanmax(CVMagImg),4), location="right", pad=0.02, shrink=0.9)
-cbar.ax.tick_params(labelsize=20)
+cbar.ax.tick_params(labelsize=15)
 cbar.ax.facecolor = 'r'
-cbar.set_label('CV Magnitude [cm/s]', fontsize=20)
+cbar.set_label('CV Magnitude [cm/s]', fontsize=15)
 if args.outPath != "0":
     plt.savefig(os.path.join(args.outPath, "cvMag.{}".format(args.outType)))
 else:
     plt.show(block=True)
 
 if args.outPath != "0":
-    plotHistAndBoxPlot(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]")
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]")
 
 # CV versors directions
 X = np.arange(0, actMap.shape[0], 1)
@@ -140,14 +147,47 @@ else:
 # CV vectors
 fig = plt.figure()
 ax = fig.add_subplot(111)
-Q = plt.quiver(positions[:,1], np.abs(positions[:,0]-actMap.shape[0]), CVvectors[:,0], CVvectors[:,1], CVmagnitudes, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
+Q = plt.quiver(positions[:,1], np.abs(positions[:,0]-actMap.shape[0]), CVvectors[:,0], CVvectors[:,1], CVmagnitudes, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors, cmap='viridis')
 plt.scatter(positions[:,1], positions[:,0], color='k', s=0.01)
 cbar = plt.colorbar(Q, ticks=np.linspace(np.nanmin(CVmagnitudes), np.nanmax(CVmagnitudes),6), location="right", pad=0.02, shrink=0.9)
-cbar.ax.tick_params(labelsize=20)
+cbar.ax.tick_params(labelsize=15)
 cbar.ax.facecolor = 'r'
 plt.axis('off')
-cbar.set_label('CV vectors [cm/s]', fontsize=20)
+cbar.set_label('CV vectors [cm/s]', fontsize=15)
 if args.outPath != "0":
     plt.savefig(os.path.join(args.outPath, "cvVectors.{}".format(args.outType)))
+else:
+    plt.show(block=True)
+
+
+# CVx and CVy
+
+plotMin = np.nanmin(np.array([CVxMagImg,CVyMagImg]).flatten())
+plotMax = np.nanmax(np.array([CVxMagImg,CVyMagImg]).flatten())
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+plt.imshow(CVxMagImg, vmin=plotMin, vmax=plotMax, cmap='viridis')
+plt.axis('off')
+cbar = plt.colorbar(ax=[ax], ticks=np.linspace(plotMin, plotMax, 4), location="right", pad=0.02, shrink=0.9)
+cbar.ax.tick_params(labelsize=15)
+cbar.ax.facecolor = 'r'
+cbar.set_label('CVx Magnitude [cm/s]', fontsize=15)
+if args.outPath != "0":
+    plt.savefig(os.path.join(args.outPath, "cvxMag.{}".format(args.outType)))
+else:
+    plt.show(block=True)
+
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+plt.imshow(CVyMagImg, vmin=plotMin, vmax=plotMax, cmap='viridis')
+plt.axis('off')
+cbar = plt.colorbar(ax=[ax], ticks=np.linspace(plotMin, plotMax, 4), location="right", pad=0.02, shrink=0.9)
+cbar.ax.tick_params(labelsize=15)
+cbar.ax.facecolor = 'r'
+cbar.set_label('CVy Magnitude [cm/s]', fontsize=15)
+if args.outPath != "0":
+    plt.savefig(os.path.join(args.outPath, "cvyMag.{}".format(args.outType)))
 else:
     plt.show(block=True)

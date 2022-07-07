@@ -5,6 +5,7 @@ import argparse
 from scipy.spatial.distance import cdist
 from tqdm import tqdm
 from utils import calculateBoxPlotParams, isMemberIdxsRowWise, getLocalCvVanillaMesh, getLocalCvBaylyMesh, plotHistAndBoxPlotSeaBorn
+from scipy import stats as st
 
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")

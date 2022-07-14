@@ -12,16 +12,17 @@ parser.add_argument('--nameData2',type=str, required=True)
 parser.add_argument('--histSteps',type=int, required=True)
 parser.add_argument('--outPath',type=str, required=True)
 parser.add_argument('--outType',type=str, required=True)
+parser.add_argument('--outName',type=str, required=True)
 args = parser.parse_args()
 
 with open(args.dataPath1, "r") as f:
     data = f.readlines()
-data1 = np.array(data[4:]).astype(int)
+data1 = np.array(data[4:]).astype(float)
 data1 = data1[~np.isnan(data1)]
 
 with open(args.dataPath2, "r") as f:
     data = f.readlines()
-data2 = np.array(data[4:]).astype(int)
+data2 = np.array(data[4:]).astype(float)
 data2 = data2[~np.isnan(data2)]
 
 dataMin = np.min(np.array([np.min(data1), np.min(data2)]))
@@ -34,12 +35,12 @@ ax.set_ylabel("Frequency")
 ax.set_xlabel("AT [ms]")
 ax.legend(loc='upper right')
 # ax.axis("off")
-plt.savefig(os.path.join(args.outPath,'endo_intramyo_comparison_hists.{}'.format(args.outType)), transparent=False)
+plt.savefig(os.path.join(args.outPath,'{}_hists.{}'.format(args.outName, args.outType)), transparent=False)
 plt.show()
 
 data = [data1, data2]
 fig, ax = plt.subplots()
 ax.boxplot(data, labels=[args.nameData1, args.nameData2])
 ax.set_ylabel("AT [ms]", **csfont)
-plt.savefig(os.path.join(args.outPath,'endo_intramyo_comparison_boxs.{}'.format(args.outType)), transparent=True)
+plt.savefig(os.path.join(args.outPath,'{}_boxs.{}'.format(args.outName, args.outType)), transparent=True)
 plt.show()

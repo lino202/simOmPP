@@ -61,6 +61,8 @@ CVmagnitudes[idxs2Nan] = np.nan
 CVversors[idxs2Nan,:] = np.nan
 CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
 
+
+
 CVMagImg = np.zeros(actMap.shape)
 CVMagImg[positions[:,0], positions[:,1]] = CVmagnitudes
 
@@ -68,6 +70,11 @@ CVxMagImg = np.zeros(actMap.shape)
 CVxMagImg[positions[:,0], positions[:,1]] = CVvectors[:,0]
 CVyMagImg = np.zeros(actMap.shape)
 CVyMagImg[positions[:,0], positions[:,1]] = CVvectors[:,1]
+
+#Save to .mat
+if args.outPath != "0":
+    cvMat = np.array([CVxMagImg, CVyMagImg])
+    scipy.io.savemat(os.path.join(args.outPath, "CVxy.mat"), {"CVxy" : cvMat})
 
 CVDirsImg = np.zeros((actMap.shape[0], actMap.shape[1], 2))
 CVDirsImg[positions[:,0], positions[:,1], 0] = CVversors[:,0]
@@ -91,7 +98,6 @@ totDir = np.nanmax(np.abs(CVvectors), axis=0)
 print("CVmaxAbs is {}".format(totDir))
 totDir = np.nanmin(np.abs(CVvectors), axis=0)
 print("CVminAbs is {}".format(totDir))
-
 
 array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
 if args.outPath != "0":

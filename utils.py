@@ -300,11 +300,17 @@ def getLocalCvBaylyMesh(points, ats, maxDist):
 
 
 def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
+    if "AT" in arrayName:
+        binsNum = 10
+    elif "CV" in arrayName:
+        binsNum = 60
+    else:
+        binsNum = "auto"
 
     sns.set(style="ticks")
     f, (ax_box, ax_hist) = plt.subplots(2, sharex=True, gridspec_kw={"height_ratios": (.15, .85)})
     sns.boxplot(x=array, ax=ax_box)
-    sns.histplot(x=array, ax=ax_hist)
+    sns.histplot(x=array, ax=ax_hist, bins=binsNum, kde=True)
     ax_box.set(yticks=[])
     ax_hist.set_ylabel("Frequencies")
     ax_hist.set_xlabel(arrayName)

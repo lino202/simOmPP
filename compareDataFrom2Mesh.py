@@ -2,7 +2,14 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-csfont = {'fontname':'Times New Roman'}
+# csfont = {'fontname':'Times New Roman'}
+# plt.rcParams["font.family"] = "Times New Roman"
+
+font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 13}
+
+plt.rc('font', **font)
 
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath1',type=str, required=True, help='path to data')
@@ -32,8 +39,10 @@ fig, ax = plt.subplots()
 ax.hist(data1, bins, alpha=0.5, label=args.nameData1, color = (0.2039,0.2039, 0.2039), ec = (0.2039,0.2039, 0.2039))
 ax.hist(data2, bins, alpha=0.5, label=args.nameData2, color = (0.3334,0.6667, 1.0), ec = (0.3334,0.6667, 1.0))
 ax.set_ylabel("Frequency")
-ax.set_xlabel("AT [ms]")
+ax.set_xlabel("AT (ms)")
 ax.legend(loc='upper right')
+plt.xlim([0, 100])
+plt.ylim([0, 15000])
 # ax.axis("off")
 plt.savefig(os.path.join(args.outPath,'{}_hists.{}'.format(args.outName, args.outType)), transparent=False)
 plt.show()
@@ -41,6 +50,6 @@ plt.show()
 data = [data1, data2]
 fig, ax = plt.subplots()
 ax.boxplot(data, labels=[args.nameData1, args.nameData2])
-ax.set_ylabel("AT [ms]", **csfont)
+ax.set_ylabel("AT [ms]")
 plt.savefig(os.path.join(args.outPath,'{}_boxs.{}'.format(args.outName, args.outType)), transparent=True)
 plt.show()

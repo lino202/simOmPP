@@ -9,6 +9,12 @@ import pandas as pd
 import meshio
 import matplotlib.pyplot as plt
 
+font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 16}
+
+plt.rc('font', **font)
+
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
 parser.add_argument('--nbins',type=int, required=False, help='number of bins')
@@ -28,6 +34,7 @@ print ("IVD {0:.2f} (ms)".format(np.nanmin(data["lvEpiATs"]) - np.nanmin(data["r
 sns.histplot(data=data["lvEndoATs"], color="skyblue", label="LV endo", bins=args.nbins if args.nbins else "auto")
 sns.histplot(data=data["rvEpiATs"], color="red", label="RV epi", bins=args.nbins if args.nbins else "auto")
 sns.histplot(data=data["lvEpiATs"], color="green", label="LV epi", bins=args.nbins if args.nbins else "auto")
+plt.xlim([0, 100])
 plt.xlabel("AT (ms)")
 plt.ylabel("Frequencies")
 plt.legend() 

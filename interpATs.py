@@ -18,12 +18,24 @@ points1 = mesh1.points
 points2 = mesh2.points
 values = mesh1.point_data["LAT"]
 
-if args.interpType == "nearest":
-    ats2 = griddata(points1, values, points2, method='nearest')
-elif args.interpType == "rbf":
-    ats2 = RBFInterpolator(points1, values, neighbors=100)(points2)
+if "cover" in mesh2.point_data.keys():
+    realMyoIdxs = np.where(mesh2.point_data["cover"] == 0)[0]
+    points2 = points2[realMyoIdxs]
 
-mesh2.point_data["LAT"] = ats2 - np.min(ats2)
+if args.interpType == "nearest":
+    values2 = griddata(points1, values, points2, method='nearest')
+elif args.interpType == "rbf":
+    values2 = RBFInterpolator(points1, values, neighbors=100)(points2)
+
+
+ats2 = np.zeros(mesh2.points.shape[0])
+ats2[:] = np.nan 
+if "cover" in mesh2.point_data.keys():
+    ats2[realMyoIdxs] =  values2
+else:
+    ats2 = values2
+
+mesh2.point_data["LAT"] = ats2 - np.nanmin(ats2)
 fileOutName = args.outPath.split(".")[0] + "_{}.vtk".format(args.interpType)
 mesh2.write(fileOutName)
 # meshio.vtk.write(fileOutName, mesh2, binary=False) #Debugging

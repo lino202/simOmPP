@@ -7,10 +7,13 @@ from utils import meanFilter, cleanMap, keepBigIsland, vector_to_rgb
 from utils import getLocalCvBayly, getLocalCvVanilla, plotHistAndBoxPlot
 import copy
 from roipoly import RoiPoly
+import pickle
 
+font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 15}
 
-print("Hola Aida!")
-
+plt.rc('font', **font)
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--filePath',type=str, required=True, help='path to data')
@@ -164,3 +167,6 @@ plt.savefig(os.path.join(args.outPath, "cvDirs.{}".format(args.outType))) if arg
 # cbar.set_label('CV vectors [cm/s]', fontsize=20)
 # plt.savefig(os.path.join(args.outPath, "cvVectors.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 
+if args.outPath != "0":
+    with open(os.path.join(args.outPath, "cvMags"), "wb") as fp:
+        pickle.dump(CVmagnitudes, fp)

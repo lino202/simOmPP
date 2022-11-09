@@ -41,6 +41,6 @@ df = pd.concat(map(pd.Series, data.values()), keys=data.keys(), axis=1)
 
 plt.figure()
 sns.boxplot(data=df, palette=args.palette)
-plt.xlabel(args.variableName)
-plt.ylabel("Count")
+# plt.xlabel(args.variableName)
+plt.ylabel(args.variableName)
 plt.savefig(args.outPath) if args.save else plt.show(block=True)

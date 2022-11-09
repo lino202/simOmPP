@@ -16,13 +16,14 @@ font = {'family' : "Times New Roman",
 plt.rc('font', **font)
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
-parser.add_argument('--filePath',type=str, required=True, help='path to data')
+parser.add_argument('--filePath',type=str, required=True, help='path to data, AT should be in ms')
+parser.add_argument('--shouldNotHaveAllPoints', action='store_true', help="If false CV in a point is only computed if it has all the points in its sourroundings defined, according to maxdist")
 parser.add_argument('--atMapName',type=str, required=True, help='name of AT map from Matlab')
-parser.add_argument('--cleanProcess',type=int, required=True)
-parser.add_argument('--blockDown',type=int, required=True)
-parser.add_argument('--blockUp',type=int, required=True)
+parser.add_argument('--cleanProcess',type=int, required=True, help='Select the cleaning proccessed, they are really similar. 0 for not cleaning')
+parser.add_argument('--blockDown',type=int, required=True, help='Cut bottom boundary for AT values, 0 = not cutting')
+parser.add_argument('--blockUp',type=int, required=True, help='Cut upper boundary for AT values, 0 = not cutting')
 parser.add_argument('--pixRes',type=float, required=True, help='pixel resolution in cm')
-parser.add_argument('--maxDist', type=float, required=True, help='distance of Bayly paper in px')
+parser.add_argument('--maxDist', type=float, required=True, help='max distance of pxs from the pixel in which the CV computation is happening in order to be used in the calculation, in px')
 parser.add_argument('--maxCV', type=float, required=True, help='max CV in cm/s')
 parser.add_argument('--calcMethod', type=str, required=True, help='bayly or vanilla')
 parser.add_argument('--scaleVectors', type=float, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
@@ -59,7 +60,8 @@ _, clearImg, imgMin, imgMax = keepBigIsland(newActMap, show=False if args.outPat
 #PREPARE FOR PLOT AND DELETE OUTLIERS-------------------------------------------
 clearImg = clearImg.astype(float)
 clearImg[clearImg==0] = np.nan
-clearImg = np.round(clearImg-imgMin)
+# clearImg = np.round(clearImg-imgMin)
+clearImg = clearImg-imgMin
 
 # Block in case there are outliers
 if args.blockDown != 0: clearImg[clearImg<args.blockDown] = np.nan
@@ -82,14 +84,12 @@ plt.savefig(os.path.join(args.outPath, "atmap.{}".format(args.outType))) if args
 
 # CV-----------------------------------------------
 print("Starting calculation of the local CVs with method {}".format(args.calcMethod))
-if args.calcMethod == "bayly": xyuv = getLocalCvBayly(clearImg, args.maxDist)
-elif args.calcMethod == "vanilla": xyuv = getLocalCvVanilla(clearImg, args.maxDist)
+if args.calcMethod == "bayly": x_y_vx_vy = getLocalCvBayly(clearImg, args.maxDist, args.shouldNotHaveAllPoints)
+elif args.calcMethod == "vanilla": x_y_vx_vy = getLocalCvVanilla(clearImg, args.maxDist, args.maxCV / (args.pixRes * 1000), args.shouldNotHaveAllPoints)
 else: raise ValueError("Wrong calculation method")
 
-CVvectors = np.zeros(xyuv[:,-2:].shape)
-CVvectors[:,0] = xyuv[:,3]
-CVvectors[:,1] = -1*xyuv[:,2]
-positions = xyuv[:,:2].astype(int)
+CVvectors = x_y_vx_vy[:,-2:]
+positions = x_y_vx_vy[:,:2].astype(int)
 CVmagnitudes = np.linalg.norm(CVvectors, axis=1)
 CVversors = CVvectors / np.expand_dims(CVmagnitudes, axis=1)
 
@@ -109,10 +109,10 @@ CVDirsImg[positions[:,0], positions[:,1], 1] = CVversors[:,1]
 
 totMag = np.nanmean(CVmagnitudes)
 totDir = np.nanmean(CVversors, axis=0)
-totDir = totDir / np.linalg.norm(totDir)
+# totDir = totDir / np.linalg.norm(totDir) #values near zero apear to have a direction when normalize
 print("The mean CV magnitude is {}  cm/s".format(totMag))
 print("The median CV magnitude is {}  cm/s".format(np.nanmedian(CVmagnitudes)))
-print("The mean CV direction versor is {} ".format(totDir))
+print("The mean of CV direction versors is {} ".format(totDir))
 totDir = np.nanmean(CVvectors, axis=0)
 print("The mean CVxy vector is {} ".format(totDir))
 totDir = np.nanmean(np.abs(CVvectors), axis=0)

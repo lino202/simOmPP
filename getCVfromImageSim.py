@@ -7,12 +7,13 @@ from utils import vector_to_rgb, getLocalCvVanilla, getLocalCvBayly, plotHistAnd
 
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
-parser.add_argument('--filePath',type=str, required=True, help='path to data including .mat with actmap in ms')
+parser.add_argument('--filePath',type=str, required=True, help='path to data')
+parser.add_argument('--shouldNotHaveAllPoints', action='store_true', help="If false CV in a point is only computed if it has all the points in its sourroundings defined, according to maxdist")
 parser.add_argument('--pixRes',type=float, required=True, help='pixel resolution in cm')
-parser.add_argument('--maxDist', type=float, required=True, help='distance of Bayly paper in px')
-parser.add_argument('--maxCV', type=float, required=True, help='max CV in cm/s, this supplant the time window in the paper')
+parser.add_argument('--maxDist', type=float, required=True, help='max distance of pxs from the pixel in which the CV computation is happening in order to be used in the calculation, in px')
+parser.add_argument('--maxCV', type=float, required=True, help='max CV in cm/s')
 parser.add_argument('--calcMethod', type=str, required=True, help='bayly or vanilla')
-parser.add_argument('--scaleVectors', type=int, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
+parser.add_argument('--scaleVectors', type=float, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
 parser.add_argument('--outPath', type=str, required=True, help='path to the folder for saving images, if 0 images are plotted and not saved')
 parser.add_argument('--outType', type=str, required=True, help='png or pdf')
 args = parser.parse_args()
@@ -42,15 +43,13 @@ else:
 
 # CV-----------------------------------------------
 print("Starting calculation of the local CVs with method {}".format(args.calcMethod))
-if args.calcMethod == "bayly": xyuv = getLocalCvBayly(actMap, args.maxDist)
-elif args.calcMethod == "vanilla": xyuv = getLocalCvVanilla(actMap, args.maxDist)
+if args.calcMethod == "bayly": x_y_vx_vy = getLocalCvBayly(actMap, args.maxDist, args.shouldNotHaveAllPoints)
+elif args.calcMethod == "vanilla": x_y_vx_vy = getLocalCvVanilla(actMap, args.maxDist, args.shouldNotHaveAllPoints)
 else: raise ValueError("Wrong calculation method")
 
 
-CVvectors = np.zeros(xyuv[:,-2:].shape)
-CVvectors[:,0] = xyuv[:,3]
-CVvectors[:,1] = -1*xyuv[:,2]
-positions = xyuv[:,:2].astype(int)
+CVvectors = x_y_vx_vy[:,-2:]
+positions = x_y_vx_vy[:,:2].astype(int)
 CVmagnitudes = np.linalg.norm(CVvectors, axis=1)
 CVversors = CVvectors / np.expand_dims(CVmagnitudes, axis=1)
 

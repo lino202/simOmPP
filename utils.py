@@ -7,7 +7,13 @@ import matplotlib.pyplot as plt
 import matplotlib.colors
 from tqdm import tqdm
 import seaborn as sns
+import copy
 
+font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 15}
+
+plt.rc('font', **font)
 def isMemberIdxsRowWise(arr1, arr2, tol = 1E-6, showMem=False):
     if showMem: 
         print("Required Memory: {} GB".format(4 *(arr1.shape[0]) * (arr2.shape[0]) / 1e9))
@@ -74,8 +80,19 @@ def vector_to_rgb(angle, absolute, max_abs):
         return np.array([0,0,0])
 
 
-def getLocalCvVanilla(img, maxDist):
+def getNeededNumberOfPoints(maxDist):
+    halfWidth = np.ceil(maxDist).astype(int)
+    y, x = np.meshgrid(np.arange(halfWidth*2+2), np.arange(halfWidth*2+2))
+    xy = np.array([x.flatten(), y.flatten()]).transpose()
+    middlePoint = np.array([halfWidth, halfWidth])
+    dists = np.squeeze(cdist([middlePoint], xy))
+    idxs = np.where((dists > 0)&(dists <= maxDist))[0]
+    return idxs.shape[0]
+
+
+def getLocalCvVanilla(img, maxDist, maxCV, shouldNotHaveAllPoints):
     img = img.astype(float)
+    nPoints = getNeededNumberOfPoints(maxDist)
     idxs = np.logical_not(np.isnan(img)).nonzero()
     y, x = np.meshgrid(np.arange(img.shape[0]), np.arange(img.shape[0]))
     xyuv = np.zeros((x.flatten().shape[0],4))
@@ -87,34 +104,48 @@ def getLocalCvVanilla(img, maxDist):
         thisPoint = xyuv[i,:2].astype(int)
         dists = np.squeeze(cdist([thisPoint], xyuv[:,:2]))
         idxs = np.where((dists > 0)&(dists <= maxDist))[0]
-        influencePoints = xyuv[idxs,:2].astype(int)
+        if idxs.shape[0] == nPoints or shouldNotHaveAllPoints:
+            influencePoints = xyuv[idxs,:2].astype(int)
 
-        dirs = influencePoints - thisPoint  
-        dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
-        
-        times = img[influencePoints[:,0], influencePoints[:,1]]
-        times = times - img[thisPoint[0],thisPoint[1]]
-        pixCVs = np.empty(idxs.shape)
-        pixCVs[:] = np.nan
-        np.divide(dists[idxs], times, out=pixCVs, where=times!=0.)
-        
-        if not np.isnan(pixCVs).all():
-            #Velocity sign changes direction so pixCVs must not be absolute value
-            pixCVvectors = dirsVersors * np.expand_dims(pixCVs, axis=1)
-            resVector = np.nanmean(pixCVvectors, axis=0)  
-            if np.linalg.norm(resVector) != 0.0:
-                #Here I not consider sources and sinks of velocities as I wanted to do consider only the trevalling of 
-                # the vector field 
-                xyuv[i,-2:] = resVector
+            dirs = influencePoints - thisPoint  
+            dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
+            
+            times = img[influencePoints[:,0], influencePoints[:,1]]
+            times = times - img[thisPoint[0],thisPoint[1]]
+            pixCVs = np.empty(idxs.shape)
+            pixCVs[:] = np.nan
+            np.divide(dists[idxs], times, out=pixCVs, where=times!=0.)
+            #We clean in order to avoid huge CV values when taking into account the situation:
+            # of two points in the same wavefroint 
+            # And two points, one one wavefront and the other in a colliding wavefront
+            idxs2Nan = np.where(np.abs(pixCVs)>maxCV)
+            pixCVs[idxs2Nan] = np.nan
+            
+            if not np.isnan(pixCVs).all():
+                #Velocity sign changes direction so pixCVs must not be absolute value
+                pixCVvectors = dirsVersors * np.expand_dims(pixCVs, axis=1)
+                resVector = np.nanmean(pixCVvectors, axis=0)  
+                if np.linalg.norm(resVector) != 0.0:
+                    # Here I not consider sources and sinks of velocities as I wanted to do consider 
+                    # only the travelling of the vector field 
+                    xyuv[i,-2:] = resVector
+                else:
+                    xyuv[i,-2:] = [np.nan, np.nan]
             else:
                 xyuv[i,-2:] = [np.nan, np.nan]
+        
         else:
             xyuv[i,-2:] = [np.nan, np.nan]
 
-    return xyuv
+
+    #Set reference in bottom-left angle of the screen
+    x_y_vx_vy = copy.deepcopy(xyuv)
+    x_y_vx_vy[:,2] = xyuv[:,3]
+    x_y_vx_vy[:,3] = -1*xyuv[:,2]
+    return x_y_vx_vy
 
 
-def getLocalCvBayly(img, maxDist):
+def getLocalCvBayly(img, maxDist, shouldNotHaveAllPoints):
     # Performs local estimation of CV using Bayly's method (doi: 10.1109/10.668746).
     # IN:
     # img - activation map from which a vector field is obtained.
@@ -124,6 +155,7 @@ def getLocalCvBayly(img, maxDist):
     # to x,y,u,v:  x,y gives indices of row and column, with u,v
     # corresponding to dx,dy.
     img = img.astype(float)
+    nPoints = getNeededNumberOfPoints(maxDist)
     idxs = np.logical_not(np.isnan(img)).nonzero()
     y, x = np.meshgrid(np.arange(img.shape[0]), np.arange(img.shape[0]))
     xyuv = np.zeros((x.flatten().shape[0],4))
@@ -135,35 +167,42 @@ def getLocalCvBayly(img, maxDist):
         # for each point, find points nearby.
         thisPoint = xyuv[iPoint,:2].astype(int)
         dists = np.squeeze(cdist([thisPoint], xyuv[:,:2]))
-        idxs = np.where((dists > 0)&(dists <= maxDist))[0]
-        locationsNeighbours = xyuv[idxs,:2].astype(int)
-        xArr = locationsNeighbours[:,0]; yArr = locationsNeighbours[:,1]
         x = thisPoint[0]; y = thisPoint[1]
-        neighbourActivationTimes = img[xArr, yArr]
-        
-        if not np.isnan(neighbourActivationTimes).all():
-            noNanATidxs = ~np.isnan(neighbourActivationTimes)
-            noNanATs = neighbourActivationTimes[noNanATidxs]
-            sf, cond = polyfit22(locationsNeighbours[noNanATidxs,0],locationsNeighbours[noNanATidxs,1], noNanATs)
-            coeffs = sf[0]
-            # Check fitting
-            # SST =  np.sum((noNanATs - np.mean(noNanATs))**2)
-            # SSE = sf[1]
-            # R2  =  1 - (SSE/SST)                      
-            # linearAprox = coeffs[1]*locationsNeighbours[noNanATidxs,0] + coeffs[2]*locationsNeighbours[noNanATidxs,1] + coeffs[0] 
-            # SSE = np.sum((noNanATs - linearAprox)**2)
-            # R2lin = 1 - (SSE/SST)
+        idxs = np.where((dists > 0)&(dists <= maxDist))[0]
 
-            dx = coeffs[1] + 2*coeffs[3]*x + coeffs[4]*y
-            dy = coeffs[2] + 2*coeffs[5]*y + coeffs[4]*x
-            if ((dx!=0 or dy!=0) ): #and (R2lin>0.05) and (R2 > 0.5)
-                xyuv[iPoint, :] = [x, y, dx/(dx*dx+dy*dy), dy/(dx*dx + dy*dy)]
+        if idxs.shape[0] == nPoints or shouldNotHaveAllPoints:
+            locationsNeighbours = xyuv[idxs,:2].astype(int)
+            xArr = locationsNeighbours[:,0]; yArr = locationsNeighbours[:,1]
+            neighbourActivationTimes = img[xArr, yArr]
+            
+            if not np.isnan(neighbourActivationTimes).all():
+                noNanATidxs = ~np.isnan(neighbourActivationTimes)
+                noNanATs = neighbourActivationTimes[noNanATidxs]
+                sf, cond = polyfit22(locationsNeighbours[noNanATidxs,0],locationsNeighbours[noNanATidxs,1], noNanATs)
+                coeffs = sf[0]
+                # Check fitting
+                # SST =  np.sum((noNanATs - np.mean(noNanATs))**2)
+                # SSE = sf[1]
+                # R2  =  1 - (SSE/SST)                      
+                # linearAprox = coeffs[1]*locationsNeighbours[noNanATidxs,0] + coeffs[2]*locationsNeighbours[noNanATidxs,1] + coeffs[0] 
+                # SSE = np.sum((noNanATs - linearAprox)**2)
+                # R2lin = 1 - (SSE/SST)
+
+                dx = coeffs[1] + 2*coeffs[3]*x + coeffs[4]*y
+                dy = coeffs[2] + 2*coeffs[5]*y + coeffs[4]*x
+                if ((dx!=0 or dy!=0) ): #and (R2lin>0.05) and (R2 > 0.5)
+                    xyuv[iPoint, :] = [x, y, dx/(dx*dx+dy*dy), dy/(dx*dx + dy*dy)]
+                else:
+                    xyuv[iPoint, :] = [x, y, np.nan, np.nan]
             else:
                 xyuv[iPoint, :] = [x, y, np.nan, np.nan]
         else:
             xyuv[iPoint, :] = [x, y, np.nan, np.nan]
-
-    return xyuv
+    #Set reference in bottom-left angle of the screen
+    x_y_vx_vy = copy.deepcopy(xyuv)
+    x_y_vx_vy[:,2] = xyuv[:,3]
+    x_y_vx_vy[:,3] = -1*xyuv[:,2]
+    return x_y_vx_vy
 
 
 def polyfit22(x, y, z):

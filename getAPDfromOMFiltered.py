@@ -88,6 +88,6 @@ plt.imshow(apd)
 plt.show()
 
 
-plotHistAndBoxPlotSeaBorn(apd[~np.isnan(apd)], "APD{} [ms]".format(args.apdtype), path=args.outPath)
+plotHistAndBoxPlotSeaBorn(apd[~np.isnan(apd)], "APD{} (ms)".format(args.apdtype), path=args.outPath)
 
 

@@ -172,7 +172,7 @@ res["RTGP max"] = np.nanmax(RTgradients[idxpatch])
 # print("Min RTgrad {0:f}".format(np.nanmin(RTgradients[idxpatch])))
 # print("Max RTgrad {0:f}".format(np.nanmax(RTgradients[idxpatch])))
 #Save--------------------------------------------------------------------
-point_data = {"ATs_[ms]": lats, "APD{}_[ms]".format(args.apd): apds, "CVMag_[cm/s]": CVmagnitudes, "CVversors": CVversors, "RTs_[ms]": rts}
+point_data = {"ATs_(ms)": lats, "APD{}_(ms)".format(args.apd): apds, "CVMag_(cm/s)": CVmagnitudes, "CVversors": CVversors, "RTs_(ms)": rts}
 point_data["RTgrad_[ms/mm]"] = RTgradients
 myo_nodes = np.zeros(points.shape[0])
 myo_nodes[idxmyo] = 1

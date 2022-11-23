@@ -64,26 +64,26 @@ print("The meanAbs CVxyz vector is {} ".format(np.nanmean(np.abs(CVvectors), axi
 
 array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVx (cm/s)", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVx (cm/s)")
 
 array = CVvectors[:,1][~np.isnan(CVvectors[:,1])]
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVy (cm/s)", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVy (cm/s)")
 
 array = CVvectors[:,2][~np.isnan(CVvectors[:,2])]
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(array, "CVz [cm/s]", path=os.path.join(args.outPath, "cvz_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVz (cm/s)", path=os.path.join(args.outPath, "cvz_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(array, "CVz [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVz (cm/s)")
 
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag (cm/s)", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]")
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag (cm/s)")
 
 
 #Save

@@ -50,6 +50,6 @@ plt.show()
 data = [data1, data2]
 fig, ax = plt.subplots()
 ax.boxplot(data, labels=[args.nameData1, args.nameData2])
-ax.set_ylabel("AT [ms]")
+ax.set_ylabel("AT (ms)")
 plt.savefig(os.path.join(args.outPath,'{}_boxs.{}'.format(args.outName, args.outType)), transparent=True)
 plt.show()

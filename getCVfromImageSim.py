@@ -27,7 +27,7 @@ plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(actMap),np.nanmax(actMap),6), location="right", pad=0.02, shrink=0.9)
 cbar.ax.tick_params(labelsize=20)
 cbar.ax.facecolor = 'r'
-cbar.set_label('AT [ms]', fontsize=20)
+cbar.set_label('AT (ms)', fontsize=20)
 if args.outPath != "0":
     plt.savefig(os.path.join(args.outPath, "atmap.{}".format(args.outType)))
 else:
@@ -36,9 +36,9 @@ else:
 # AT------------------------------------------
 lats = actMap[~np.isnan(actMap)]
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(lats, "AT [ms]", path=os.path.join(args.outPath, "atmap_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(lats, "AT (ms)", path=os.path.join(args.outPath, "atmap_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(lats, "AT [ms]")
+    plotHistAndBoxPlotSeaBorn(lats, "AT (ms)")
 
 
 # CV-----------------------------------------------
@@ -100,15 +100,15 @@ print("CVminAbs is {}".format(totDir))
 
 array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVx (cm/s)", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(array, "CVx [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVx (cm/s)")
 
 array = CVvectors[:,1][~np.isnan(CVvectors[:,1])]
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVy (cm/s)", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(array, "CVy [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVy (cm/s)")
 
 # CV PLOTS ---------------------------------------------
 # CV Magnitude
@@ -119,16 +119,16 @@ plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(CVMagImg),np.nanmax(CVMagImg),4), location="right", pad=0.02, shrink=0.9)
 cbar.ax.tick_params(labelsize=15)
 cbar.ax.facecolor = 'r'
-cbar.set_label('CV Magnitude [cm/s]', fontsize=15)
+cbar.set_label('CV Magnitude (cm/s)', fontsize=15)
 if args.outPath != "0":
     plt.savefig(os.path.join(args.outPath, "cvMag.{}".format(args.outType)))
 else:
     plt.show(block=True)
 
 if args.outPath != "0":
-    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag (cm/s)", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]")
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag (cm/s)")
 
 # CV versors directions
 X = np.arange(0, actMap.shape[0], 1)
@@ -158,7 +158,7 @@ cbar = plt.colorbar(Q, ticks=np.linspace(np.nanmin(CVmagnitudes), np.nanmax(CVma
 cbar.ax.tick_params(labelsize=15)
 cbar.ax.facecolor = 'r'
 plt.axis('off')
-cbar.set_label('CV vectors [cm/s]', fontsize=15)
+cbar.set_label('CV vectors (cm/s)', fontsize=15)
 if args.outPath != "0":
     plt.savefig(os.path.join(args.outPath, "cvVectors.{}".format(args.outType)))
 else:
@@ -177,7 +177,7 @@ plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(plotMin, plotMax, 4), location="right", pad=0.02, shrink=0.9)
 cbar.ax.tick_params(labelsize=15)
 cbar.ax.facecolor = 'r'
-cbar.set_label('CVx Magnitude [cm/s]', fontsize=15)
+cbar.set_label('CVx Magnitude (cm/s)', fontsize=15)
 if args.outPath != "0":
     plt.savefig(os.path.join(args.outPath, "cvxMag.{}".format(args.outType)))
 else:
@@ -191,7 +191,7 @@ plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(plotMin, plotMax, 4), location="right", pad=0.02, shrink=0.9)
 cbar.ax.tick_params(labelsize=15)
 cbar.ax.facecolor = 'r'
-cbar.set_label('CVy Magnitude [cm/s]', fontsize=15)
+cbar.set_label('CVy Magnitude (cm/s)', fontsize=15)
 if args.outPath != "0":
     plt.savefig(os.path.join(args.outPath, "cvyMag.{}".format(args.outType)))
 else:

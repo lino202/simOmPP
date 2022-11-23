@@ -3,8 +3,8 @@ import numpy as np
 import argparse
 import matplotlib.pyplot as plt 
 import scipy.io
-from utils import meanFilter, cleanMap, keepBigIsland, vector_to_rgb
-from utils import getLocalCvBayly, getLocalCvVanilla, plotHistAndBoxPlot
+from utils import meanFilter, cleanMap, keepBigIsland, vector_to_rgb, plotHistAndBoxPlotSeaBorn
+from utilsCV import getLocalCvBayly, getLocalCvVanilla
 import copy
 from roipoly import RoiPoly
 import pickle
@@ -33,7 +33,8 @@ args = parser.parse_args()
 
 #LOAD and CLEAN -------------------------------------------------------------------
 actMap = scipy.io.loadmat(args.filePath)[args.atMapName]
-plt.figure(); plt.imshow(actMap) 
+plt.figure(); plt.imshow(actMap)
+plt.title("Initial AT map")
 my_roi = RoiPoly(color='r') # draw new ROI in red color
 plt.show(block=False) if args.outPath != "0" else plt.show(block=True)
 actMap = np.nan_to_num(actMap) 
@@ -44,18 +45,16 @@ try:
 except IndexError:
     pass
 
-
 if args.cleanProcess==0: newActMap = copy.deepcopy(actMap)
 elif args.cleanProcess==1: newActMap = cleanMap(actMap.astype('uint8'))
 elif args.cleanProcess==2: newActMap = meanFilter(actMap)
 else: raise ValueError("Wrong cleanProcess")
 plt.figure(); plt.imshow(newActMap)
+plt.title("AT map after cleanning")
 plt.show(block=False) if args.outPath != "0" else plt.show(block=True)
 
 #KEEP BIGGEST ISLAND---------------------------------------------------
 _, clearImg, imgMin, imgMax = keepBigIsland(newActMap, show=False if args.outPath != "0" else True)
-
-
 
 #PREPARE FOR PLOT AND DELETE OUTLIERS-------------------------------------------
 clearImg = clearImg.astype(float)
@@ -72,14 +71,15 @@ imgLatRange = np.nanmax(clearImg)
 #PLOT AT---------------------------------------------------------------
 lats = clearImg[~np.isnan(clearImg)]
 if args.outPath != "0":
-    plotHistAndBoxPlot(lats, "AT [ms]", path=os.path.join(args.outPath, "atmap_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(lats, "AT (ms)", path=os.path.join(args.outPath, "atmap_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(lats, "AT [ms]")
+    plotHistAndBoxPlotSeaBorn(lats, "AT (ms)")
 
 fig = plt.figure(); ax = fig.add_subplot(111)
 plt.imshow(clearImg, vmin=np.nanmin(clearImg), vmax=np.nanmax(clearImg), cmap='Blues'); plt.axis('off')
+plt.title("Final AT map")
 cbar = plt.colorbar(ax=[ax], ticks=np.round(np.linspace(np.nanmin(clearImg),np.nanmax(clearImg),4)), location="right", pad=0.02, shrink=0.9)
-cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; cbar.set_label('AT [ms]', fontsize=20)
+cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; cbar.set_label('AT (ms)', fontsize=20)
 plt.savefig(os.path.join(args.outPath, "atmap.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 
 # CV-----------------------------------------------
@@ -120,15 +120,15 @@ print("The meanAbs CVxy vector is {} ".format(totDir))
 
 array = CVvectors[:,0][~np.isnan(CVvectors[:,0])]
 if args.outPath != "0":
-    plotHistAndBoxPlot(array, "CVx [cm/s]", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVx (cm/s)", path=os.path.join(args.outPath, "cvx_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(array, "CVx [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVx (cm/s)")
 
 array = CVvectors[:,1][~np.isnan(CVvectors[:,1])]
 if args.outPath != "0":
-    plotHistAndBoxPlot(array, "CVy [cm/s]", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(array, "CVy (cm/s)", path=os.path.join(args.outPath, "cvy_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(array, "CVy [cm/s]")
+    plotHistAndBoxPlotSeaBorn(array, "CVy (cm/s)")
 
 # CV PLOTS ---------------------------------------------
 # CV Magnitude
@@ -136,12 +136,12 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 plt.imshow(CVMagImg, vmin=np.nanmin(CVMagImg), vmax=np.nanmax(CVMagImg)); plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(CVMagImg),np.nanmax(CVMagImg),4), location="right", pad=0.02, shrink=0.9)
-cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; cbar.set_label('CV Magnitude [cm/s]', fontsize=20)
+cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; cbar.set_label('CV Magnitude (cm/s)', fontsize=20)
 plt.savefig(os.path.join(args.outPath, "cvMag.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 if args.outPath != "0":
-    plotHistAndBoxPlot(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag (cm/s)", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))
 else:
-    plotHistAndBoxPlot(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag [cm/s]")
+    plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag (cm/s)")
 
 # CV versors directions
 X = np.arange(0, actMap.shape[0], 1)
@@ -164,7 +164,7 @@ plt.savefig(os.path.join(args.outPath, "cvDirs.{}".format(args.outType))) if arg
 # # plt.scatter(positions[:,1], positions[:,0], color='k', s=0.01)
 # cbar = plt.colorbar(Q, ticks=np.linspace(np.nanmin(CVmagnitudes), np.nanmax(CVmagnitudes),6), location="right", pad=0.02, shrink=0.9)
 # cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; plt.axis('off')
-# cbar.set_label('CV vectors [cm/s]', fontsize=20)
+# cbar.set_label('CV vectors (cm/s)', fontsize=20)
 # plt.savefig(os.path.join(args.outPath, "cvVectors.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 
 if args.outPath != "0":

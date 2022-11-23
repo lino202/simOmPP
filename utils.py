@@ -4,6 +4,7 @@ import cv2
 from scipy.ndimage import label, median_filter
 import matplotlib.pyplot as plt
 import matplotlib.colors
+from matplotlib.ticker import FormatStrFormatter
 import seaborn as sns
 
 font = {'family' : "Times New Roman",
@@ -107,6 +108,8 @@ def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
     ax_box.set(yticks=[])
     ax_hist.set_ylabel("Frequencies")
     ax_hist.set_xlabel(arrayName)
+    ax_hist.ticklabel_format(useOffset=False)
+    ax_hist.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
     sns.despine(ax=ax_hist)
     sns.despine(ax=ax_box, left=True)
     plt.savefig(path) if path else plt.show(block=True)

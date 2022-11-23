@@ -1,7 +1,8 @@
 import os
 import numpy as np
 import argparse
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 import scipy.io
 from utils import meanFilter, cleanMap, keepBigIsland, vector_to_rgb, plotHistAndBoxPlotSeaBorn
 from utilsCV import getLocalCvBayly, getLocalCvVanilla
@@ -137,6 +138,8 @@ ax = fig.add_subplot(111)
 plt.imshow(CVMagImg, vmin=np.nanmin(CVMagImg), vmax=np.nanmax(CVMagImg)); plt.axis('off')
 cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(CVMagImg),np.nanmax(CVMagImg),4), location="right", pad=0.02, shrink=0.9)
 cbar.ax.tick_params(labelsize=20); cbar.ax.facecolor = 'r'; cbar.set_label('CV Magnitude (cm/s)', fontsize=20)
+cbar.ax.ticklabel_format(useOffset=False)
+cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
 plt.savefig(os.path.join(args.outPath, "cvMag.{}".format(args.outType))) if args.outPath != "0" else plt.show(block=True)
 if args.outPath != "0":
     plotHistAndBoxPlotSeaBorn(CVmagnitudes[~np.isnan(CVmagnitudes)], "CV Mag (cm/s)", path=os.path.join(args.outPath, "cvmag_metrics.{}".format(args.outType)))

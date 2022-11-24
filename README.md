@@ -58,7 +58,6 @@ Three types of CV can be computed for MatLab matrices _Bayly_, _Vanilla_ and _2P
 * The vanilla simply computes the CV in a pixel as the mean of the CV among this pixel and the ones in a specific circle with radious determined by the user.
 
 Several images can be saved in different formats and ready for publication.
-There is a power point with some examples performed for validation.
 
 
 

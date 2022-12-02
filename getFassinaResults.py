@@ -80,13 +80,13 @@ for i in tqdm(range(args.timeStart, args.timeEnd)):
     v[:, i-args.timeStart] = tmp
 
 # Plot some curves
-fig, ax = plt.subplots()
-for i in range(10):
-    plotIdx = random.randint(0,v.shape[0])
-    ax.plot(v[plotIdx,:], label=plotIdx)
-ax.legend()
-ax.set_title("10 Vm signals")
-plt.show()
+# fig, ax = plt.subplots()
+# for i in range(10):
+#     plotIdx = random.randint(0,v.shape[0])
+#     ax.plot(v[plotIdx,:], label=plotIdx)
+# ax.legend()
+# ax.set_title("10 Vm signals")
+# plt.show()
 
 diff = np.diff(v, axis=1)
 upstrokeIdxs = np.argmax(diff, axis=1)
@@ -212,8 +212,8 @@ point_data["patch_nodes"] = patch_nodes
 meshOut = meshio.Mesh(mesh.points, mesh.cells, point_data=point_data)
 meshOut.write(os.path.join(myResPath, "myresults.vtk"))
 
-# df = pd.read_excel(args.resExcel)
-# res["Id"] = "_".join(args.mainPath.split("/")[-2:])
-# new_row = pd.Series(res)
-# df2 = pd.concat([df, new_row.to_frame().T], ignore_index=True)
-# df2.to_excel(args.resExcel)
+df = pd.read_excel(args.resExcel)
+res["Id"] = "_".join(args.mainPath.split("/")[-2:])
+new_row = pd.Series(res)
+df2 = pd.concat([df, new_row.to_frame().T], ignore_index=True)
+df2.to_excel(args.resExcel)

@@ -44,7 +44,7 @@ You can run
    ```sh
    /path-to-script/script.py --help 
    ```
-In order to see the arguments needed it and what they do. Some more complicate code is explain in the following.
+In order to see the arguments needed and what they do. Some more complicate code is explain in the following.
 
 ### CV computation
 
@@ -57,8 +57,7 @@ Three types of CV can be computed for MatLab matrices _Bayly_, _Vanilla_ and _2P
 * The bayly method is described in [Bayly et al](https://ieeexplore.ieee.org/document/668746) but it basically aproximates a surface with the least-squared method in a region of the AT map center in the pixel of interest and computes dx and dy. 
 * The vanilla simply computes the CV in a pixel as the mean of the CV among this pixel and the ones in a specific circle with radious determined by the user.
 
-Several images can be saved in different formats and ready for publication.
-
+Maps with CV magnitude per pixel as well as histograms and boxplots are generated for the CV magnitudes and CVx/y are obtained. Values of CV magnitude mean and median are printed. A colored versor map is plotted following the HSV color palette, which indicates the direction of CV versors per pixel assuming as the reference the bottom left corner of the image and,  x and y as the horizontal and vertical axes respectively. Images can be saved in different formats.
 
 
 #### CV scripts main arguments

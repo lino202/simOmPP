@@ -9,7 +9,7 @@ import random
 
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
-parser.add_argument('--animationPrefix',type=str, required=True)
+parser.add_argument('--animationPrefix',type=str, default="tissue_animation")
 parser.add_argument('--timeStart',type=float, required=True)
 parser.add_argument('--timeEnd',type=float, required=True)
 args = parser.parse_args()
@@ -25,8 +25,7 @@ nSteps = np.array(data[caseTimeIdx+2].split(':')[-1].split('\n')[0]).astype(int)
 caseVariableIdx = data.index("VARIABLE\n")
 ensNames = data[caseVariableIdx+1].split(':')[-1].split('\n')[0].split(" ")[2].split("*")[0]
 
-times = np.arange(args.timeStart, args.timeEnd+dt, dt)
-times = (times * 1/dt).astype(int)     # paraview has problems with this being decimals maybe read ensight manual            
+times = np.arange(args.timeStart * 1/dt, args.timeEnd * 1/dt + 1).astype(int) # paraview has problems with this being decimals maybe read ensight manual              
 newdata = data[:caseTimeIdx+5]
 newdata[caseTimeIdx+1] = 'time set: 1\n'
 newdata[caseTimeIdx+2] = 'number of steps: {0:d}\n'.format(times.shape[0])

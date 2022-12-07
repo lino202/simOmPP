@@ -11,9 +11,10 @@ import pandas as pd
 
 np.seterr(divide='raise', invalid='raise')
 parser = argparse.ArgumentParser(description="Options")
-parser.add_argument('--mainPath',type=str, required=True, help='path to data')
+parser.add_argument('--resPath',type=str, required=True, help='path to data')
+parser.add_argument('--myResPath',type=str, required=True, help='path to data')
 parser.add_argument('--meshPath',type=str, default="F:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/tissue.inp")
-# parser.add_argument('--id',type=str, required=True, help='path to data')
+parser.add_argument('--nameDigits',type=int, default=5)
 parser.add_argument('--timeStart',type=int, default=2000)
 parser.add_argument('--timeEnd',type=int, default=3000)
 parser.add_argument('--dt',type=float, default=1.)
@@ -25,17 +26,15 @@ parser.add_argument('--resExcel', type=str, help='max CV in cm/s', default="F:/S
 args = parser.parse_args()
 
 mesh = meshio.read(args.meshPath)
-myResPath = os.path.join(args.mainPath, "myResults")
-resPath = os.path.join(args.mainPath, "results")
-latPath = os.path.join(resPath, "lat.ens")
+latPath = os.path.join(args.resPath, "lat.ens")
 res = {}
 idxmyo = np.append(mesh.point_sets["endo_nodes"], mesh.point_sets["mid_nodes"])
 idxmyo = np.append(idxmyo, mesh.point_sets["epi_nodes"])
 idxpatch = mesh.point_sets["patch_nodes"]
-if not os.path.isdir(myResPath): os.mkdir(myResPath)
+if not os.path.isdir(args.myResPath): os.mkdir(args.myResPath)
 
 # ATs------------------------------------------------------------------------
-copyfile(latPath, os.path.join(resPath, "latOri.ens"))
+copyfile(latPath, os.path.join(args.resPath, "latOri.ens"))
 
 with open(latPath, "r") as f:
     data = f.readlines()
@@ -71,9 +70,9 @@ print("ATP max:    {0:f}".format(np.nanmax(lats[idxpatch])))
 
 #APD90 ----------------------------------------------------------------------------
 print("Calculating APD")
-nDigits = len(str(args.timeEnd))
+nDigits = args.nameDigits
 for i in tqdm(range(args.timeStart, args.timeEnd)):
-    with open(os.path.join(resPath, 'tissue_solution{}.ens'.format(str(i).zfill(nDigits)))) as f:
+    with open(os.path.join(args.resPath, 'tissue_solution{}.ens'.format(str(i).zfill(nDigits)))) as f:
         data = f.readlines()
     tmp = np.array(data[4:]).astype(float)
     if i == args.timeStart: v = np.zeros((tmp.shape[0], args.timeEnd - args.timeStart))
@@ -210,10 +209,10 @@ patch_nodes[idxpatch] = 1
 point_data["myo_nodes"] = myo_nodes
 point_data["patch_nodes"] = patch_nodes
 meshOut = meshio.Mesh(mesh.points, mesh.cells, point_data=point_data)
-meshOut.write(os.path.join(myResPath, "myresults.vtk"))
+meshOut.write(os.path.join(args.myResPath, "results.vtk"))
 
 df = pd.read_excel(args.resExcel)
-res["Id"] = "_".join(args.mainPath.split("/")[-2:])
+res["Id"] = "_".join(args.resPath.split("/")[-3:])
 new_row = pd.Series(res)
 df2 = pd.concat([df, new_row.to_frame().T], ignore_index=True)
 df2.to_excel(args.resExcel)

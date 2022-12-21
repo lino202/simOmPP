@@ -3,6 +3,8 @@ from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import copy
+# import numba as nb
+# from scipy.spatial import KDTree
 
 
 def getNeededNumberOfPoints(maxDist):
@@ -158,6 +160,71 @@ def polyfit22_3D(x, y, z, at):
     # do leastsq fitting and return leastsq result
     return np.linalg.lstsq(a.T, np.ravel(at), rcond=None), np.linalg.cond(a.T)
 
+# Seems that no Numba or Python with KD is faster as RAM collapses
+# @nb.jit('float64[:](uint32, float64[:,:], float64[:], uint32)', nopython=True)
+# def getLocalCvVanillaMeshNumbaCore(idx, points, ats, maxDist):
+#     #Get connections
+#     dists = points - points[idx,:]
+#     dists = (np.sum(dists*dists, axis=1))**0.5
+#     nodeConns = np.where((dists > 0)&(dists <= maxDist))[0] #nodes connected
+    
+#     #Calculate mean magnitude and direction
+#     dists = np.transpose(dists[nodeConns])
+#     times = ats[nodeConns] - ats[idx]
+#     validIdxs = (times != 0).nonzero()[0]
+#     nodeCVs = dists[validIdxs] / times[validIdxs]
+#     # np.divide(dists, times, out=nodeCVs, where=times != 0.)
+    
+#     if nodeCVs.size > 0:
+#         #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
+#         dirs = points[nodeConns[validIdxs],:] - points[idx,:]  
+#         dirsVersors = dirs / np.expand_dims((np.sum(dirs*dirs, axis=1))**0.5, axis=1)
+#         cvVectors = dirsVersors * np.expand_dims(nodeCVs, axis=1)
+#         cvVectors = cvVectors[np.unique((~np.isnan(cvVectors)).nonzero()[0]),:]
+#         resVector = np.sum(cvVectors, axis=0)/cvVectors.shape[0]
+#         if np.sum(resVector*resVector)**0.5 != 0.0:
+#             return resVector
+#         else:
+#             return np.ones(3) * np.nan
+#     else:
+#         return np.ones(3) * np.nan
+
+
+# def getLocalCvVanillaMeshPythonCore(idx, points, ats, maxDist):
+
+#     #Get connections
+#     dists = np.squeeze(cdist([points[idx,:]], points))
+#     nodeConns = np.where((dists > 0)&(dists <= maxDist))[0] #nodes connected
+    
+#     #Calculate mean magnitude and direction
+#     dists = np.transpose(dists[nodeConns])
+#     times = ats[nodeConns] - ats[idx]
+#     nodeCVs = np.empty(dists.shape); nodeCVs[:] = np.nan
+#     np.divide(dists, times, out=nodeCVs, where=times != 0.)
+    
+#     if not np.isnan(nodeCVs).all():
+#         #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
+#         dirs = points[nodeConns,:] - points[idx,:]  
+#         dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
+#         cvVectors = dirsVersors * np.expand_dims(nodeCVs, axis=1)
+#         resVector = np.nanmean(cvVectors, axis=0)
+#         if np.linalg.norm(resVector) != 0.0:
+#             return resVector
+#         else:
+#             return np.ones(3) * np.nan
+#     else:
+#         return np.ones(3) * np.nan
+
+# def getLocalCvVanillaMesh(points, ats, maxDist):
+
+#     xyzuvw = np.zeros((points.shape[0], 6))
+#     xyzuvw[:,:3] = points
+#     for i in tqdm(range(points.shape[0])):
+#         #Get connections
+#         # xyzuvw[i,-3:] = getLocalCvVanillaMeshNumbaCore(i, points, ats, maxDist)
+#         xyzuvw[i,-3:] = getLocalCvVanillaMeshPythonCore(i, points, ats, maxDist)
+#     return xyzuvw
+
 
 def getLocalCvVanillaMesh(points, ats, maxDist):
 
@@ -189,7 +256,6 @@ def getLocalCvVanillaMesh(points, ats, maxDist):
             xyzuvw[i,-3:] = [np.nan, np.nan, np.nan]
 
     return xyzuvw
-
 
 
 def getLocalCvBaylyMesh(points, ats, maxDist):

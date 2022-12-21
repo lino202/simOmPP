@@ -10,6 +10,7 @@ import random
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
 parser.add_argument('--animationPrefix',type=str, default="tissue_animation")
+parser.add_argument('--solutionPrefix',type=str, default="tissue_animation")
 parser.add_argument('--timeStart',type=float, required=True)
 parser.add_argument('--timeEnd',type=float, required=True)
 args = parser.parse_args()

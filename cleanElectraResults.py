@@ -50,7 +50,7 @@ nAsterisks = newdata[caseTimeIdx-3].count('*')
 times2Delete = allTimes[~np.isin(allTimes, times)]
 for time in times2Delete:
     os.remove(os.path.join(args.dataPath, "{0}{1}.ens".format(files2DeletePrefix, str(time).zfill(nAsterisks))))
-    # print(os.path.join(args.dataPath, "{0}{1}.ens".format(files2DeletePrefix, str(time).zfill(nAsterisks))))
+    print(os.path.join(args.dataPath, "{0}{1}.ens".format(files2DeletePrefix, str(time).zfill(nAsterisks))))
 
 with open(os.path.join(args.dataPath, "{}.case".format(args.animationPrefix)), 'w') as f:
     f.writelines(newdata)

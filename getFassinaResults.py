@@ -28,12 +28,22 @@ args = parser.parse_args()
 mesh = meshio.read(args.meshPath)
 latPath = os.path.join(args.resPath, "lat.ens")
 res = {}
-idxmyo = np.append(mesh.point_sets["endo_nodes"], mesh.point_sets["mid_nodes"])
-idxmyo = np.append(idxmyo, mesh.point_sets["epi_nodes"])
-if mesh.point_sets["patch_nodes"].size!=0:
-    patch_flag = 1 
+if "endo_nodes" in mesh.point_sets.keys():
+    idxmyo = np.append(mesh.point_sets["endo_nodes"], mesh.point_sets["mid_nodes"])
+    idxmyo = np.append(idxmyo, mesh.point_sets["epi_nodes"])
+elif "myo_nodes" in mesh.point_sets.keys():
+    idxmyo = mesh.point_sets["myo_nodes"]
+else:  
+    idxmyo = np.arange(mesh.points.shape[0])
+
+if "patch_nodes" in mesh.point_sets.keys():
+    if mesh.point_sets["patch_nodes"].size!=0:
+        patch_flag = 1 
+    else:
+       patch_flag = 0 
 else: 
     patch_flag = 0
+
 if patch_flag: idxpatch = mesh.point_sets["patch_nodes"]
 if not os.path.isdir(args.myResPath): os.mkdir(args.myResPath)
 
@@ -133,6 +143,9 @@ if patch_flag:
 del v
 # CVs --------------------------------------------------------------------
 points = mesh.points
+
+if points.shape[1]==2:
+    points = np.concatenate((points, np.zeros((points.shape[0],1))), axis=1)
 cells = mesh.cells
 ats = lats
 
@@ -148,7 +161,8 @@ if args.spaceUnit == "mm": CVmagnitudes = CVmagnitudes * 100
 elif args.spaceUnit == "cm": CVmagnitudes = CVmagnitudes * 1000
 else: raise ValueError("Wrong space unit")
 idxs2Nan = np.where(CVmagnitudes>args.maxCV)
-if "stim_nodes" in mesh.point_sets.keys(): idxs2Nan = np.append(idxs2Nan, mesh.point_sets["stim_nodes"])
+if "stim_nodes" in mesh.point_sets.keys(): 
+    idxs2Nan = np.append(idxs2Nan, mesh.point_sets["stim_nodes"])
 CVmagnitudes[idxs2Nan] = np.nan
 CVversors[idxs2Nan,:] = np.nan
 CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
@@ -181,6 +195,9 @@ xyzuvw = getLocalCvVanillaMesh(points, rts, args.maxDist)
 RTVvectors = xyzuvw[:,-3:]
 RTVmagnitudes = np.linalg.norm(RTVvectors, axis=1)
 RTgradients = 1 / RTVmagnitudes
+if "stim_nodes" in mesh.point_sets.keys(): 
+    idxs2Nan = mesh.point_sets["stim_nodes"]
+    RTgradients[idxs2Nan] = np.nan
 
 res["RTGM mean"] = np.nanmean(RTgradients[idxmyo])
 res["RTGM median"] = np.nanmedian(RTgradients[idxmyo])
@@ -207,9 +224,10 @@ point_data = {"ATs_(ms)": lats, "APD{}_(ms)".format(args.apd): apds, "CVMag_(cm/
 point_data["RTgrad_[ms/mm]"] = RTgradients
 
 # Delete scar nodes from results
-idxscar = mesh.point_sets["scar_nodes"]
-for key in point_data.keys():
-    point_data[key][idxscar] = np.nan
+if "scar_nodes" in mesh.point_sets.keys():
+    idxscar = mesh.point_sets["scar_nodes"]
+    for key in point_data.keys():
+        point_data[key][idxscar] = np.nan
 
 myo_nodes = np.zeros(points.shape[0])
 myo_nodes[idxmyo] = 1

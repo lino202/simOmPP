@@ -1,17 +1,66 @@
 import numpy as np
 from scipy.spatial.distance import cdist
-import cv2
 from scipy.ndimage import label, median_filter
 import matplotlib.pyplot as plt
 import matplotlib.colors
 from matplotlib.ticker import FormatStrFormatter
-import seaborn as sns
+from tqdm import tqdm
+import os
+import pandas as pd
 
-font = {'family' : "Times New Roman",
-        'weight' : 'normal',
-        'size'   : 15}
+def calcATFromVs(v, dt, method="upstroke"):
+    ATs = np.ones(v.shape[0]) * np.nan
+    if method == "upstroke":
+        diff = np.diff(v, axis=1)
+        upstrokeIdxs = np.argmax(diff, axis=1)  # ATs
+        return upstrokeIdxs * dt
+    elif method == "zero-cross":
+        for i in tqdm(range(v.shape[0])):
+            try:
+                ATs[i] = np.where(np.diff(np.sign(v[i])))[0][0] * dt
+            except IndexError: pass
+    else: raise ValueError("Wrong method")
 
-plt.rc('font', **font)
+
+def calcAPDXFromEns(nodeStart, nodeEnd, timeStart, timeEnd, dt, apdType, resPath, nDigits):
+    v = np.zeros((nodeEnd - nodeStart, timeEnd - timeStart))
+    for i in tqdm(range(timeStart, timeEnd)):
+        fileName = os.path.join(resPath, 'tissue_solution{}.ens'.format(str(i).zfill(nDigits)))
+        df = pd.read_csv(fileName, usecols=[0], skiprows=3, dtype=np.float64)
+        v[:, i-timeStart] = df["coordinates"][nodeStart:nodeEnd].to_numpy()
+
+    # Plot some curves
+    # fig, ax = plt.subplots()
+    # for i in range(10):
+    #     plotIdx = random.randint(0,v.shape[0])
+    #     ax.plot(v[plotIdx,:], label=plotIdx)
+    # ax.legend()
+    # ax.set_title("10 Vm signals")
+    # plt.show()
+
+    apds = calcAPDXFromV(v, dt, apdType)
+    return apds
+
+def calcAPDXFromV(v, dt, apdType):
+    upstrokeIdxs = np.argmax(np.diff(v, axis=1), axis=1)
+    peakIdxs = np.argmax(v, axis=1)
+    peaks    = np.max(v, axis=1)
+    baselinelvls = np.array([np.min(v[i,peakIdxs[i]:]) for i in range(v.shape[0])])
+
+    Voi = baselinelvls + (1 - (apdType/100)) * (peaks - baselinelvls)
+    tin = np.ones(v.shape[0]) * np.nan
+    for i in tqdm(range(v.shape[0])):
+        try:
+            tin[i] = (v[i,peakIdxs[i]:]<Voi[i]).nonzero()[0][0] 
+        except IndexError:
+            pass
+
+    tin = tin + peakIdxs 
+    apds = tin - upstrokeIdxs
+    apds[apds<0] = np.nan
+    apds = apds * dt
+    return apds
+
 def isMemberIdxsRowWise(arr1, arr2, tol = 1E-6, showMem=False):
     if showMem: 
         print("Required Memory: {} GB".format(4 *(arr1.shape[0]) * (arr2.shape[0]) / 1e9))
@@ -26,6 +75,7 @@ def meanFilter(img, size=2):
 
 
 def cleanMap(img, kernelSize=2):
+    import cv2
     kernel = np.ones((kernelSize,kernelSize),np.uint8)
     median = median_filter(img, kernelSize+1)
     opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
@@ -79,6 +129,11 @@ def vector_to_rgb(angle, absolute, max_abs):
 
 
 def plotHistAndBoxPlot(array, title, path=None):
+    font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 15}
+    plt.rc('font', **font)
+    
     fig, axs = plt.subplots(1,2)
     plt.subplots_adjust(wspace=0.4)
     axs[0].hist(array)
@@ -94,6 +149,13 @@ def plotHistAndBoxPlot(array, title, path=None):
 
 
 def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
+    import seaborn as sns
+    
+    font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 15}
+    plt.rc('font', **font)
+    
     if "AT" in arrayName:
         binsNum = 10
     elif "CV" in arrayName:

@@ -3,7 +3,10 @@ from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import copy
-# import numba as nb
+import numba as nb
+import warnings
+import os
+from multiprocessing import Pool
 # from scipy.spatial import KDTree
 
 
@@ -16,7 +19,7 @@ def getNeededNumberOfPoints(maxDist):
     idxs = np.where((dists > 0)&(dists <= maxDist))[0]
     return idxs.shape[0]
 
-
+#CV for images -----------------------------------------------------------------------------------
 def getLocalCvVanilla(img, maxDist, maxCV, shouldNotHaveAllPoints):
     img = img.astype(float)
     nPoints = getNeededNumberOfPoints(maxDist)
@@ -160,73 +163,88 @@ def polyfit22_3D(x, y, z, at):
     # do leastsq fitting and return leastsq result
     return np.linalg.lstsq(a.T, np.ravel(at), rcond=None), np.linalg.cond(a.T)
 
-# Seems that no Numba or Python with KD is faster as RAM collapses
-# @nb.jit('float64[:](uint32, float64[:,:], float64[:], uint32)', nopython=True)
-# def getLocalCvVanillaMeshNumbaCore(idx, points, ats, maxDist):
-#     #Get connections
-#     dists = points - points[idx,:]
-#     dists = (np.sum(dists*dists, axis=1))**0.5
-#     nodeConns = np.where((dists > 0)&(dists <= maxDist))[0] #nodes connected
+
+#CV for meshes -----------------------------------------------------------------------------------
+# The CV vanilla calculation for Meshes was optimized for speed, several approaches were tried:
+# 1-First KDTree crashes as it is  memory bounded (at least in scipy)
+# 2-Numba was not performing faster (cpu) I think as several used functions
+# are already implemented in c/c++ in the background
+# 3-A vectorized approach with CV calculation of nodes in batches was tried
+# but rarely this took more time to be computed (I migth made an error/unoptimization). 
+# Also, using the batch increases the risk of unleashing an out-of-memory error.
+# 4-Finally we tried to compute with multiprocesses in parallel, which maked it faster
+# Batch With    Pool 628.04 s
+# Batch Without Pool 941.68 s
+# Node  With    Pool 53.20 s
+# Node  Without Pool 110.27 s
+# As seen, the CV per node is faster than using batches and the utilization of multiprocesses
+# reduced the computation time.
+
+
+def initPoolGradVanillaMesh(_points, _ats, _maxDist, _gradType):
+    global points, ats, maxDist, gradType
+    # warnings.filterwarnings(action='ignore', message='Mean of empty slice')
+    points  = _points
+    ats     = _ats
+    maxDist = _maxDist
+    gradType = _gradType
+
+def getLocalGradsVanillaMeshPerNodeCorePool(idx):
+    thisPoint = points[idx,:]
+    dists = np.squeeze(cdist([thisPoint], points))
+    nodeConns = np.where((dists > 0)&(dists <= maxDist))[0] #nodes connected
     
-#     #Calculate mean magnitude and direction
-#     dists = np.transpose(dists[nodeConns])
-#     times = ats[nodeConns] - ats[idx]
-#     validIdxs = (times != 0).nonzero()[0]
-#     nodeCVs = dists[validIdxs] / times[validIdxs]
-#     # np.divide(dists, times, out=nodeCVs, where=times != 0.)
+    #Calculate mean magnitude and direction
+    dists = np.transpose(dists[nodeConns])
+    times = ats[nodeConns] - ats[idx]
+    nodeGrads = np.empty(dists.shape); nodeGrads[:] = np.nan
+    if gradType == "time":
+        np.divide(dists, times, out=nodeGrads, where=times != 0.)
+    elif gradType == "space":
+        np.divide(times, dists, out=nodeGrads, where=dists != 0.)
+    else: raise ValueError("Wrong gradType")
     
-#     if nodeCVs.size > 0:
-#         #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
-#         dirs = points[nodeConns[validIdxs],:] - points[idx,:]  
-#         dirsVersors = dirs / np.expand_dims((np.sum(dirs*dirs, axis=1))**0.5, axis=1)
-#         cvVectors = dirsVersors * np.expand_dims(nodeCVs, axis=1)
-#         cvVectors = cvVectors[np.unique((~np.isnan(cvVectors)).nonzero()[0]),:]
-#         resVector = np.sum(cvVectors, axis=0)/cvVectors.shape[0]
-#         if np.sum(resVector*resVector)**0.5 != 0.0:
-#             return resVector
-#         else:
-#             return np.ones(3) * np.nan
-#     else:
-#         return np.ones(3) * np.nan
+    if not np.isnan(nodeGrads).all(): 
+        #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
+        dirs = points[nodeConns,:] - points[[idx],:]  
+        dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
+        cvVectors = dirsVersors * np.expand_dims(nodeGrads, axis=1)
+        resVector = np.nanmean(cvVectors, axis=0)
+        # if np.linalg.norm(resVector) != 0.0: 
+        return resVector
+        # else:
+        #     #Here we assigned as Nans the sink and sources
+        #     return [np.nan, np.nan, np.nan]
+    else:
+        return [np.nan, np.nan, np.nan]
 
 
-# def getLocalCvVanillaMeshPythonCore(idx, points, ats, maxDist):
-
-#     #Get connections
-#     dists = np.squeeze(cdist([points[idx,:]], points))
-#     nodeConns = np.where((dists > 0)&(dists <= maxDist))[0] #nodes connected
+def getLocalGradsVanillaMeshPerNodePool(points, ats, maxDist, maxMem, gradType):
+    #This could be used for computing gradients over time or space
+    #This function creates a pool of processes and defines the chunksize of its
+    #argument "interable" based on the maxMemory parameter and leaves one cpu core free 
+    totNodes     = points.shape[0]
+    xyzuvw       = np.zeros((totNodes, 6))
+    xyzuvw[:,:3] = points
+    segments     = np.arange(totNodes).astype(int)
+    nNodes       = int((maxMem * 1e9) / (totNodes * 4)) #maxMem in GB
+    nProcesses   = os.cpu_count()-1
+    print("Processes pool:\nCpu cores: {}\nIterable chucnksize: {}\n".format(nProcesses, nNodes))
     
-#     #Calculate mean magnitude and direction
-#     dists = np.transpose(dists[nodeConns])
-#     times = ats[nodeConns] - ats[idx]
-#     nodeCVs = np.empty(dists.shape); nodeCVs[:] = np.nan
-#     np.divide(dists, times, out=nodeCVs, where=times != 0.)
-    
-#     if not np.isnan(nodeCVs).all():
-#         #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
-#         dirs = points[nodeConns,:] - points[idx,:]  
-#         dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
-#         cvVectors = dirsVersors * np.expand_dims(nodeCVs, axis=1)
-#         resVector = np.nanmean(cvVectors, axis=0)
-#         if np.linalg.norm(resVector) != 0.0:
-#             return resVector
-#         else:
-#             return np.ones(3) * np.nan
-#     else:
-#         return np.ones(3) * np.nan
-
-# def getLocalCvVanillaMesh(points, ats, maxDist):
-
-#     xyzuvw = np.zeros((points.shape[0], 6))
-#     xyzuvw[:,:3] = points
-#     for i in tqdm(range(points.shape[0])):
-#         #Get connections
-#         # xyzuvw[i,-3:] = getLocalCvVanillaMeshNumbaCore(i, points, ats, maxDist)
-#         xyzuvw[i,-3:] = getLocalCvVanillaMeshPythonCore(i, points, ats, maxDist)
-#     return xyzuvw
+    with Pool(nProcesses, initializer=initPoolGradVanillaMesh, initargs=(points,ats,maxDist, gradType)) as p:
+        res = list(tqdm(p.imap(getLocalGradsVanillaMeshPerNodeCorePool, segments, nNodes), total=segments.shape[0]))
+    xyzuvw[:,-3:] = np.array(res)
+    return xyzuvw
 
 
-def getLocalCvVanillaMesh(points, ats, maxDist):
+def getLocalGradsVanillaMeshPerNode(points, ats, maxDist, gradType):
+    #This could be used for computing gradients over time or space
+    #All is referred as CV as this was made for CV initially
+    #The Cv is computed locally per each node as the mean of the
+    #mean CVs obtained from the AT distribution in its neighbour nodes
+    #This is the simplest code and more memory efficient,
+    #For speed see getLocalCvVanillaMeshPerNodePool
+    #Here we assigned as Nans the sink and sources
 
     xyzuvw = np.zeros((points.shape[0], 6))
     xyzuvw[:,:3] = points
@@ -239,19 +257,24 @@ def getLocalCvVanillaMesh(points, ats, maxDist):
         #Calculate mean magnitude and direction
         dists = np.transpose(dists[nodeConns])
         times = ats[nodeConns] - ats[i]
-        nodeCVs = np.empty(dists.shape); nodeCVs[:] = np.nan
-        np.divide(dists, times, out=nodeCVs, where=times != 0.)
+        nodeGrads = np.empty(dists.shape); nodeGrads[:] = np.nan
+        if gradType == "time":
+            np.divide(dists, times, out=nodeGrads, where=times != 0.)
+        elif gradType == "space":
+            np.divide(times, dists, out=nodeGrads, where=dists != 0.)
+        else: raise ValueError("Wrong gradType")
         
-        if not np.isnan(nodeCVs).all():
+        if not np.isnan(nodeGrads).all():
             #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
             dirs = points[nodeConns,:] - points[[i],:]  
             dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
-            cvVectors = dirsVersors * np.expand_dims(nodeCVs, axis=1)
+            cvVectors = dirsVersors * np.expand_dims(nodeGrads, axis=1)
             resVector = np.nanmean(cvVectors, axis=0)
-            if np.linalg.norm(resVector) != 0.0:
-                xyzuvw[i,-3:] = resVector
-            else:
-                xyzuvw[i,-3:] = [np.nan, np.nan, np.nan]
+            # if np.linalg.norm(resVector) != 0.0:
+            xyzuvw[i,-3:] = resVector
+            # else:
+            #     #Here we assigned as Nans the sink and sources
+            #     xyzuvw[i,-3:] = [np.nan, np.nan, np.nan]
         else:
             xyzuvw[i,-3:] = [np.nan, np.nan, np.nan]
 
@@ -259,7 +282,7 @@ def getLocalCvVanillaMesh(points, ats, maxDist):
 
 
 def getLocalCvBaylyMesh(points, ats, maxDist):
-
+    #Bayly method is not working for 3D meshes, 2D ones can be treated as images
     xyzuvw = np.zeros((points.shape[0], 6))
     xyzuvw[:,:3] = points
     for i in tqdm(range(xyzuvw.shape[0])):

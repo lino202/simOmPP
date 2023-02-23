@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import argparse
-import matplotlib.pyplot as plt 
 import time
 from tqdm import tqdm
 from shutil import copyfile
@@ -14,7 +13,6 @@ parser.add_argument('--solutionPrefix',type=str, default="tissue_animation")
 parser.add_argument('--timeStart',type=float, required=True)
 parser.add_argument('--timeEnd',type=float, required=True)
 args = parser.parse_args()
-
 
 #Adjust .case for seeing new apd data
 with open(os.path.join(args.dataPath, "{}.case".format(args.animationPrefix)), 'r') as f:

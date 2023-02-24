@@ -7,8 +7,10 @@ addpath Tools/
 
 %Options
 dataPath = 'F:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/healthy/';
-load(append(dataPath, 'sampleP21_389_PECG.mat'));
-slow = 1; %Leave this in slow if you are working with huge meshes (millions of cells) and low RAM (32GB)
+load(append(dataPath, 'H.mat'));
+
+%Leave this in slow if you are working with huge meshes (millions of cells) and low RAM (32GB)
+slow = 1; 
 T = 0:1:size(H.v,2)-1;
 
 % Position of each electrode

@@ -219,7 +219,7 @@ def getLocalGradsVanillaMeshPerNodeCorePool(idx):
         return [np.nan, np.nan, np.nan]
 
 
-def getLocalGradsVanillaMeshPerNodePool(points, ats, maxDist, maxMem, gradType):
+def getLocalGradsVanillaMeshPerNodePool(points, ats, maxDist, maxMem, gradType, nProcesses):
     #This could be used for computing gradients over time or space
     #This function creates a pool of processes and defines the chunksize of its
     #argument "interable" based on the maxMemory parameter and leaves one cpu core free 
@@ -228,7 +228,7 @@ def getLocalGradsVanillaMeshPerNodePool(points, ats, maxDist, maxMem, gradType):
     xyzuvw[:,:3] = points
     segments     = np.arange(totNodes).astype(int)
     nNodes       = int((maxMem * 1e9) / (totNodes * 4)) #maxMem in GB
-    nProcesses   = os.cpu_count()-1
+    if nProcesses >= os.cpu_count(): nProcesses = os.cpu_count()-1
     print("Processes pool:\nCpu cores: {}\nIterable chucnksize: {}\n".format(nProcesses, nNodes))
     
     with Pool(nProcesses, initializer=initPoolGradVanillaMesh, initargs=(points,ats,maxDist, gradType)) as p:

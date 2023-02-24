@@ -29,7 +29,7 @@ def main():
     parser.add_argument('--dt',       type=float, default=1.)
     parser.add_argument('--apd',      type=int, default=90)
     parser.add_argument('--maxMem',   type=float, default=5, help="Allowed RAM consumption in critical computations in GB")
-    parser.add_argument('--usePool',  action='store_true')
+    parser.add_argument('--nCores',   type=int, default=1)
     parser.add_argument('--spaceUnit',type=str, default="mm")
     parser.add_argument('--maxDist',  type=float, help='distance radius', default=0.5)
     parser.add_argument('--maxCV',    type=float, help='max CV in cm/s', default=300)
@@ -149,8 +149,8 @@ def main():
 
     print("Starting calculation of the local CVs with vanilla method")
     start = time.time()
-    if args.usePool:
-        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, ats, args.maxDist, args.maxMem, "time")
+    if args.nCores != 1:
+        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, ats, args.maxDist, args.maxMem, "time", args.nCores)
     else:
         xyzuvw = getLocalGradsVanillaMeshPerNode(points, ats, args.maxDist, "time")
     print("Cv computed in {} s".format(time.time() - start))
@@ -194,8 +194,8 @@ def main():
     rts = lats + apds
     print("Starting calculation of the local RT gradients with vanilla method")
     start = time.time()
-    if args.usePool:
-        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, rts, args.maxDist, args.maxMem, "space")
+    if args.nCores != 1:
+        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, rts, args.maxDist, args.maxMem, "space", args.nCores)
     else:
         xyzuvw = getLocalGradsVanillaMeshPerNode(points, rts, args.maxDist, "space")
     print("RT grads computed in {} s".format(time.time() - start))

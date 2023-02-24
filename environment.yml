@@ -1,10 +1,11 @@
-name: simOMPP
+name: simOmPP
 channels:
   - defaults
 dependencies:
-  - meshio
+  - python==3.8
   - scipy
   - tqdm
   - openpyxl
   - seaborn
 prefix: C:\Users\usuario\anaconda3\envs\simOMPP
+

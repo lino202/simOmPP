@@ -11,6 +11,11 @@ from utils import calcAPDXFromEns
 import pandas as pd
 import time
 
+params = ["ATM mean", "ATM median", "ATM min", "ATM max", "ATP mean", "ATP median", "ATP min", "ATP max",
+        "APD90M mean", "APD90M median", "APD90M min", "APD90M max", "APD90P mean", "APD90P median", "APD90P min", "APD90P max",    
+        "CVM mean", "CVM median", "CVM min", "CVM max", "CVP mean", "CVP median", "CVP min", "CVP max",
+        "RTGM mean", "RTGM median", "RTGM min", "RTGM max", "RTGP mean", "RTGP median", "RTGP min", "RTGP max"]
+    
 def main():
 
     np.seterr(divide='raise', invalid='raise')
@@ -134,7 +139,7 @@ def main():
 
 
     # CVs --------------------------------------------------------------------
-    # mesh = meshio.read(args.meshPath)
+    mesh = meshio.read(args.meshPath)
     points = mesh.points
 
     if points.shape[1]==2:
@@ -197,7 +202,6 @@ def main():
     
     RTVvectors = xyzuvw[:,-3:]
     RTgradients = np.linalg.norm(RTVvectors, axis=1)
-    # RTgradients = 1 / RTVmagnitudes
     if "stim_nodes" in mesh.point_sets.keys(): 
         idxs2Nan = mesh.point_sets["stim_nodes"]
         RTgradients[idxs2Nan] = np.nan
@@ -223,7 +227,12 @@ def main():
         print("RTGP max:    {0:f}".format(np.nanmax(RTgradients[idxpatch])))
 
     #Save--------------------------------------------------------------------
-    point_data = {"ATs_(ms)": lats, "APD{}_(ms)".format(args.apd): apds, "CVMag_(cm/s)": CVmagnitudes, "CVversors": CVversors, "RTs_(ms)": rts}
+    point_data = {}
+    point_data["ATs_(ms)"] = lats
+    point_data["APD{}_(ms)".format(args.apd)] = apds
+    point_data["CVMag_(cm/s)"] = CVmagnitudes
+    point_data["CVversors"] = CVversors
+    point_data["RTs_(ms)"] = rts
     point_data["RTgrad_[ms/mm]"] = RTgradients
 
     # Delete scar nodes from results
@@ -243,13 +252,21 @@ def main():
 
     meshOut = meshio.Mesh(mesh.points, mesh.cells, point_data=point_data)
     meshOut.write(args.myResPath)
-
-    df = pd.read_excel(args.resExcel)
-    res["Id"] = "_".join(args.resPath.split("/")[-3:])
-    new_row = pd.Series(res)
-    df2 = pd.concat([df, new_row.to_frame().T], ignore_index=True)
-    df2.to_excel(args.resExcel)
-
+    
+    indexs = ["_".join(args.resPath.split("/")[-3:])]
+    stats  = np.ones(len(params)) * np.nan
+    for i, param in enumerate(params):
+        try:
+            stats[i] = res[params[i]]
+        except KeyError:
+            pass
+    df = pd.DataFrame([stats], index=indexs, columns=params)
+    if not os.path.exists(args.resExcel):
+        df.to_excel(args.resExcel, sheet_name='sheet1')
+    else:
+        with pd.ExcelWriter(args.resExcel, engine="openpyxl", mode='a',if_sheet_exists="overlay") as writer:
+            startrow = writer.sheets['sheet1'].max_row
+            df.to_excel(writer, sheet_name='sheet1', startrow=startrow, header=False)
 
 if __name__ == '__main__':
     main()

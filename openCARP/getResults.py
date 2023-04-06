@@ -19,8 +19,8 @@ def main():
     parser.add_argument('--myResPath',type=str, required=True, help='path to data')
     parser.add_argument('--meshPath', type=str, required=True)
     # parser.add_argument('--nDigits',  type=int, default=5)
-    # parser.add_argument('--timeStart',type=int, default=2000)
-    # parser.add_argument('--timeEnd',  type=int, default=3000)
+    parser.add_argument('--timeStart',type=int, default=2000)
+    parser.add_argument('--timeEnd',  type=int, default=3000)
     parser.add_argument('--dt',       type=float, default=1.)
     parser.add_argument('--apd',      type=int, default=90)
     # parser.add_argument('--maxMem',   type=float, default=5, help="Allowed RAM consumption in critical computations in GB")
@@ -59,6 +59,7 @@ def main():
         header = f.header()
         data   = f.data()
     v = data.reshape(header['t'], -1).T
+    v = v[:,args.timeStart:args.timeEnd]
     
     # Plot some curves
     fig, ax = plt.subplots()

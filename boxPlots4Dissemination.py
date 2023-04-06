@@ -10,8 +10,8 @@ import pickle
 font = {'family' : "Times New Roman",
         'weight' : 'normal',
         'size'   : 15}
-
 plt.rc('font', **font)
+
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPaths',type=str, required=True, nargs='+', help='path to different files')
 parser.add_argument('--dataNames',type=str, required=True, nargs='+', help='data names')

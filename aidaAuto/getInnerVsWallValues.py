@@ -84,6 +84,7 @@ else:
 #Load the mesh and tissue masks
 if "png" in args.tissueMask:
     tissueMask = np.array(Image.open(args.tissueMask)).astype(int)
+    tissueMask = (tissueMask - np.min(tissueMask)) / (np.max(tissueMask) - np.min(tissueMask))
 else:
     raise ValueError("Wrong type of file")
 

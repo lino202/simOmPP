@@ -3,7 +3,7 @@ from scipy.spatial.distance import cdist
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import copy
-import numba as nb
+# import numba as nb
 import warnings
 import os
 from multiprocessing import Pool

@@ -9,7 +9,8 @@ import random
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--dataPath',type=str, required=True, help='path to data')
 parser.add_argument('--animationPrefix',type=str, default="tissue_animation")
-parser.add_argument('--solutionPrefix',type=str, default="tissue_animation")
+parser.add_argument('--solutionPrefix',type=str, default="tissue_solution")
+parser.add_argument('--nDigits',type=int, default=4)
 parser.add_argument('--timeStart',type=float, required=True)
 parser.add_argument('--timeEnd',type=float, required=True)
 args = parser.parse_args()
@@ -40,15 +41,17 @@ for idx in range(0,times.shape[0],timeWriteStep):
         newdata.append(tmp)
 
 print("Removing .ens solutions")
-filesInfoString = newdata[caseTimeIdx-3]
-files2DeletePrefix = filesInfoString.split('*')[0].split(" ")[-1]
+# filesInfoString = newdata[caseTimeIdx-3]
+# files2DeletePrefix = filesInfoString.split('*')[0].split(" ")[-1]
 nFiles = int(data[caseTimeIdx+2].split("\n")[0].split(" ")[-1])
 allTimes = np.arange(0, nFiles)
-nAsterisks = newdata[caseTimeIdx-3].count('*')
+# nAsterisks = newdata[caseTimeIdx-3].count('*')
 times2Delete = allTimes[~np.isin(allTimes, times)]
 for time in times2Delete:
-    os.remove(os.path.join(args.dataPath, "{0}{1}.ens".format(files2DeletePrefix, str(time).zfill(nAsterisks))))
-    print(os.path.join(args.dataPath, "{0}{1}.ens".format(files2DeletePrefix, str(time).zfill(nAsterisks))))
+    tmpName = os.path.join(args.dataPath, "{0}{1}.ens".format(args.solutionPrefix, str(time).zfill(args.nDigits)))
+    print(tmpName)
+    os.remove(tmpName)
+    
 
 with open(os.path.join(args.dataPath, "{}.case".format(args.animationPrefix)), 'w') as f:
     f.writelines(newdata)

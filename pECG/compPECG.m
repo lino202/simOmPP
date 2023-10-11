@@ -9,7 +9,7 @@ addpath Tools/
 %Leave this in slow if you are working with huge meshes (millions of cells) and low RAM (32GB)
 %Also H can be provided with V or not deppending on RAM
 
-dataPath  = 'F:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/edgelength/1mm/healthy/results_cs_endo/';
+dataPath  = 'D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/edgelength/1mm/healthy/results_cs_endo/';
 load(append(dataPath, 'pECG_matrix_noVs.mat'));
 ensPath   = append(dataPath, 'tissue/tissue_solution');
 slow      = 1;

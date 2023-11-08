@@ -22,10 +22,10 @@ def calcATFromVs(v, dt, method="upstroke"):
     else: raise ValueError("Wrong method")
 
 
-def calcAPDXFromEns(nodeStart, nodeEnd, timeStart, timeEnd, dt, apdType, resPath, nDigits):
+def calcAPDXFromEns(nodeStart, nodeEnd, timeStart, timeEnd, dt, apdType, resPath, nDigits, soluName):
     v = np.zeros((nodeEnd - nodeStart, timeEnd - timeStart))
     for i in tqdm(range(timeStart, timeEnd)):
-        fileName = os.path.join(resPath, 'tissue_solution{}.ens'.format(str(i).zfill(nDigits)))
+        fileName = os.path.join(resPath, '{}{}.ens'.format(soluName, str(i).zfill(nDigits)))
         df = pd.read_csv(fileName, usecols=[0], skiprows=3, dtype=np.float64)
         v[:, i-timeStart] = df["coordinates"][nodeStart:nodeEnd].to_numpy()
 

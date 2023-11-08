@@ -23,6 +23,8 @@ def main():
     parser.add_argument('--resPath',  type=str, required=True, help='path to data')
     parser.add_argument('--myResPath',type=str, required=True, help='path to data')
     parser.add_argument('--meshPath', type=str, required=True)
+    parser.add_argument('--stimLabel',type=str, default="stim_nodes")
+    parser.add_argument('--soluName', type=str, default='tissue_solution')
     parser.add_argument('--nDigits',  type=int, default=5)
     parser.add_argument('--timeStart',type=int, default=2000)
     parser.add_argument('--timeEnd',  type=int, default=3000)
@@ -111,10 +113,10 @@ def main():
             nodeStart = int(i*nNodes)
             nodeEnd   = int((i+1)*nNodes)
             if nodeEnd > totNodes: nodeEnd = totNodes
-            apds[nodeStart:nodeEnd] = calcAPDXFromEns(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits)
+            apds[nodeStart:nodeEnd] = calcAPDXFromEns(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
 
     else:
-        apds = calcAPDXFromEns(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits)
+        apds = calcAPDXFromEns(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
 
     res["APD90M mean"] = np.nanmean(apds[idxmyo])
     res["APD90M median"] = np.nanmedian(apds[idxmyo])
@@ -164,8 +166,8 @@ def main():
     elif args.spaceUnit == "cm": CVmagnitudes = CVmagnitudes * 1000
     else: raise ValueError("Wrong space unit")
     idxs2Nan = np.where(CVmagnitudes>args.maxCV)
-    if "stim_nodes" in mesh.point_sets.keys(): 
-        idxs2Nan = np.append(idxs2Nan, mesh.point_sets["stim_nodes"])
+    if args.stimLabel in mesh.point_sets.keys(): 
+        idxs2Nan = np.append(idxs2Nan, mesh.point_sets[args.stimLabel])
     CVmagnitudes[idxs2Nan] = np.nan
     CVversors[idxs2Nan,:] = np.nan
     CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
@@ -202,8 +204,8 @@ def main():
     
     RTVvectors = xyzuvw[:,-3:]
     RTgradients = np.linalg.norm(RTVvectors, axis=1)
-    if "stim_nodes" in mesh.point_sets.keys(): 
-        idxs2Nan = mesh.point_sets["stim_nodes"]
+    if args.stimLabel in mesh.point_sets.keys(): 
+        idxs2Nan = mesh.point_sets[args.stimLabel]
         RTgradients[idxs2Nan] = np.nan
 
     res["RTGM mean"] = np.nanmean(RTgradients[idxmyo])
@@ -251,6 +253,8 @@ def main():
         point_data["patch_nodes"] = patch_nodes
 
     meshOut = meshio.Mesh(mesh.points, mesh.cells, point_data=point_data)
+    resFolder = "/".join(args.myResPath.split('/')[:-1])
+    if not os.path.exists(resFolder): os.mkdir(resFolder)
     meshOut.write(args.myResPath)
     
     indexs = ["_".join(args.resPath.split("/")[-3:])]

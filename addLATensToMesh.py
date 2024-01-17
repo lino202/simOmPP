@@ -11,7 +11,6 @@ def main():
     parser.add_argument('--latPath',  type=str, required=True, help='path to data')
     parser.add_argument('--outPath',type=str, required=True, help='path to data')
     parser.add_argument('--meshPath', type=str, required=True)
-    parser.add_argument('--nDigits',  type=int, default=5)
     parser.add_argument('--timeStart',type=int, default=2000)
     parser.add_argument('--timeEnd',  type=int, default=3000)
     parser.add_argument('--dt',       type=float, default=1.)

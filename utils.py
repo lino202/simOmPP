@@ -4,6 +4,7 @@ from scipy.ndimage import label, median_filter
 import matplotlib.pyplot as plt
 import matplotlib.colors
 from matplotlib.ticker import FormatStrFormatter
+import seaborn as sns
 from tqdm import tqdm
 import os
 import pandas as pd
@@ -149,21 +150,21 @@ def plotHistAndBoxPlot(array, title, path=None):
 
 
 def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
-    import seaborn as sns
-    
-    font = {'family' : "Times New Roman",
-        'weight' : 'normal',
-        'size'   : 15}
-    plt.rc('font', **font)
-    
-    if "AT" in arrayName:
-        binsNum = 10
-    elif "CV" in arrayName:
-        binsNum = 60
-    else:
-        binsNum = "auto"
+
+    # if "AT" in arrayName:
+    #     binsNum = 10
+    # elif "CV" in arrayName:
+    #     binsNum = 60
+    # else:
+    binsNum = "auto"
 
     sns.set(style="ticks")
+    font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 20}
+
+    plt.rc('font', **font)
+    plt.rcParams.update({'mathtext.default':  'regular' })
     f, (ax_box, ax_hist) = plt.subplots(2, sharex=True, gridspec_kw={"height_ratios": (.15, .85)})
     sns.boxplot(x=array, ax=ax_box)
     sns.histplot(x=array, ax=ax_hist, bins=binsNum, kde=True)
@@ -171,7 +172,29 @@ def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
     ax_hist.set_ylabel("Frequencies")
     ax_hist.set_xlabel(arrayName)
     ax_hist.ticklabel_format(useOffset=False)
-    ax_hist.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    ax_hist.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
     sns.despine(ax=ax_hist)
     sns.despine(ax=ax_box, left=True)
-    plt.savefig(path) if path else plt.show(block=True)
+    plt.savefig(path, dpi=500) if path else plt.show(block=True)
+
+
+def plotColorbar(mymap, label, outName):
+
+    font = {'family' : "Times New Roman",
+        'weight' : 'normal',
+        'size'   : 20}
+
+    plt.rc('font', **font)
+    plt.rcParams.update({'mathtext.default':  'regular' })
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.imshow(mymap, vmin=np.nanmin(mymap), vmax=np.nanmax(mymap), cmap='viridis')
+    plt.axis('off')
+    cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(mymap),np.nanmax(mymap),4), location="right", pad=0.02, shrink=0.9)
+    # cbar.ax.tick_params(labelsize=fontsize)
+    cbar.ax.facecolor = 'r'
+    cbar.set_label(label) #fontfamily=fontFamily, fontsize=fontsize
+    cbar.ax.ticklabel_format(useOffset=False)
+    cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    plt.savefig(outName, dpi=500)

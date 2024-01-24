@@ -72,7 +72,7 @@ plt.savefig(os.path.join(secondaryOutFolder, "see_reversed_or_not.png"))
 #Cropping Space--------------------------------------------------------------------
 if len(os.listdir(roisFolder))<1:
     img0 = atmap
-    plt.figure(); plt.imshow(img0); plt.title("Select Area") 
+    plt.figure(); plt.imshow(img0); plt.title("Select Area, Nans here are nans already in ATs inside the ROI from omap, 0s are pixels outside the ROI in omap") 
     my_roi = RoiPoly(color='r') # draw new ROI in red color
     try:
         mask_overall = my_roi.get_mask(img0)
@@ -340,5 +340,3 @@ for i, key in enumerate(videos.keys()):
     #     with open(dataFramePath, 'rb') as file: df_old = pickle.load(file) 
     #     df_new = df_old.append(new_data, ignore_index=True)
     #     with open(dataFramePath, 'wb') as file: pickle.dump(df_new, file)
-    
-

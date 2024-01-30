@@ -42,7 +42,7 @@ parser.add_argument('--endFrame',type=int, required=True)
 parser.add_argument('--oneCycleSamples',type=int, required=True)
 parser.add_argument('--reverse',action='store_true')
 parser.add_argument('--apdtype',type=int, required=True)
-parser.add_argument('--fps',type=int, required=True)
+parser.add_argument('--fps',type=float, required=True)
 
 parser.add_argument('--stimFreq',type=int, required=True)
 parser.add_argument('--stimType',type=str, required=True)
@@ -97,8 +97,9 @@ if len(os.listdir(roisFolder))<1:
 
 else:
     with open(os.path.join(roisFolder,'overall_mask.pkl'), 'rb') as file: mask_overall = pickle.load(file) 
-    with open(os.path.join(roisFolder,'mi_mask.pkl'), 'rb') as file: mask_mi = pickle.load(file) 
-    with open(os.path.join(roisFolder,'healthy_mask.pkl'), 'rb') as file: mask_healthy = pickle.load(file) 
+    if args.infarction: 
+        with open(os.path.join(roisFolder,'mi_mask.pkl'), 'rb') as file: mask_mi = pickle.load(file) 
+        with open(os.path.join(roisFolder,'healthy_mask.pkl'), 'rb') as file: mask_healthy = pickle.load(file) 
 
 # Get the Data 
 videos = {}
@@ -131,7 +132,7 @@ if args.infarction:
     axs[2].imshow(v_mi[:,:,0])
 else:
     fig, axs = plt.subplots(1)
-    axs[0].imshow(v_overall[:,:,0])
+    axs.imshow(v_overall[:,:,0])
 plt.savefig(os.path.join(secondaryOutFolder, "firstFrameVideoWithMask.png"))
 
 
@@ -161,6 +162,9 @@ for i, key in enumerate(videos.keys()):
     i_atmap = i_atmap.astype(float)
     i_atmap[i_atmap==0] = np.nan
 
+    i_atmap = i_atmap - np.nanmin(i_atmap)      # With Nans
+    i_ats = i_atmap[~np.isnan(i_atmap)]         # Without Nans
+
     # Block in case there are outliers
     if args.blockDown != 0:
         i_atmap[i_atmap<args.blockDown] = np.nan
@@ -169,6 +173,8 @@ for i, key in enumerate(videos.keys()):
 
     i_atmap = i_atmap - np.nanmin(i_atmap)      # With Nans
     i_ats = i_atmap[~np.isnan(i_atmap)]         # Without Nans
+
+    plotHistAndBoxPlotSeaBorn(i_ats, "AT (ms)", path=os.path.join(secondaryOutFolder, "outliers4Block.png"))
 
     boxplotData = calculateBoxPlotParams(i_ats)
     res["AT_{} mean".format(nameMap[i])]   = np.mean(i_ats)

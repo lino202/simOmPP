@@ -23,9 +23,7 @@ plt.rcParams.update({'mathtext.default':  'regular' })
 
 
 df = pd.read_excel(args.excelFilePath, sheet_name=args.sheetName, header=args.headerRow)
-# df.loc[(df['column_name'] >= A) & (df['column_name'] <= B)]
-# df = df.loc[df['Tissue'] != 'Myo']
-df = df.loc[df['Pig'] != 2]
+df = df.loc[df['Tissue'] != 'Myo']
 
 # CV------------------------------------------
 

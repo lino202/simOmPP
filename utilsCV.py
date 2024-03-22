@@ -227,9 +227,9 @@ def getLocalGradsVanillaMeshPerNodePool(points, ats, maxDist, maxMem, gradType, 
     xyzuvw       = np.zeros((totNodes, 6))
     xyzuvw[:,:3] = points
     segments     = np.arange(totNodes).astype(int)
-    nNodes       = int((maxMem * 1e9) / (totNodes * 4)) #maxMem in GB
+    nNodes       = 10000 #int((maxMem * 1e9) / (totNodes * 4)) #maxMem in GB
     if nProcesses >= os.cpu_count(): nProcesses = os.cpu_count()-1
-    print("Processes pool:\nCpu cores: {}\nIterable chucnksize: {}\n".format(nProcesses, nNodes))
+    print("Processes pool:\nCpu cores: {}\nIterable chuncksize: {}".format(nProcesses, nNodes))
     
     with Pool(nProcesses, initializer=initPoolGradVanillaMesh, initargs=(points,ats,maxDist, gradType)) as p:
         res = list(tqdm(p.imap(getLocalGradsVanillaMeshPerNodeCorePool, segments, nNodes), total=segments.shape[0]))

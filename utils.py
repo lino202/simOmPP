@@ -8,19 +8,36 @@ import seaborn as sns
 from tqdm import tqdm
 import os
 import pandas as pd
+import random
 
-def calcATFromVs(v, dt, method="upstroke"):
-    ATs = np.ones(v.shape[0]) * np.nan
+def calcATFromEnsBinary(nodeStart, nodeEnd, timeStart, timeEnd, dt, resPath, nDigits, soluName, method="upstroke"): 
+    fileNumbers = np.arange(timeStart/dt, timeEnd/dt + 1 ).astype(int)
+    v = np.zeros((nodeEnd - nodeStart, fileNumbers.shape[0]), dtype=np.float32) #Electra precision is single (32 bits)
+    for i, fileNumber in tqdm(enumerate(fileNumbers)):
+        fileName = os.path.join(resPath, '{}{}.ens'.format(soluName, str(fileNumber).zfill(nDigits)))
+        with open(fileName, 'rb') as f:
+            b = f.read()
+
+        # See ensight variable file format 244 bytes before the first v value, and little endian
+        # Electra save states in float32, offset is in bytes but count is items not bytes
+        # https://docs.python.org/3/library/struct.html#format-characters
+        v[:, i] = np.frombuffer(b, dtype='<f', offset=244+nodeStart*4, count=nodeEnd-nodeStart) 
+    ats = calcATFromV(v, dt, method=method)
+    return ats
+
+def calcATFromV(v, dt, method="upstroke"):
+    ats = np.ones(v.shape[0], dtype=np.float32) * np.nan
     if method == "upstroke":
         diff = np.diff(v, axis=1)
-        upstrokeIdxs = np.argmax(diff, axis=1)  # ATs
-        return upstrokeIdxs * dt
+        upstrokeIdxs = np.argmax(diff, axis=1)  # ats
+        ats = upstrokeIdxs * dt 
     elif method == "zero-cross":
         for i in tqdm(range(v.shape[0])):
             try:
-                ATs[i] = np.where(np.diff(np.sign(v[i])))[0][0] * dt
+                ats[i] = np.where(np.diff(np.sign(v[i])))[0][0] * dt
             except IndexError: pass
     else: raise ValueError("Wrong method")
+    return ats
 
 
 def calcAPDXFromEns(nodeStart, nodeEnd, timeStart, timeEnd, dt, apdType, resPath, nDigits, soluName):
@@ -29,6 +46,31 @@ def calcAPDXFromEns(nodeStart, nodeEnd, timeStart, timeEnd, dt, apdType, resPath
         fileName = os.path.join(resPath, '{}{}.ens'.format(soluName, str(i).zfill(nDigits)))
         df = pd.read_csv(fileName, usecols=[0], skiprows=3, dtype=np.float64)
         v[:, i-timeStart] = df["coordinates"][nodeStart:nodeEnd].to_numpy()
+
+    # Plot some curves
+    # fig, ax = plt.subplots()
+    # for i in range(10):
+    #     plotIdx = random.randint(0,v.shape[0])
+    #     ax.plot(v[plotIdx,:], label=plotIdx)
+    # ax.legend()
+    # ax.set_title("10 Vm signals")
+    # plt.show()
+
+    apds = calcAPDXFromV(v, dt, apdType)
+    return apds
+
+def calcAPDXFromEnsBinary(nodeStart, nodeEnd, timeStart, timeEnd, dt, apdType, resPath, nDigits, soluName):
+    fileNumbers = np.arange(timeStart/dt, timeEnd/dt + 1 ).astype(int)
+    v = np.zeros((nodeEnd - nodeStart, fileNumbers.shape[0]), dtype=np.float32) #Electra precision is single (32 bits)
+    for i, fileNumber in tqdm(enumerate(fileNumbers)):
+        fileName = os.path.join(resPath, '{}{}.ens'.format(soluName, str(fileNumber).zfill(nDigits)))
+        with open(fileName, 'rb') as f:
+            b = f.read()
+
+        # See ensight variable file format 244 bytes before the first v value, and little endian
+        # Electra save states in float32, offset is in bytes but count is items not bytes
+        # https://docs.python.org/3/library/struct.html#format-characters
+        v[:, i] = np.frombuffer(b, dtype='<f', offset=244+nodeStart*4, count=nodeEnd-nodeStart) 
 
     # Plot some curves
     # fig, ax = plt.subplots()

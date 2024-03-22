@@ -1,10 +1,13 @@
 import os  
+from shutil import copyfile
 import argparse
 from tqdm import tqdm
 import numpy as np
 import meshio
+import matplotlib.pyplot as plt
+import random
 from utilsCV import getLocalGradsVanillaMeshPerNodePool, getLocalGradsVanillaMeshPerNode
-from utils import calcATFromEnsBinary, calcAPDXFromEnsBinary
+from utils import calcAPDXFromEns
 import pandas as pd
 import time
 
@@ -35,8 +38,8 @@ def main():
     parser.add_argument('--resExcel', type=str, required=True, help='Excel for saving results')
     args = parser.parse_args()
 
-    # Get mesh, myo , patch and other idxs as well as required memory for partially computation of things to avoid memory overload
     mesh = meshio.read(args.meshPath)
+    latPath = os.path.join(args.resPath, "lat.ens")
     res = {}
     if "endo_nodes" in mesh.point_sets.keys():
         idxmyo = np.append(mesh.point_sets["endo_nodes"], mesh.point_sets["mid_nodes"])
@@ -55,65 +58,65 @@ def main():
         patch_flag = 0
 
     if patch_flag: idxpatch = mesh.point_sets["patch_nodes"]
-
-    # We compute the memory reqs for the Vs most memory-wise heavy variable
-    # but more memory can be consumed! even if this reqMem is lower than the one we set
-    totNodes = mesh.points.shape[0]
-    nTimeSteps = (args.timeEnd / args.dt) - (args.timeStart / args.dt) + 1
-    reqMem = (totNodes * nTimeSteps * 4) / 1e9
-    print("Required Memory for reading and handling potentials is: {} GB".format(reqMem))
-    maxNodesPerSection = int((args.maxMem * 1e9) / (nTimeSteps * 4))
+    # if not os.path.isdir(args.myResPath): os.mkdir(args.myResPath)
     # del mesh
-
     # ATs------------------------------------------------------------------------
-    print("Calculating AT-----------------------------------------------------")
-    if reqMem > args.maxMem:
-        ats = np.zeros(totNodes)
-        for i in tqdm(range(np.arange(0, totNodes, maxNodesPerSection).shape[0])):
-            nodeStart = int(i*maxNodesPerSection)
-            nodeEnd   = int((i+1)*maxNodesPerSection)
-            if nodeEnd > totNodes: nodeEnd = totNodes
-            ats[nodeStart:nodeEnd] = calcATFromEnsBinary(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.resPath, args.nDigits, args.soluName)
-    else:
-        ats = calcATFromEnsBinary(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.resPath, args.nDigits, args.soluName)
-    ats = ats - np.nanmin(ats)
+    copyfile(latPath, os.path.join(args.resPath, "latOri.ens"))
 
-    res["ATM mean"] = np.nanmean(ats[idxmyo])
-    res["ATM median"] = np.nanmedian(ats[idxmyo])
-    res["ATM min"] = np.nanmin(ats[idxmyo])
-    res["ATM max"] = np.nanmax(ats[idxmyo])
-    if patch_flag:
-        res["ATP mean"] = np.nanmean(ats[idxpatch])
-        res["ATP median"] = np.nanmedian(ats[idxpatch])
-        res["ATP min"] = np.nanmin(ats[idxpatch])
-        res["ATP max"] = np.nanmax(ats[idxpatch])
+    with open(latPath, "r") as f:
+        data = f.readlines()
+    lats = np.array(data[4:]).astype(float)
+    lats = lats - np.nanmin(lats)
 
-    print("ATM mean:   {0:f}".format(np.nanmean(ats[idxmyo])))
-    print("ATM median: {0:f}".format(np.nanmedian(ats[idxmyo])))
-    print("ATM min:    {0:f}".format(np.nanmin(ats[idxmyo])))
-    print("ATM max:    {0:f}".format(np.nanmax(ats[idxmyo])))
+    with open(latPath, "w") as f:
+        f.write("Ensight Model Post Process\n")
+        f.write("part\n")
+        f.write(" 1\n")
+        f.write("coordinates\n")
+        for i in tqdm(range(lats.shape[0])):
+            f.write("{0:f}\n".format(lats[i]))
+
+    res["ATM mean"] = np.nanmean(lats[idxmyo])
+    res["ATM median"] = np.nanmedian(lats[idxmyo])
+    res["ATM min"] = np.nanmin(lats[idxmyo])
+    res["ATM max"] = np.nanmax(lats[idxmyo])
     if patch_flag:
-        print("ATP mean:   {0:f}".format(np.nanmean(ats[idxpatch])))
-        print("ATP median: {0:f}".format(np.nanmedian(ats[idxpatch])))
-        print("ATP min:    {0:f}".format(np.nanmin(ats[idxpatch])))
-        print("ATP max:    {0:f}".format(np.nanmax(ats[idxpatch])))
+        res["ATP mean"] = np.nanmean(lats[idxpatch])
+        res["ATP median"] = np.nanmedian(lats[idxpatch])
+        res["ATP min"] = np.nanmin(lats[idxpatch])
+        res["ATP max"] = np.nanmax(lats[idxpatch])
+
+
+    print("ATM mean:   {0:f}".format(np.nanmean(lats[idxmyo])))
+    print("ATM median: {0:f}".format(np.nanmedian(lats[idxmyo])))
+    print("ATM min:    {0:f}".format(np.nanmin(lats[idxmyo])))
+    print("ATM max:    {0:f}".format(np.nanmax(lats[idxmyo])))
+    if patch_flag:
+        print("ATP mean:   {0:f}".format(np.nanmean(lats[idxpatch])))
+        print("ATP median: {0:f}".format(np.nanmedian(lats[idxpatch])))
+        print("ATP min:    {0:f}".format(np.nanmin(lats[idxpatch])))
+        print("ATP max:    {0:f}".format(np.nanmax(lats[idxpatch])))
 
     #APD90 ----------------------------------------------------------------------------
-    print("Calculating APD-----------------------------------------------")
-    # Here happens the most memory burden, check memory consumption and make it in parts if neccesary
-    # Take into account this is the reqMem for storing v but diff has almost the same store size
-    # So memMax should be set to approximately one third of your RAM, for 32GB -> 10GB
+    print("Calculating APD")
+    #Here happens the most memory burden, check memory consumption and make it in parts if neccesary
+    #Take into account this is the reqMem for storing v but diff has almost the same store size
+    #So memMax should be set to approximately one third of your RAM, for 32GB -> 10GB
+    totNodes = lats.shape[0]
+    reqMem = (totNodes * (args.timeEnd - args.timeStart) * 4) / 1e9
+    print("Required Memory: {} GB".format(reqMem))
 
     if reqMem > args.maxMem:
         apds = np.zeros(totNodes)
-        for i in tqdm(range(np.arange(0, totNodes, maxNodesPerSection).shape[0])):
-            nodeStart = i*maxNodesPerSection
-            nodeEnd   = (i+1)*maxNodesPerSection
+        nNodes = (args.maxMem * 1e9) / ((args.timeEnd - args.timeStart) * 4)
+        for i in tqdm(range(np.arange(0, totNodes, nNodes).shape[0])):
+            nodeStart = int(i*nNodes)
+            nodeEnd   = int((i+1)*nNodes)
             if nodeEnd > totNodes: nodeEnd = totNodes
-            apds[nodeStart:nodeEnd] = calcAPDXFromEnsBinary(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
+            apds[nodeStart:nodeEnd] = calcAPDXFromEns(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
 
     else:
-        apds = calcAPDXFromEnsBinary(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
+        apds = calcAPDXFromEns(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
 
     res["APD90M mean"] = np.nanmean(apds[idxmyo])
     res["APD90M median"] = np.nanmedian(apds[idxmyo])
@@ -138,11 +141,15 @@ def main():
 
 
     # CVs --------------------------------------------------------------------
+    mesh = meshio.read(args.meshPath)
     points = mesh.points
+
     if points.shape[1]==2:
         points = np.concatenate((points, np.zeros((points.shape[0],1))), axis=1)
+    cells = mesh.cells
+    ats = lats
 
-    print("Calculating CVs-----------------------------------------------------")
+    print("Starting calculation of the local CVs with vanilla method")
     start = time.time()
     if args.nCores != 1:
         xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, ats, args.maxDist, args.maxMem, "time", args.nCores)
@@ -186,8 +193,8 @@ def main():
         print("CVP max:    {0:f}".format(np.nanmax(CVmagnitudes[idxpatch])))
 
     # RTs--------------------------------------------------------------------
-    rts = ats + apds
-    print("Calculating RTGs--------------------------------------------------")
+    rts = lats + apds
+    print("Starting calculation of the local RT gradients with vanilla method")
     start = time.time()
     if args.nCores != 1:
         xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, rts, args.maxDist, args.maxMem, "space", args.nCores)
@@ -223,7 +230,7 @@ def main():
 
     #Save--------------------------------------------------------------------
     point_data = {}
-    point_data["ATs_(ms)"] = ats
+    point_data["ATs_(ms)"] = lats
     point_data["APD{}_(ms)".format(args.apd)] = apds
     point_data["CVMag_(cm/s)"] = CVmagnitudes
     point_data["CVversors"] = CVversors
@@ -266,6 +273,4 @@ def main():
             df.to_excel(writer, sheet_name='sheet1', startrow=startrow, header=False)
 
 if __name__ == '__main__':
-    startTime = time.time()
     main()
-    print("Total time was {0:.2f}".format(time.time()-startTime))

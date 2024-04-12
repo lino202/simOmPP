@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--myResPath',type=str, required=True, help='path to data')
     parser.add_argument('--meshPath', type=str, required=True)
     parser.add_argument('--nDigits',  type=int, default=5)
+    parser.add_argument('--soluName', type=str, default='tissue_solution')
     parser.add_argument('--timeStart',type=int, default=2000)
     parser.add_argument('--timeEnd',  type=int, default=3000)
     parser.add_argument('--dt',       type=float, default=1.)
@@ -115,10 +116,10 @@ def main():
             nodeStart = int(i*nNodes)
             nodeEnd   = int((i+1)*nNodes)
             if nodeEnd > totNodes: nodeEnd = totNodes
-            apds[nodeStart:nodeEnd] = calcAPDXFromEns(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits)
+            apds[nodeStart:nodeEnd] = calcAPDXFromEns(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
 
     else:
-        apds = calcAPDXFromEns(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits)
+        apds = calcAPDXFromEns(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.apd, args.resPath, args.nDigits, args.soluName)
 
     res["APD90M mean"] = np.nanmean(apds[idxmyo])
     res["APD90M median"] = np.nanmedian(apds[idxmyo])
@@ -152,7 +153,7 @@ def main():
     ats = lats
 
     #Myo --------------------------------------------------------------------
-    print("LOCAL CV HEALTHY MYO")
+    print("LOCAL CV HEALTHY MYO with maxDist {0}".format(args.maxDist[0]))
     start = time.time()
     if args.nCores != 1:
         xyzuvw = getLocalGradsVanillaMeshPerNodePool(points[idxmyo], ats[idxmyo], args.maxDist[0], args.maxMem, "time", args.nCores)
@@ -189,7 +190,7 @@ def main():
     CVversorsMyo      = copy.deepcopy(CVversors)
     
     #Patch --------------------------------------------------------------------
-    print("LOCAL CV PATCH")
+    print("LOCAL CV HEALTHY PATCH with maxDist {0}".format(args.maxDist[1]))
     start = time.time()
     if args.nCores != 1:
         xyzuvw = getLocalGradsVanillaMeshPerNodePool(points[idxpatch], ats[idxpatch], args.maxDist[1], args.maxMem, "time", args.nCores)

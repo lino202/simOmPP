@@ -36,17 +36,16 @@ for i, dataPath in enumerate(args.dataPaths):
         else:
                 raise ValueError("Input datapath must be a .vtk file")
 
-# if "AT" in args.variableName:
-#         for i, key in enumerate(data.keys()):
-#                 data[key] = data[key] - np.min(data[key])
-
 mymap = {"10": 0, "50": 1, "90": 2}
 values = np.array([])
 valuesEHTc = np.array([])
 valuesAttach = np.array([])
 for key in data.keys():
         EHTc         = int(key.split("_")[0])
-        attach       = int(key.split("_")[1])
+        try: 
+                attach       = int(key.split("_")[1])
+        except:
+                attach = key.split("_")[1]
 
         # if min(args.threshold) != 0 and args.threshold != None:
         #         valueThres = (data[key]>=args.threshold[mymap[str(EHTc)]]).nonzero()[0]
@@ -68,12 +67,19 @@ for key in data.keys():
         # valuesAttach = np.concatenate((valuesAttach, attach)) if valuesAttach.size else attach
         # else:       
         EHTcArr      = np.ones(data[key].shape[0]) * EHTc
-        attachArr    = np.ones(data[key].shape[0]) * attach
+        try:
+                attachArr    = np.ones(data[key].shape[0]) * attach
+        except:
+                attachArr = [attach] * data[key].shape[0]
+                attachArr = np.array(attachArr)
         valuesEHTc   = np.concatenate((valuesEHTc, EHTcArr)) if valuesEHTc.size else EHTcArr
         valuesAttach = np.concatenate((valuesAttach, attachArr)) if valuesAttach.size else attachArr  
         values = np.concatenate((values, data[key])) if values.size else data[key]
 
-data4DF = {args.variableName: values, args.xlabel: valuesEHTc.astype(int), args.huelabel: valuesAttach.astype(int)}   
+try:
+        data4DF = {args.variableName: values, args.xlabel: valuesEHTc.astype(int), args.huelabel: valuesAttach.astype(int)}   
+except:
+        data4DF = {args.variableName: values, args.xlabel: valuesEHTc.astype(int), args.huelabel: valuesAttach}   
 
 # df = pd.concat(map(pd.Series, data.values()), keys=data.keys(), axis=1)
 df = pd.DataFrame(data4DF)
@@ -94,4 +100,4 @@ else:
         sns.violinplot(data=df, x=args.xlabel, y=args.variableName, hue=args.huelabel, palette="deep", scale="width")
 plt.ylabel(args.ylabel, fontsize=45)
 plt.xlabel(args.xlabel, fontsize=45)
-plt.savefig(args.outPath) if args.outPath else plt.show()
+plt.savefig(args.outPath) if args.outPath else plt.show(block=True)

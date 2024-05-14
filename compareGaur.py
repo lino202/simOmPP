@@ -19,19 +19,24 @@ def main():
 
     vms = np.zeros((int((args.ends[0] - args.starts[0] ) / args.dt), len(args.filePaths)))
     for i, filePath in enumerate(args.filePaths):
-        # with open(filePath, 'r') as file:
-        #     data = np.loadtxt(file)
-        #     vms[:,i] = data[int(args.starts[i]/args.dt):int(args.ends[i]/args.dt), 1]
-        with h5py.File(filePath, "r") as f:
-            vm = np.asarray(f['V'])   # f['time'] can be also obtained
-            vms[:,i] = vm[0,int(args.starts[i]/args.dt):int(args.ends[i]/args.dt)]
+        if '.dat'in filePath:
+            data = np.loadtxt(filePath)[1:,-1]
+            vms[:,i] = data[int(args.starts[i]/args.dt):int(args.ends[i]/args.dt)]
+        elif 'txt' in filePath:
+            with open(filePath, 'r') as file:
+                data = np.loadtxt(file)
+                vms[:,i] = data[int(args.starts[i]/args.dt):int(args.ends[i]/args.dt), 1]
+        else:
+            with h5py.File(filePath, "r") as f:
+                vm = np.asarray(f['V'])   # f['time'] can be also obtained
+                vms[:,i] = vm[0,int(args.starts[i]/args.dt):int(args.ends[i]/args.dt)]
 
     time = np.arange(args.starts[0]/args.dt, args.ends[0]/args.dt, 1)
     time = (time - args.starts[0]/args.dt) * args.dt
 
     apds = calcAPDXFromV(vms.T, args.dt, args.apdType)
     for i in range(vms.shape[1]):
-        args.names[i] = "{0}, APD{1} {2:.2f}".format(args.names[i], args.apdType, apds[i])
+        args.names[i] = "{0}, APD{1} {2}".format(args.names[i], args.apdType, apds[i])
         print(args.names[i])
 
     font = {'family' : "Times New Roman",

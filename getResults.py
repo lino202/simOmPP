@@ -8,10 +8,18 @@ from utils import calcATFromEnsBinary, calcAPDXFromEnsBinary
 import pandas as pd
 import time
 
-params = ["ATM mean", "ATM median", "ATM min", "ATM max", "ATP mean", "ATP median", "ATP min", "ATP max",
-        "APD90M mean", "APD90M median", "APD90M min", "APD90M max", "APD90P mean", "APD90P median", "APD90P min", "APD90P max",    
-        "CVM mean", "CVM median", "CVM min", "CVM max", "CVP mean", "CVP median", "CVP min", "CVP max",
-        "RTGM mean", "RTGM median", "RTGM min", "RTGM max", "RTGP mean", "RTGP median", "RTGP min", "RTGP max"]
+params = ["ATM mean", "ATM median", "ATM min", "ATM max", "ATP mean", "ATP median", "ATP min", "ATP max", "ATBZ mean", "ATBZ median", "ATBZ min", "ATBZ max",
+        "APD90M mean", "APD90M median", "APD90M min", "APD90M max", "APD90P mean", "APD90P median", "APD90P min", "APD90P max", "APD90BZ mean", "APD90BZ median", "APD90BZ min", "APD90BZ max",  
+        "CVM mean", "CVM median", "CVM min", "CVM max", "CVP mean", "CVP median", "CVP min", "CVP max", "CVBZ mean", "CVBZ median", "CVBZ min", "CVBZ max",
+        "RTGM mean", "RTGM median", "RTGM min", "RTGM max", "RTGP mean", "RTGP median", "RTGP min", "RTGP max", "RTGBZ mean", "RTGBZ median", "RTGBZ min", "RTGBZ max"]
+
+layers_myo_flag = 1
+layers_endo_flag = 3
+layers_mid_flag  = 4
+layers_epi_flag  = 5
+layers_bz_flag   = 7
+layers_scar_flag = 8
+layers_patch_flag = 9
     
 def main():
 
@@ -53,8 +61,16 @@ def main():
             patch_flag = 0 
     else: 
         patch_flag = 0
-
     if patch_flag: idxpatch = mesh.point_sets["patch_nodes"]
+
+    if "bz_nodes" in mesh.point_sets.keys():
+        if mesh.point_sets["bz_nodes"].size!=0:
+            bz_flag = 1 
+        else:
+            bz_flag = 0 
+    else: 
+        bz_flag = 0
+    if bz_flag: idxbz = mesh.point_sets["bz_nodes"]
 
     # We compute the memory reqs for the Vs most memory-wise heavy variable
     # but more memory can be consumed! even if this reqMem is lower than the one we set
@@ -87,6 +103,11 @@ def main():
         res["ATP median"] = np.nanmedian(ats[idxpatch])
         res["ATP min"] = np.nanmin(ats[idxpatch])
         res["ATP max"] = np.nanmax(ats[idxpatch])
+    if bz_flag:
+        res["ATBZ mean"]   = np.nanmean(ats[idxbz])
+        res["ATBZ median"] = np.nanmedian(ats[idxbz])
+        res["ATBZ min"]    = np.nanmin(ats[idxbz])
+        res["ATBZ max"]    = np.nanmax(ats[idxbz])
 
     print("ATM mean:   {0:f}".format(np.nanmean(ats[idxmyo])))
     print("ATM median: {0:f}".format(np.nanmedian(ats[idxmyo])))
@@ -97,6 +118,11 @@ def main():
         print("ATP median: {0:f}".format(np.nanmedian(ats[idxpatch])))
         print("ATP min:    {0:f}".format(np.nanmin(ats[idxpatch])))
         print("ATP max:    {0:f}".format(np.nanmax(ats[idxpatch])))
+    if bz_flag:
+        print("ATBZ mean:   {0:f}".format(np.nanmean(ats[idxbz])))
+        print("ATBZ median: {0:f}".format(np.nanmedian(ats[idxbz])))
+        print("ATBZ min:    {0:f}".format(np.nanmin(ats[idxbz])))
+        print("ATBZ max:    {0:f}".format(np.nanmax(ats[idxbz])))
 
     #APD90 ----------------------------------------------------------------------------
     print("Calculating APD-----------------------------------------------")
@@ -124,6 +150,11 @@ def main():
         res["APD90P median"] = np.nanmedian(apds[idxpatch])
         res["APD90P min"] = np.nanmin(apds[idxpatch])
         res["APD90P max"] = np.nanmax(apds[idxpatch])
+    if bz_flag:
+        res["APD90BZ mean"] = np.nanmean(apds[idxbz])
+        res["APD90BZ median"] = np.nanmedian(apds[idxbz])
+        res["APD90BZ min"] = np.nanmin(apds[idxbz])
+        res["APD90BZ max"] = np.nanmax(apds[idxbz])
 
 
     print("APD90M mean:   {0:f}".format(np.nanmean(apds[idxmyo])))
@@ -135,6 +166,11 @@ def main():
         print("APD90P median: {0:f}".format(np.nanmedian(apds[idxpatch])))
         print("APD90P min:    {0:f}".format(np.nanmin(apds[idxpatch])))
         print("APD90P max:    {0:f}".format(np.nanmax(apds[idxpatch])))
+    if bz_flag:
+        print("APD90BZ mean:   {0:f}".format(np.nanmean(apds[idxbz])))
+        print("APD90BZ median: {0:f}".format(np.nanmedian(apds[idxbz])))
+        print("APD90BZ min:    {0:f}".format(np.nanmin(apds[idxbz])))
+        print("APD90BZ max:    {0:f}".format(np.nanmax(apds[idxbz])))
 
 
     # CVs --------------------------------------------------------------------
@@ -174,6 +210,11 @@ def main():
         res["CVP median"] = np.nanmedian(CVmagnitudes[idxpatch])
         res["CVP min"] = np.nanmin(CVmagnitudes[idxpatch])
         res["CVP max"] = np.nanmax(CVmagnitudes[idxpatch])
+    if bz_flag:
+        res["CVBZ mean"] = np.nanmean(CVmagnitudes[idxbz])
+        res["CVBZ median"] = np.nanmedian(CVmagnitudes[idxbz])
+        res["CVBZ min"] = np.nanmin(CVmagnitudes[idxbz])
+        res["CVBZ max"] = np.nanmax(CVmagnitudes[idxbz])
 
     print("CVM mean:   {0:f}".format(np.nanmean(CVmagnitudes[idxmyo])))
     print("CVM median: {0:f}".format(np.nanmedian(CVmagnitudes[idxmyo])))
@@ -184,6 +225,11 @@ def main():
         print("CVP median: {0:f}".format(np.nanmedian(CVmagnitudes[idxpatch])))
         print("CVP min:    {0:f}".format(np.nanmin(CVmagnitudes[idxpatch])))
         print("CVP max:    {0:f}".format(np.nanmax(CVmagnitudes[idxpatch])))
+    if bz_flag:
+        print("CVBZ mean:   {0:f}".format(np.nanmean(CVmagnitudes[idxbz])))
+        print("CVBZ median: {0:f}".format(np.nanmedian(CVmagnitudes[idxbz])))
+        print("CVBZ min:    {0:f}".format(np.nanmin(CVmagnitudes[idxbz])))
+        print("CVBZ max:    {0:f}".format(np.nanmax(CVmagnitudes[idxbz])))
 
     # RTs--------------------------------------------------------------------
     rts = ats + apds
@@ -210,6 +256,11 @@ def main():
         res["RTGP median"] = np.nanmedian(RTgradients[idxpatch])
         res["RTGP min"] = np.nanmin(RTgradients[idxpatch])
         res["RTGP max"] = np.nanmax(RTgradients[idxpatch])
+    if bz_flag:
+        res["RTGBZ mean"] = np.nanmean(RTgradients[idxbz])
+        res["RTGBZ median"] = np.nanmedian(RTgradients[idxbz])
+        res["RTGBZ min"] = np.nanmin(RTgradients[idxbz])
+        res["RTGBZ max"] = np.nanmax(RTgradients[idxbz])
 
     print("RTGM mean:   {0:f}".format(np.nanmean(RTgradients[idxmyo])))
     print("RTGM median: {0:f}".format(np.nanmedian(RTgradients[idxmyo])))
@@ -220,6 +271,11 @@ def main():
         print("RTGP median: {0:f}".format(np.nanmedian(RTgradients[idxpatch])))
         print("RTGP min:    {0:f}".format(np.nanmin(RTgradients[idxpatch])))
         print("RTGP max:    {0:f}".format(np.nanmax(RTgradients[idxpatch])))
+    if bz_flag:
+        print("RTGBZ mean:   {0:f}".format(np.nanmean(RTgradients[idxbz])))
+        print("RTGBZ median: {0:f}".format(np.nanmedian(RTgradients[idxbz])))
+        print("RTGBZ min:    {0:f}".format(np.nanmin(RTgradients[idxbz])))
+        print("RTGBZ max:    {0:f}".format(np.nanmax(RTgradients[idxbz])))
 
     #Save--------------------------------------------------------------------
     point_data = {}
@@ -236,14 +292,21 @@ def main():
         for key in point_data.keys():
             point_data[key][idxscar] = np.nan
 
-    myo_nodes = np.zeros(points.shape[0])
-    myo_nodes[idxmyo] = 1
-    point_data["myo_nodes"] = myo_nodes
-
+    # Get some reference for the node types
+    tmp = np.zeros(mesh.points.shape[0])
+    if "endo_nodes" in mesh.point_sets.keys():
+        tmp[mesh.point_sets["endo_nodes"]] = layers_endo_flag
+        tmp[mesh.point_sets["mid_nodes"]]  = layers_mid_flag
+        tmp[mesh.point_sets["epi_nodes"]]  = layers_epi_flag
+    elif "myo_nodes" in mesh.point_sets.keys():
+        tmp[idxmyo] = layers_myo_flag
     if patch_flag:
-        patch_nodes = np.zeros(points.shape[0])
-        patch_nodes[idxpatch] = 1
-        point_data["patch_nodes"] = patch_nodes
+        tmp[idxpatch] = layers_patch_flag
+    if bz_flag:
+        tmp[idxbz] = layers_bz_flag
+    if "scar_nodes" in mesh.point_sets.keys():
+        tmp[mesh.point_sets["scar_nodes"]] = layers_scar_flag
+    point_data["layers"] = tmp
 
     meshOut = meshio.Mesh(mesh.points, mesh.cells, point_data=point_data)
     resFolder = "/".join(args.myResPath.split('/')[:-1])

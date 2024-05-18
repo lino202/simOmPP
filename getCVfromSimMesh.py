@@ -6,8 +6,16 @@ from utilsCV import getLocalGradsVanillaMeshPerNodePool, getLocalGradsVanillaMes
 import pandas as pd
 import time
 
-params = ["CVM mean", "CVM median", "CVM min", "CVM max", "CVP mean", "CVP median", "CVP min", "CVP max"]
-    
+params = ["CVM mean", "CVM median", "CVM min", "CVM max", "CVP mean", "CVP median", "CVP min", "CVP max", "CVBZ mean", "CVBZ median", "CVBZ min", "CVBZ max",]
+
+layers_myo_flag = 1
+layers_endo_flag = 3
+layers_mid_flag  = 4
+layers_epi_flag  = 5
+layers_bz_flag   = 7
+layers_scar_flag = 8
+layers_patch_flag = 9
+
 def main():
 
     np.seterr(divide='raise', invalid='raise')
@@ -29,18 +37,35 @@ def main():
     ats = ats - np.nanmin(ats)
     res = {}
 
-    # if "myo_nodes" in mesh.point_data.keys():
-    #     idxmyo = np.where(mesh.point_data["myo_nodes"]==1)
+    # If I have layers it means I have the MI and maybe the patch otherwise I just have myo HE nodes
+    if "layers" in mesh.point_data.keys():
+        layers   = mesh.point_data['layers']
+        idxmyo   = np.where((layers==layers_endo_flag) | (layers==layers_mid_flag) | (layers==layers_epi_flag))[0]
+        idxpatch = np.where(layers==layers_patch_flag)[0]
+        idxbz    = np.where(layers==layers_bz_flag)[0]
+        idxscar  = np.where(layers==layers_scar_flag)[0]
 
-    # if idxmyo.shape[0] != points.shape[0]:
-    #     patch_flag = True
-    # else:
-    #     patch_flag = False    
+        if idxpatch.size:
+            patch_flag = 1
+        else:
+            patch_flag = 0
+        
+        if idxbz.size:
+            bz_flag = 1
+        else:
+            bz_flag = 0
 
-    # if patch_flag: idxpatch = np.where(mesh.point_data["myo_nodes"]==0)
+        if idxscar.size:
+            scar_flag = 1
+        else:
+            scar_flag = 0
 
-    patch_flag = False
-    idxmyo = np.arange(points.shape[0])
+    else:  
+        idxmyo = np.arange(mesh.points.shape[0])
+        patch_flag = 0
+        bz_flag = 0
+        scar_flag = 0
+
 
     print("Calculating CVs-----------------------------------------------------")
     start = time.time()
@@ -69,33 +94,41 @@ def main():
     res["CVM median"] = np.nanmedian(CVmagnitudes[idxmyo])
     res["CVM min"] = np.nanmin(CVmagnitudes[idxmyo])
     res["CVM max"] = np.nanmax(CVmagnitudes[idxmyo])
-    # if patch_flag:
-    #     res["CVP mean"] = np.nanmean(CVmagnitudes[idxpatch])
-    #     res["CVP median"] = np.nanmedian(CVmagnitudes[idxpatch])
-    #     res["CVP min"] = np.nanmin(CVmagnitudes[idxpatch])
-    #     res["CVP max"] = np.nanmax(CVmagnitudes[idxpatch])
+    if patch_flag:
+        res["CVP mean"] = np.nanmean(CVmagnitudes[idxpatch])
+        res["CVP median"] = np.nanmedian(CVmagnitudes[idxpatch])
+        res["CVP min"] = np.nanmin(CVmagnitudes[idxpatch])
+        res["CVP max"] = np.nanmax(CVmagnitudes[idxpatch])
+    if bz_flag:
+        res["CVBZ mean"] = np.nanmean(CVmagnitudes[idxbz])
+        res["CVBZ median"] = np.nanmedian(CVmagnitudes[idxbz])
+        res["CVBZ min"] = np.nanmin(CVmagnitudes[idxbz])
+        res["CVBZ max"] = np.nanmax(CVmagnitudes[idxbz])
 
     print("CVM mean:   {0:f}".format(np.nanmean(CVmagnitudes[idxmyo])))
     print("CVM median: {0:f}".format(np.nanmedian(CVmagnitudes[idxmyo])))
     print("CVM min:    {0:f}".format(np.nanmin(CVmagnitudes[idxmyo])))
     print("CVM max:    {0:f}".format(np.nanmax(CVmagnitudes[idxmyo])))
-    # if patch_flag:
-    #     print("CVP mean:   {0:f}".format(np.nanmean(CVmagnitudes[idxpatch])))
-    #     print("CVP median: {0:f}".format(np.nanmedian(CVmagnitudes[idxpatch])))
-    #     print("CVP min:    {0:f}".format(np.nanmin(CVmagnitudes[idxpatch])))
-    #     print("CVP max:    {0:f}".format(np.nanmax(CVmagnitudes[idxpatch])))
-
+    if patch_flag:
+        print("CVP mean:   {0:f}".format(np.nanmean(CVmagnitudes[idxpatch])))
+        print("CVP median: {0:f}".format(np.nanmedian(CVmagnitudes[idxpatch])))
+        print("CVP min:    {0:f}".format(np.nanmin(CVmagnitudes[idxpatch])))
+        print("CVP max:    {0:f}".format(np.nanmax(CVmagnitudes[idxpatch])))
+    if bz_flag:
+        print("CVBZ mean:   {0:f}".format(np.nanmean(CVmagnitudes[idxbz])))
+        print("CVBZ median: {0:f}".format(np.nanmedian(CVmagnitudes[idxbz])))
+        print("CVBZ min:    {0:f}".format(np.nanmin(CVmagnitudes[idxbz])))
+        print("CVBZ max:    {0:f}".format(np.nanmax(CVmagnitudes[idxbz])))
     
     #Save--------------------------------------------------------------------
 
     mesh.point_data["CVMag_(cm/s)_epi"] = CVmagnitudes
     mesh.point_data["CVversors_epi"] = CVversors
 
-    # # Delete scar nodes from results
-    # if "scar_nodes" in mesh.point_data.keys():
-    #     idxscar = mesh.point_data["scar_nodes"]
-    #     for key in mesh.point_data.keys():
-    #         mesh.point_data[key][idxscar] = np.nan
+    # Delete scar nodes from results
+    if scar_flag:
+        for key in mesh.point_data.keys():
+            mesh.point_data[key][idxscar] = np.nan
 
     mesh.write(args.meshPath)
     

@@ -82,6 +82,14 @@ call conda activate simOmPP
 @REM --meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur/results_anterior_view.vtu ^
 @REM --resExcel    D:/Paper3/Simulations/invivo/he/results_epi.xlsx
 
+python D:/Simulations/simOmPP/getResultsToExcel.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transminus15/results_anterior_view.vtk ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi.xlsx
+
+python D:/Simulations/simOmPP/getResultsToExcel.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transplus15/results_anterior_view.vtk ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi.xlsx
+
 
 @REM python D:/Simulations/simOmPP/getResultsToExcel.py ^
 @REM --meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_endo_tentusscher/results_posterior_view.vtu ^
@@ -107,6 +115,14 @@ call conda activate simOmPP
 @REM python D:/Simulations/simOmPP/getResultsToExcel.py ^
 @REM --meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur/results_posterior_view.vtu ^
 @REM --resExcel    D:/Paper3/Simulations/invivo/he/results_epi.xlsx
+
+python D:/Simulations/simOmPP/getResultsToExcel.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transminus15/results_posterior_view.vtk ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi.xlsx
+
+python D:/Simulations/simOmPP/getResultsToExcel.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transplus15/results_posterior_view.vtk ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi.xlsx
 
 
 @REM @REM @REM SAMPLE 3------------------------------------------------

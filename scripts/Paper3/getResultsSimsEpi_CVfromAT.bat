@@ -140,6 +140,23 @@ call conda activate simOmPP
 
 
 
+python D:/Simulations/simOmPP/getCVfromSimMesh.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transminus15/results_anterior_view.vtk ^
+--spaceUnit   mm ^
+--maxDist     0.6 ^
+--maxCV       300 ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi_cv_from_epi_at.xlsx
+
+
+python D:/Simulations/simOmPP/getCVfromSimMesh.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transplus15/results_anterior_view.vtk ^
+--spaceUnit   mm ^
+--maxDist     0.6 ^
+--maxCV       300 ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi_cv_from_epi_at.xlsx
+
+
+
 
 
 @REM python D:/Simulations/simOmPP/getCVfromSimMesh.py ^
@@ -186,7 +203,19 @@ call conda activate simOmPP
 @REM --resExcel    D:/Paper3/Simulations/invivo/he/results_epi_cv_from_epi_at.xlsx
 
 
+python D:/Simulations/simOmPP/getCVfromSimMesh.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transminus15/results_posterior_view.vtk ^
+--spaceUnit   mm ^
+--maxDist     0.6 ^
+--maxCV       300 ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi_cv_from_epi_at.xlsx
 
+python D:/Simulations/simOmPP/getCVfromSimMesh.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transplus15/results_posterior_view.vtk ^
+--spaceUnit   mm ^
+--maxDist     0.6 ^
+--maxCV       300 ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_epi_cv_from_epi_at.xlsx
 
 @REM @REM SAMPLE 3 -----------------------------------------------------------------
 @REM python D:/Simulations/simOmPP/getCVfromSimMesh.py ^

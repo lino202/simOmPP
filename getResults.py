@@ -3,7 +3,7 @@ import argparse
 from tqdm import tqdm
 import numpy as np
 import meshio
-from utilsCV import getLocalGradsVanillaMeshPerNodePool, getLocalGradsVanillaMeshPerNode
+from utilsCV import getLocalGradsVanillaMeshPerNodePool, getLocalGradsVanillaMeshPerNode, getLocalGradsVanillaMeshPerNodeCS
 from utils import calcATFromEnsBinary, calcAPDXFromEnsBinary
 import pandas as pd
 import time
@@ -180,10 +180,14 @@ def main():
 
     print("Calculating CVs-----------------------------------------------------")
     start = time.time()
-    if args.nCores != 1:
-        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, ats, args.maxDist, args.maxMem, "time", args.nCores)
+    if 'cs' in args.soluName:
+        xyzuvw = getLocalGradsVanillaMeshPerNodeCS(points, ats, mesh.cells_dict['line'] , "time")
     else:
-        xyzuvw = getLocalGradsVanillaMeshPerNode(points, ats, args.maxDist, "time")
+        if args.nCores != 1:
+            xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, ats, args.maxDist, args.maxMem, "time", args.nCores)
+        else:
+            xyzuvw = getLocalGradsVanillaMeshPerNode(points, ats, args.maxDist, "time")
+
     print("Cv computed in {} s".format(time.time() - start))
     CVvectors = xyzuvw[:,-3:]
     CVmagnitudes = np.linalg.norm(CVvectors, axis=1)
@@ -235,10 +239,13 @@ def main():
     rts = ats + apds
     print("Calculating RTGs--------------------------------------------------")
     start = time.time()
-    if args.nCores != 1:
-        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, rts, args.maxDist, args.maxMem, "space", args.nCores)
+    if 'cs' in args.soluName:
+        xyzuvw = getLocalGradsVanillaMeshPerNodeCS(points, rts, mesh.cells_dict['line'] , "space")
     else:
-        xyzuvw = getLocalGradsVanillaMeshPerNode(points, rts, args.maxDist, "space")
+        if args.nCores != 1:
+            xyzuvw = getLocalGradsVanillaMeshPerNodePool(points, rts, args.maxDist, args.maxMem, "space", args.nCores)
+        else:
+            xyzuvw = getLocalGradsVanillaMeshPerNode(points, rts, args.maxDist, "space")
     print("RT grads computed in {} s".format(time.time() - start))
     
     RTVvectors = xyzuvw[:,-3:]

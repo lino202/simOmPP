@@ -281,6 +281,52 @@ def getLocalGradsVanillaMeshPerNode(points, ats, maxDist, gradType):
     return xyzuvw
 
 
+def getLocalGradsVanillaMeshPerNodeCS(points, ats, cells, gradType):
+    #This could be used for computing gradients over time or space
+    #All is referred as CV as this was made for CV initially
+    #The Cv is computed locally per each node as the mean of the
+    #mean CVs obtained from the AT distribution in its neighbour nodes
+    #This is the simplest code and more memory efficient,
+    #For speed see getLocalCvVanillaMeshPerNodePool
+    #Here we assigned as Nans the sink and sources
+    #For CS only the neighbour contactint nodes are taken into account for calculation
+
+    xyzuvw = np.zeros((points.shape[0], 6))
+    xyzuvw[:,:3] = points
+    for i in tqdm(range(points.shape[0])):
+        #Get connections
+        thisPoint = points[i,:]
+        dists = np.squeeze(cdist([thisPoint], points))
+        nodeConns = cells[np.where(cells==i)[0],:].flatten() #nodes connected
+        nodeConns = np.delete(nodeConns, nodeConns==i) #without ith node
+        
+        #Calculate mean magnitude and direction
+        dists = np.transpose(dists[nodeConns])
+        times = ats[nodeConns] - ats[i]
+        nodeGrads = np.empty(dists.shape); nodeGrads[:] = np.nan
+        if gradType == "time":
+            np.divide(dists, times, out=nodeGrads, where=times != 0.)
+        elif gradType == "space":
+            np.divide(times, dists, out=nodeGrads, where=dists != 0.)
+        else: raise ValueError("Wrong gradType")
+        
+        if not np.isnan(nodeGrads).all():
+            #Direction: All vectors go out from central node and times vector defines the final sign to be entering the node or going out from it
+            dirs = points[nodeConns,:] - points[[i],:]  
+            dirsVersors = dirs / np.expand_dims(np.linalg.norm(dirs,axis=1), axis=1)
+            cvVectors = dirsVersors * np.expand_dims(nodeGrads, axis=1)
+            resVector = np.nanmean(cvVectors, axis=0)
+            # if np.linalg.norm(resVector) != 0.0:
+            xyzuvw[i,-3:] = resVector
+            # else:
+            #     #Here we assigned as Nans the sink and sources
+            #     xyzuvw[i,-3:] = [np.nan, np.nan, np.nan]
+        else:
+            xyzuvw[i,-3:] = [np.nan, np.nan, np.nan]
+
+    return xyzuvw
+
+
 def getLocalCvBaylyMesh(points, ats, maxDist):
     #Bayly method is not working for 3D meshes, 2D ones can be treated as images
     xyzuvw = np.zeros((points.shape[0], 6))

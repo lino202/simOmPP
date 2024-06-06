@@ -53,6 +53,13 @@ call conda activate simOmPP
 @REM --meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur/myresults.vtk ^
 @REM --resExcel    D:/Paper3/Simulations/invivo/he/results_vol.xlsx
 
+python D:/Simulations/simOmPP/getResultsToExcel.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transminus15/myresults.vtk ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_vol.xlsx
+
+python D:/Simulations/simOmPP/getResultsToExcel.py ^
+--meshPath    D:/Paper3/Simulations/invivo/he/sample2/results_fib_standard_cs_intra_gaur_transplus15/myresults.vtk ^
+--resExcel    D:/Paper3/Simulations/invivo/he/results_vol.xlsx
 
 @REM @REM SAMPLE 3------------------------------------------------
 

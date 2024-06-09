@@ -8,9 +8,8 @@ import seaborn as sns
 from tqdm import tqdm
 import os
 import pandas as pd
-import random
 
-def calcATFromEnsBinary(nodeStart, nodeEnd, timeStart, timeEnd, dt, resPath, nDigits, soluName, method="upstroke"): 
+def calcATFromEnsBinary(nodeStart, nodeEnd, timeStart, timeEnd, dt, resPath, nDigits, soluName, method="zero-cross"): 
     fileNumbers = np.arange(timeStart/dt, timeEnd/dt + 1 ).astype(int)
     v = np.zeros((nodeEnd - nodeStart, fileNumbers.shape[0]), dtype=np.float32) #Electra precision is single (32 bits)
     for i, fileNumber in tqdm(enumerate(fileNumbers)):
@@ -25,7 +24,7 @@ def calcATFromEnsBinary(nodeStart, nodeEnd, timeStart, timeEnd, dt, resPath, nDi
     ats = calcATFromV(v, dt, method=method)
     return ats
 
-def calcATFromV(v, dt, method="upstroke"):
+def calcATFromV(v, dt, method="zero-cross"):
     ats = np.ones(v.shape[0], dtype=np.float32) * np.nan
     if method == "upstroke":
         diff = np.diff(v, axis=1)

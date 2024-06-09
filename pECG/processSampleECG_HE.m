@@ -8,25 +8,34 @@ clc
 addpath Tools/
 
 root_path         = 'D:/Paper3/Simulations/invivo/he/';
-sample            = 'sample2';
+sample            = 'sample3';
 % experiments_names = {'std', 'dwi', 'intra', 'ohara', 'gaur', 'in ga', 'trans l', 'trans s', 'exp'};
 % result_names      = {'results_fib_standard_cs_endo_tentusscher', 'results_fib_fromdwi_cs_endo_tentusscher', ...
 %                     'results_fib_standard_cs_intra_tentusscher', 'results_fib_standard_cs_endo_ohara',  ...
 %                     'results_fib_standard_cs_endo_gaur',         'results_fib_standard_cs_intra_gaur', ...
 %                     'results_fib_standard_cs_intra_gaur_transminus15', 'results_fib_standard_cs_intra_gaur_transplus15'};
-experiments_names = {'in ga', 'trans l', 'trans s', 'exp'};
-result_names      = {'results_fib_standard_cs_intra_gaur', ...
-                    'results_fib_standard_cs_intra_gaur_transminus15', 'results_fib_standard_cs_intra_gaur_transplus15'};
-n_experiments     = 3;
-dt_sim_out        = 0.00025; %s
+% experiments_names = {'in ga', 'trans l', 'trans s', 'exp'};
+% result_names      = {'results_fib_standard_cs_intra_gaur', ...
+%                     'results_fib_standard_cs_intra_gaur_transminus15', 'results_fib_standard_cs_intra_gaur_transplus15'};
+
+experiments_names = {'endo ga', 'intra ga', 'exp'};
+result_names      = {'results_fib_standard_cs_endo_gaur', ...
+                    'results_fib_standard_cs_intra_gaur_pmj_higherdiff_lowerratio05'};
+
+n_experiments     = 2;
+dt_sim            = 0.00025; %s
 exp_sim_factor    = 0.7686;%0.7686;      % RR ratio between exp and sim, put to 1 for having the real simulation timings
-dt_sim_out        = dt_sim_out * exp_sim_factor;
+dt_sim_out        = dt_sim * exp_sim_factor;
 
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
-pecg_name         = 'pECG_nearer.mat';
+pecg_name         = 'pECG.mat';
+nLeads            = 12;
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_nearer_only_gaur/');
+tot_time_ms          = 500;
+samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
+
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_endo_intra/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end
@@ -35,11 +44,8 @@ if ~exist(ecg_path_results_debug, 'dir')
     mkdir(ecg_path_results_debug)
 end
 
-load(append(root_path, sample,'/', result_names{1}, '/', pecg_name));
-nLeads        = size(pECG,2);
-pECG_tot_ecgs = zeros(size(pECG,1), nLeads, n_experiments);
-pECG_tot_time = zeros(size(time,2), n_experiments);
-samples_per_beat_sim = size(pECG,1);
+pECG_tot_ecgs = zeros(samples_per_beat_sim, nLeads, n_experiments);
+pECG_tot_time = zeros(samples_per_beat_sim, n_experiments);
 
 %% Load simulations pECGs and plot,
 % We plot the simulations ecg and save them without any normalization nor mean
@@ -47,8 +53,8 @@ samples_per_beat_sim = size(pECG,1);
 
 for i=1:n_experiments
     load(append(root_path, sample,'/', result_names{i}, '/', pecg_name));
-    pECG_tot_ecgs(:,:,i) = pECG;
-    pECG_tot_time(:,i) = time * exp_sim_factor;
+    pECG_tot_ecgs(:,:,i) = pECG(1:samples_per_beat_sim,:);
+    pECG_tot_time(:,i) = time(1:samples_per_beat_sim) * exp_sim_factor;
 end
 
 fig=figure;
@@ -152,7 +158,7 @@ for j=1:n_experiments
 end
 
 
-%% Plot pECG processed
+%% Plot pECG processed and time zeroed
 
 figure;
 for i=1:nLeads
@@ -160,6 +166,7 @@ for i=1:nLeads
     for j=1:n_experiments 
         pECG_tot_ecgs(:,i,j) = (pECG_tot_ecgs(:,i,j) - min(pECG_tot_ecgs(:,i,j))) / (max(pECG_tot_ecgs(:,i,j))-min(pECG_tot_ecgs(:,i,j)));
         pECG_tot_ecgs(:,i,j) = pECG_tot_ecgs(:,i,j) - pECG_tot_ecgs(1,i,j);
+        pECG_tot_time(:,j)   = pECG_tot_time(:,j) - min(pECG_tot_time(:,j));
         plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j));
         hold on
     end

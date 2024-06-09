@@ -1,4 +1,4 @@
-function compPECG_function(dataPath, eletrodesPath, experiment, slow, nDigits, startTime_ms, endTime_ms, dt, outName)
+function compPECG_function(dataPath, eletrodesPath, experiment, slow, nDigits, startTime_ms, endTime_ms, dt, step, outName)
 
     % This script computes pseudoECG using the heart mesh H.
     % This can be generated from getInput4PECG 
@@ -14,7 +14,7 @@ function compPECG_function(dataPath, eletrodesPath, experiment, slow, nDigits, s
     outPath = append(dataPath, experiment);
     ensPath = append(dataPath, experiment, 'tissue/tissue_solution');
 
-    samples = startTime_ms*1/dt:1:endTime_ms*1/dt;
+    samples = startTime_ms*1/dt:step:endTime_ms*1/dt;
     n_samples = numel(samples);
     n_nodes   = size(H.xyz,1);
 

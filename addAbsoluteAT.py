@@ -3,9 +3,7 @@ import argparse
 from tqdm import tqdm
 import numpy as np
 import meshio
-from utilsCV import getLocalGradsVanillaMeshPerNodePool, getLocalGradsVanillaMeshPerNode, getLocalGradsVanillaMeshPerNodeCS
-from utils import calcATFromEnsBinary, calcAPDXFromEnsBinary
-import pandas as pd
+from utils import calcATFromEnsBinary
 import time
 
 

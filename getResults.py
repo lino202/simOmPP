@@ -7,6 +7,7 @@ from utilsCV import getLocalGradsVanillaMeshPerNodePool, getLocalGradsVanillaMes
 from utils import calcATFromEnsBinary, calcAPDXFromEnsBinary
 import pandas as pd
 import time
+import copy
 
 params = ["ATM mean", "ATM median", "ATM min", "ATM max", "ATP mean", "ATP median", "ATP min", "ATP max", "ATBZ mean", "ATBZ median", "ATBZ min", "ATBZ max",
         "APD90M mean", "APD90M median", "APD90M min", "APD90M max", "APD90P mean", "APD90P median", "APD90P min", "APD90P max", "APD90BZ mean", "APD90BZ median", "APD90BZ min", "APD90BZ max",  
@@ -92,6 +93,7 @@ def main():
             ats[nodeStart:nodeEnd] = calcATFromEnsBinary(nodeStart, nodeEnd, args.timeStart, args.timeEnd, args.dt, args.resPath, args.nDigits, args.soluName)
     else:
         ats = calcATFromEnsBinary(0, totNodes, args.timeStart, args.timeEnd, args.dt, args.resPath, args.nDigits, args.soluName)
+    ats_absolute = copy.deepcopy(ats)
     ats = ats - np.nanmin(ats)
 
     res["ATM mean"] = np.nanmean(ats[idxmyo])
@@ -287,6 +289,7 @@ def main():
     #Save--------------------------------------------------------------------
     point_data = {}
     point_data["ATs_(ms)"] = ats
+    point_data["ATs_absolute_(ms)"] = ats_absolute
     point_data["APD{}_(ms)".format(args.apd)] = apds
     point_data["CVMag_(cm/s)"] = CVmagnitudes
     point_data["CVversors"] = CVversors

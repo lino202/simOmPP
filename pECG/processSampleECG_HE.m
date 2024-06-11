@@ -8,7 +8,7 @@ clc
 addpath Tools/
 
 root_path         = 'D:/Paper3/Simulations/invivo/he/';
-sample            = 'sample3';
+sample            = 'source_sink_mismatch';
 % experiments_names = {'std', 'dwi', 'intra', 'ohara', 'gaur', 'in ga', 'trans l', 'trans s', 'exp'};
 % result_names      = {'results_fib_standard_cs_endo_tentusscher', 'results_fib_fromdwi_cs_endo_tentusscher', ...
 %                     'results_fib_standard_cs_intra_tentusscher', 'results_fib_standard_cs_endo_ohara',  ...
@@ -18,11 +18,22 @@ sample            = 'sample3';
 % result_names      = {'results_fib_standard_cs_intra_gaur', ...
 %                     'results_fib_standard_cs_intra_gaur_transminus15', 'results_fib_standard_cs_intra_gaur_transplus15'};
 
-experiments_names = {'endo ga', 'intra ga', 'exp'};
-result_names      = {'results_fib_standard_cs_endo_gaur', ...
-                    'results_fib_standard_cs_intra_gaur_pmj_higherdiff_lowerratio05'};
+% experiments_names = {'intra ga','intra ga rv sep', 'intra ga lva up' 'exp'};
+% result_names      = {'results_fib_standard_cs_intra_gaur_pmj_higherdiff_lowerratio05', ...
+%                      'results_fib_standard_cs_intra_gaur_rv_septum', ...
+%                      'results_fib_standard_cs_intra_gaur_rv_septum_lva_up'};
 
-n_experiments     = 2;
+
+experiments_names = {'endo 01','endo 1', 'endo 2', 'intra 01','intra 0.6', 'intra 1.2', 'exp'};
+result_names      = {'results_fib_standard_cs_endo_tentusscher_pmjratio01', ...
+                     'results_fib_standard_cs_endo_tentusscher_pmjratio10', ...
+                     'results_fib_standard_cs_endo_tentusscher_pmjratio20', ...
+                     'results_fib_standard_cs_intra_tentusscher_pmjratio01', ...
+                     'results_fib_standard_cs_intra_tentusscher_pmjratio06', ...
+                     'results_fib_standard_cs_intra_tentusscher_pmjratio12'};
+
+
+n_experiments     = 6;
 dt_sim            = 0.00025; %s
 exp_sim_factor    = 0.7686;%0.7686;      % RR ratio between exp and sim, put to 1 for having the real simulation timings
 dt_sim_out        = dt_sim * exp_sim_factor;
@@ -32,10 +43,10 @@ cutoff            = 40;
 pecg_name         = 'pECG.mat';
 nLeads            = 12;
 
-tot_time_ms          = 500;
+tot_time_ms          = 250;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_endo_intra/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end
@@ -64,7 +75,7 @@ for i=1:nLeads
         plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j));
         hold on
     end
-    ylabel("Norm V"),xlabel("t(ms)");
+    ylabel("V (a.u.)"),xlabel("t(ms)");
     title(pECGLabels(i));
     legend(experiments_names,'FontSize',8)
     hold off
@@ -88,7 +99,7 @@ for i=1:nLeads
         hold on 
         
     end
-    ylabel("Norm V"),xlabel("t(ms)");
+    ylabel("V (a.u.)"),xlabel("t(ms)");
     title(pECGLabels(i));
     legend(experiments_names,'FontSize',8)
     hold off
@@ -160,11 +171,18 @@ end
 
 %% Plot pECG processed and time zeroed
 
-figure;
+fig=figure;
 for i=1:nLeads
     subplot(3,4,i);
     for j=1:n_experiments 
+        % We normalize each one separately for comparing with exp
+        % but if its all simulations you can do it with the largest and
+        % smallest value from the pool, as in that situation you can
+        % compare ecgs amplitude but no with experimental ones.
         pECG_tot_ecgs(:,i,j) = (pECG_tot_ecgs(:,i,j) - min(pECG_tot_ecgs(:,i,j))) / (max(pECG_tot_ecgs(:,i,j))-min(pECG_tot_ecgs(:,i,j)));
+%         pECG_tot_ecgs(:,i,j) = (pECG_tot_ecgs(:,i,j) - min(pECG_tot_ecgs,[],'all')) / (max(pECG_tot_ecgs,[],'all')-min(pECG_tot_ecgs,[],'all'));
+
+        
         pECG_tot_ecgs(:,i,j) = pECG_tot_ecgs(:,i,j) - pECG_tot_ecgs(1,i,j);
         pECG_tot_time(:,j)   = pECG_tot_time(:,j) - min(pECG_tot_time(:,j));
         plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j));
@@ -175,7 +193,8 @@ for i=1:nLeads
     legend(experiments_names,'Location','best','FontSize',8)
     hold off
 end
-
+set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
+exportgraphics(gcf,append(ecg_path_results, 'simulations_filtered_norm.png'),'Resolution',400);
 %% Load experimental
 
 exp_path = 'D:/Paper3/Experimental/ECGs/ecg_cerdo_sano_dylan/median_beats/';

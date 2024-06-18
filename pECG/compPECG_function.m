@@ -1,4 +1,4 @@
-function compPECG_function(dataPath, eletrodesPath, experiment, slow, nDigits, startTime_ms, endTime_ms, dt, step, outName)
+function compPECG_function(dataPath, mesh_alignment_name, eletrodesPath, experiment, slow, nDigits, startTime_ms, endTime_ms, dt, step, outName)
 
     % This script computes pseudoECG using the heart mesh H.
     % This can be generated from getInput4PECG 
@@ -9,7 +9,7 @@ function compPECG_function(dataPath, eletrodesPath, experiment, slow, nDigits, s
     %Also H can be provided with V or not deppending on RAM
 
     addpath Tools/
-    load(append(dataPath, 'mesh_aligned_sampleX.mat'), 'H');
+    load(append(dataPath, mesh_alignment_name,'.mat'), 'H');
     load(append(eletrodesPath, 'electrodes_positions.mat'), 'electrodes_positions');
     outPath = append(dataPath, experiment);
     ensPath = append(dataPath, experiment, 'tissue/tissue_solution');

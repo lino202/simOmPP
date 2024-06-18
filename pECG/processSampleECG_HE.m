@@ -8,7 +8,7 @@ clc
 addpath Tools/
 
 root_path         = 'D:/Paper3/Simulations/invivo/he/';
-sample            = 'source_sink_mismatch';
+sample            = 'sample3';
 % experiments_names = {'std', 'dwi', 'intra', 'ohara', 'gaur', 'in ga', 'trans l', 'trans s', 'exp'};
 % result_names      = {'results_fib_standard_cs_endo_tentusscher', 'results_fib_fromdwi_cs_endo_tentusscher', ...
 %                     'results_fib_standard_cs_intra_tentusscher', 'results_fib_standard_cs_endo_ohara',  ...
@@ -18,35 +18,37 @@ sample            = 'source_sink_mismatch';
 % result_names      = {'results_fib_standard_cs_intra_gaur', ...
 %                     'results_fib_standard_cs_intra_gaur_transminus15', 'results_fib_standard_cs_intra_gaur_transplus15'};
 
-% experiments_names = {'intra ga','intra ga rv sep', 'intra ga lva up' 'exp'};
-% result_names      = {'results_fib_standard_cs_intra_gaur_pmj_higherdiff_lowerratio05', ...
-%                      'results_fib_standard_cs_intra_gaur_rv_septum', ...
-%                      'results_fib_standard_cs_intra_gaur_rv_septum_lva_up'};
+experiments_names = {%'intra ga',
+    'rv sep', 'lv down', 'lv down separ', 'lv down separ half sep', 'exp'};
+result_names      = {%'results_fib_standard_cs_intra_gaur_pmj_higherdiff_lowerratio05', ...
+                     'results_fib_standard_cs_intra_gaur_rv_septum', ...
+                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down', ...
+                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_separated', ...
+                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_separated_half_sep'};
+
+% experiments_names = {'endo 01','endo 1', 'endo 2', 'intra 01','intra 0.6', 'intra 1.2', 'exp'};
+% result_names      = {'results_fib_standard_cs_endo_tentusscher_pmjratio01', ...
+%                      'results_fib_standard_cs_endo_tentusscher_pmjratio10', ...
+%                      'results_fib_standard_cs_endo_tentusscher_pmjratio20', ...
+%                      'results_fib_standard_cs_intra_tentusscher_pmjratio01', ...
+%                      'results_fib_standard_cs_intra_tentusscher_pmjratio06', ...
+%                      'results_fib_standard_cs_intra_tentusscher_pmjratio12'};
 
 
-experiments_names = {'endo 01','endo 1', 'endo 2', 'intra 01','intra 0.6', 'intra 1.2', 'exp'};
-result_names      = {'results_fib_standard_cs_endo_tentusscher_pmjratio01', ...
-                     'results_fib_standard_cs_endo_tentusscher_pmjratio10', ...
-                     'results_fib_standard_cs_endo_tentusscher_pmjratio20', ...
-                     'results_fib_standard_cs_intra_tentusscher_pmjratio01', ...
-                     'results_fib_standard_cs_intra_tentusscher_pmjratio06', ...
-                     'results_fib_standard_cs_intra_tentusscher_pmjratio12'};
-
-
-n_experiments     = 6;
+n_experiments     = 4;
 dt_sim            = 0.00025; %s
 exp_sim_factor    = 0.7686;%0.7686;      % RR ratio between exp and sim, put to 1 for having the real simulation timings
 dt_sim_out        = dt_sim * exp_sim_factor;
 
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
-pecg_name         = 'pECG.mat';
+pecg_name         = 'pECG_precord_manual.mat';
 nLeads            = 12;
 
-tot_time_ms          = 250;
+tot_time_ms          = 500;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_diff_intra_cs_precord_manual/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end
@@ -95,7 +97,7 @@ for i=1:nLeads
         [Bfpb,Afpb]   = butter(3,cutoff/fN,'low');  
         pECG_tot_ecgs(:,i,j) = filtfilt(Bfpb,Afpb,pECG_tot_ecgs(:,i,j)); 
         
-        plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j));
+        plot( pECG_tot_time(:,j) - min(pECG_tot_time(:,j)), pECG_tot_ecgs(:,i,j));
         hold on 
         
     end
@@ -125,20 +127,36 @@ for j=1:n_experiments
         [positionqrs_sim] = wavedelianation_func(append(pwd,'/stable/'), sim_path, filename, single_ecg, fs_sim, [0 0 0], []);
         
         %Check if T wave exist and is not taken as qrs
-        if (all(isnan(positionqrs_sim.T)) || all(isnan(positionqrs_sim.Ton)) || all(isnan(positionqrs_sim.Toff)))
-            [pks, locs] = findpeaks(single_ecg(positionqrs_sim.qrs));
-            if isempty(pks)
-                
-                ann.time    = positionqrs_sim.qrs';
-                ann.anntyp  = repmat('N', size(positionqrs_sim.qrs'));
-            else
-                ann.time    = positionqrs_sim.qrs(locs)';
-                ann.anntyp  = repmat('N', size(positionqrs_sim.qrs(locs)'));
-            end
+        if (~isempty(positionqrs_sim.qrs))
+            if (all(isnan(positionqrs_sim.T)) || all(isnan(positionqrs_sim.Ton)) || all(isnan(positionqrs_sim.Toff)))
+                [pks, locs] = findpeaks(single_ecg(positionqrs_sim.qrs));
 
-            
+                if isempty(pks)
+
+                    ann.time    = positionqrs_sim.qrs';
+                    ann.anntyp  = repmat('N', size(positionqrs_sim.qrs'));
+                else
+                    ann.time    = positionqrs_sim.qrs(locs)';
+                    ann.anntyp  = repmat('N', size(positionqrs_sim.qrs(locs)'));
+                end
+
+
+                writeannot(strcat(sim_path,filename,'.qrs'),ann); 
+                [positionqrs_sim] = wavedelianation_func(append(pwd,'/stable/'), sim_path, filename, single_ecg, fs_sim, [1 0 0], 0);
+                delete(strcat(sim_path,filename,'.qrs'));
+            end
+        else
+            % Try with findpeaks if wavedet failed
+            [pks, locs] = findpeaks(abs(single_ecg), "MinPeakDistance", size(single_ecg,2)/10 - 2);
+            if isempty(pks)
+                error("Could not find qrs pks!")
+            else
+                ann.time    = locs';
+                ann.anntyp  = repmat('N', size(locs'));
+            end
             writeannot(strcat(sim_path,filename,'.qrs'),ann); 
             [positionqrs_sim] = wavedelianation_func(append(pwd,'/stable/'), sim_path, filename, single_ecg, fs_sim, [1 0 0], 0);
+            delete(strcat(sim_path,filename,'.qrs'));
         end
         
         figure(100), plot(single_time, single_ecg),

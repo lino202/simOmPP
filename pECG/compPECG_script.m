@@ -10,8 +10,9 @@
 sample = 'sample3/';
 experiment = 'results_fib_standard_cs_intra_gaur_rv_septum/';
 
-dataPath      = append('D:/Paper3/Simulations/invivo/he/', sample);
-eletrodesPath = 'D:/Paper3/ECG_lead_positions/sampleX/original/';
+dataPath            = append('D:/Paper3/Simulations/invivo/he/', sample);
+mesh_alignment_name = 'mesh_aligned_sampleX'; 
+eletrodesPath       = 'D:/Paper3/ECG_lead_positions/sampleX/original/';
 
 
 slow             = 1;
@@ -23,4 +24,4 @@ outName          = 'pECG';
 step             = 4;
 
 
-compPECG_function(dataPath, eletrodesPath, experiment, slow, nDigits, startTime_ms, endTime_ms, dt, step, outName);
+compPECG_function(dataPath, mesh_alignment_name, eletrodesPath, experiment, slow, nDigits, startTime_ms, endTime_ms, dt, step, outName);

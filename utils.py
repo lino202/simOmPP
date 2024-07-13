@@ -24,6 +24,16 @@ def calcATFromEnsBinary(nodeStart, nodeEnd, timeStart, timeEnd, dt, resPath, nDi
     ats = calcATFromV(v, dt, method=method)
     return ats
 
+def calcATFromEns(nodeStart, nodeEnd, timeStart, timeEnd, dt, resPath, nDigits, soluName, method="zero-cross"):
+    v = np.zeros((nodeEnd - nodeStart, timeEnd - timeStart))
+    for i in tqdm(range(timeStart, timeEnd)):
+        fileName = os.path.join(resPath, '{}{}.ens'.format(soluName, str(i).zfill(nDigits)))
+        df = pd.read_csv(fileName, usecols=[0], skiprows=3, dtype=np.float64)
+        v[:, i-timeStart] = df["coordinates"][nodeStart:nodeEnd].to_numpy()
+
+    ats = calcATFromV(v, dt, method=method)
+    return ats
+
 def calcATFromV(v, dt, method="zero-cross"):
     ats = np.ones(v.shape[0], dtype=np.float32) * np.nan
     if method == "upstroke":

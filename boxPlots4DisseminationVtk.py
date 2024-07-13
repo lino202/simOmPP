@@ -17,7 +17,7 @@ parser.add_argument('--dataPaths',type=str, required=True, nargs='+', help='path
 # parser.add_argument('--palette',type=str, required=True, nargs='+', help='colors in boxplot')
 parser.add_argument('--variableName',type=str, required=True, help='data name')
 parser.add_argument('--dataNames',type=str, required=True, nargs='+', help='data names')
-parser.add_argument('--nodeset',type=str, required=True, help='node set')
+parser.add_argument('--layersFlag',type=int, required=True, help='flag for the layers type you want to see results of')
 parser.add_argument('--ylabel',type=str, required=True)
 parser.add_argument('--xlabel',type=str, required=True)
 parser.add_argument('--huelabel',type=str, required=True)
@@ -31,7 +31,7 @@ data = {}
 for i, dataPath in enumerate(args.dataPaths):
         if ".vtk" in dataPath:
                 mesh = meshio.read(dataPath)
-                idxs = (mesh.point_data[args.nodeset]==1.).nonzero()[0]
+                idxs = np.where(mesh.point_data['layers']==args.layersFlag)[0]
                 data[args.dataNames[i]] = mesh.point_data[args.variableName][idxs]
         else:
                 raise ValueError("Input datapath must be a .vtk file")

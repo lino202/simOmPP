@@ -190,48 +190,53 @@ def main():
     CVversorsMyo      = copy.deepcopy(CVversors)
     
     #Patch --------------------------------------------------------------------
-    print("LOCAL CV HEALTHY PATCH with maxDist {0}".format(args.maxDist[1]))
-    start = time.time()
-    if args.nCores != 1:
-        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points[idxpatch], ats[idxpatch], args.maxDist[1], args.maxMem, "time", args.nCores)
-    else:
-        xyzuvw = getLocalGradsVanillaMeshPerNode(points[idxpatch], ats[idxpatch], args.maxDist[1], "time")
-    print("Cv computed in {} s".format(time.time() - start))
-    CVvectors = xyzuvw[:,-3:]
-    CVmagnitudes = np.linalg.norm(CVvectors, axis=1)
-    CVversors = np.empty((CVmagnitudes.shape[0],3)); CVversors[:] = np.nan
-    np.divide(CVvectors, np.expand_dims(CVmagnitudes, axis=1), out=CVversors, where=np.expand_dims(CVmagnitudes, axis=1) != 0.)
+    if patch_flag:
+        print("LOCAL CV HEALTHY PATCH with maxDist {0}".format(args.maxDist[1]))
+        start = time.time()
+        if args.nCores != 1:
+            xyzuvw = getLocalGradsVanillaMeshPerNodePool(points[idxpatch], ats[idxpatch], args.maxDist[1], args.maxMem, "time", args.nCores)
+        else:
+            xyzuvw = getLocalGradsVanillaMeshPerNode(points[idxpatch], ats[idxpatch], args.maxDist[1], "time")
+        print("Cv computed in {} s".format(time.time() - start))
+        CVvectors = xyzuvw[:,-3:]
+        CVmagnitudes = np.linalg.norm(CVvectors, axis=1)
+        CVversors = np.empty((CVmagnitudes.shape[0],3)); CVversors[:] = np.nan
+        np.divide(CVvectors, np.expand_dims(CVmagnitudes, axis=1), out=CVversors, where=np.expand_dims(CVmagnitudes, axis=1) != 0.)
 
-    # Add units and get rid of CVs which are too high and stimulated
-    if args.spaceUnit == "mm": CVmagnitudes = CVmagnitudes * 100
-    elif args.spaceUnit == "cm": CVmagnitudes = CVmagnitudes * 1000
-    else: raise ValueError("Wrong space unit")
-    idxs2Nan = np.where(CVmagnitudes>args.maxCV)
-    # if "stim_nodes" in mesh.point_sets.keys(): 
-    #     idxs2Nan = np.append(idxs2Nan, mesh.point_sets["stim_nodes"])
-    CVmagnitudes[idxs2Nan] = np.nan
-    CVversors[idxs2Nan,:] = np.nan
-    CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
-    
-    res["CVP mean"] = np.nanmean(CVmagnitudes)
-    res["CVP median"] = np.nanmedian(CVmagnitudes)
-    res["CVP min"] = np.nanmin(CVmagnitudes)
-    res["CVP max"] = np.nanmax(CVmagnitudes)
+        # Add units and get rid of CVs which are too high and stimulated
+        if args.spaceUnit == "mm": CVmagnitudes = CVmagnitudes * 100
+        elif args.spaceUnit == "cm": CVmagnitudes = CVmagnitudes * 1000
+        else: raise ValueError("Wrong space unit")
+        idxs2Nan = np.where(CVmagnitudes>args.maxCV)
+        # if "stim_nodes" in mesh.point_sets.keys(): 
+        #     idxs2Nan = np.append(idxs2Nan, mesh.point_sets["stim_nodes"])
+        CVmagnitudes[idxs2Nan] = np.nan
+        CVversors[idxs2Nan,:] = np.nan
+        CVvectors = np.expand_dims(CVmagnitudes, axis=1) * CVversors
+        
+        res["CVP mean"] = np.nanmean(CVmagnitudes)
+        res["CVP median"] = np.nanmedian(CVmagnitudes)
+        res["CVP min"] = np.nanmin(CVmagnitudes)
+        res["CVP max"] = np.nanmax(CVmagnitudes)
 
-    print("CVP mean:   {0:f}".format(np.nanmean(CVmagnitudes)))
-    print("CVP median: {0:f}".format(np.nanmedian(CVmagnitudes)))
-    print("CVP min:    {0:f}".format(np.nanmin(CVmagnitudes)))
-    print("CVP max:    {0:f}".format(np.nanmax(CVmagnitudes)))
+        print("CVP mean:   {0:f}".format(np.nanmean(CVmagnitudes)))
+        print("CVP median: {0:f}".format(np.nanmedian(CVmagnitudes)))
+        print("CVP min:    {0:f}".format(np.nanmin(CVmagnitudes)))
+        print("CVP max:    {0:f}".format(np.nanmax(CVmagnitudes)))
+        
+        CVmagnitudesPatch = copy.deepcopy(CVmagnitudes)
+        CVversorsPatch    = copy.deepcopy(CVversors)
     
-    CVmagnitudesPatch = copy.deepcopy(CVmagnitudes)
-    CVversorsPatch    = copy.deepcopy(CVversors)
-    
+
+    #  Put all together
     CVmagnitudes           = np.empty(points.shape[0]);     CVmagnitudes[:] = np.nan
     CVversors              = np.empty((points.shape[0],3)); CVversors[:]    = np.nan
     CVmagnitudes[idxmyo]   = CVmagnitudesMyo
-    CVmagnitudes[idxpatch] = CVmagnitudesPatch
     CVversors[idxmyo]      = CVversorsMyo
-    CVversors[idxpatch]    = CVversorsPatch
+    
+    if patch_flag:
+        CVmagnitudes[idxpatch] = CVmagnitudesPatch
+        CVversors[idxpatch]    = CVversorsPatch
 
     # RTs--------------------------------------------------------------------
     rts = apds
@@ -262,33 +267,37 @@ def main():
     RTgradientsMyo     = copy.deepcopy(RTgradients)
     
     #Patch--------------------------------------------------------------------
-    print("LOCAL RT GRADS PATCH")
-    start = time.time()
-    if args.nCores != 1:
-        xyzuvw = getLocalGradsVanillaMeshPerNodePool(points[idxpatch], rts[idxpatch], args.maxDist[1], args.maxMem, "space", args.nCores)
-    else:
-        xyzuvw = getLocalGradsVanillaMeshPerNode(points[idxpatch], rts[idxpatch], args.maxDist[1], "space")
-    print("RT grads computed in {} s".format(time.time() - start))
-    
-    RTVvectors = xyzuvw[:,-3:]
-    RTgradients = np.linalg.norm(RTVvectors, axis=1)
-    if "stim_nodes" in mesh.point_sets.keys(): 
-        idxs2Nan = mesh.point_sets["stim_nodes"]
-        RTgradients[idxs2Nan] = np.nan
+    if patch_flag:
+        print("LOCAL RT GRADS PATCH")
+        start = time.time()
+        if args.nCores != 1:
+            xyzuvw = getLocalGradsVanillaMeshPerNodePool(points[idxpatch], rts[idxpatch], args.maxDist[1], args.maxMem, "space", args.nCores)
+        else:
+            xyzuvw = getLocalGradsVanillaMeshPerNode(points[idxpatch], rts[idxpatch], args.maxDist[1], "space")
+        print("RT grads computed in {} s".format(time.time() - start))
+        
+        RTVvectors = xyzuvw[:,-3:]
+        RTgradients = np.linalg.norm(RTVvectors, axis=1)
+        if "stim_nodes" in mesh.point_sets.keys(): 
+            idxs2Nan = mesh.point_sets["stim_nodes"]
+            RTgradients[idxs2Nan] = np.nan
 
-    res["RTGP mean"] = np.nanmean(RTgradients)
-    res["RTGP median"] = np.nanmedian(RTgradients)
-    res["RTGP min"] = np.nanmin(RTgradients)
-    res["RTGP max"] = np.nanmax(RTgradients)
-    print("RTGP mean:   {0:f}".format(np.nanmean(RTgradients)))
-    print("RTGP median: {0:f}".format(np.nanmedian(RTgradients)))
-    print("RTGP min:    {0:f}".format(np.nanmin(RTgradients)))
-    print("RTGP max:    {0:f}".format(np.nanmax(RTgradients)))
-    
-    RTgradientsPatch = copy.deepcopy(RTgradients)
+        res["RTGP mean"] = np.nanmean(RTgradients)
+        res["RTGP median"] = np.nanmedian(RTgradients)
+        res["RTGP min"] = np.nanmin(RTgradients)
+        res["RTGP max"] = np.nanmax(RTgradients)
+        print("RTGP mean:   {0:f}".format(np.nanmean(RTgradients)))
+        print("RTGP median: {0:f}".format(np.nanmedian(RTgradients)))
+        print("RTGP min:    {0:f}".format(np.nanmin(RTgradients)))
+        print("RTGP max:    {0:f}".format(np.nanmax(RTgradients)))
+        
+        RTgradientsPatch = copy.deepcopy(RTgradients)
+
+    # Put all together 
     RTgradients      = np.empty(points.shape[0]); RTgradients[:] = np.nan
     RTgradients[idxmyo]   = RTgradientsMyo
-    RTgradients[idxpatch] = RTgradientsPatch
+    if patch_flag:
+        RTgradients[idxpatch] = RTgradientsPatch
 
     #Save--------------------------------------------------------------------
     point_data = {}

@@ -8,47 +8,27 @@ clc
 addpath Tools/
 
 root_path         = 'D:/Paper3/Simulations/invivo/he/';
-sample            = 'sample3';
-% experiments_names = {'std', 'dwi', 'intra', 'ohara', 'gaur', 'in ga', 'trans l', 'trans s', 'exp'};
-% result_names      = {'results_fib_standard_cs_endo_tentusscher', 'results_fib_fromdwi_cs_endo_tentusscher', ...
-%                     'results_fib_standard_cs_intra_tentusscher', 'results_fib_standard_cs_endo_ohara',  ...
-%                     'results_fib_standard_cs_endo_gaur',         'results_fib_standard_cs_intra_gaur', ...
-%                     'results_fib_standard_cs_intra_gaur_transminus15', 'results_fib_standard_cs_intra_gaur_transplus15'};
-% experiments_names = {'in ga', 'trans l', 'trans s', 'exp'};
-% result_names      = {'results_fib_standard_cs_intra_gaur', ...
-%                     'results_fib_standard_cs_intra_gaur_transminus15', 'results_fib_standard_cs_intra_gaur_transplus15'};
+sample            = 'best_ecg';
 
-experiments_names = {%'intra ga',
-    'rv sep', 'lv down', 'lv down separ', 'lv down separ half sep', 'exp'};
-result_names      = {%'results_fib_standard_cs_intra_gaur_pmj_higherdiff_lowerratio05', ...
-                     'results_fib_standard_cs_intra_gaur_rv_septum', ...
-                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down', ...
-                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_separated', ...
-                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_separated_half_sep'};
+experiments_names = {'s1', 's2', 's3', 'exp'};
+result_names      = {'sample1', ...
+                     'sample2', ...
+                     'sample3'};
 
-% experiments_names = {'endo 01','endo 1', 'endo 2', 'intra 01','intra 0.6', 'intra 1.2', 'exp'};
-% result_names      = {'results_fib_standard_cs_endo_tentusscher_pmjratio01', ...
-%                      'results_fib_standard_cs_endo_tentusscher_pmjratio10', ...
-%                      'results_fib_standard_cs_endo_tentusscher_pmjratio20', ...
-%                      'results_fib_standard_cs_intra_tentusscher_pmjratio01', ...
-%                      'results_fib_standard_cs_intra_tentusscher_pmjratio06', ...
-%                      'results_fib_standard_cs_intra_tentusscher_pmjratio12'};
-
-
-n_experiments     = 4;
+n_experiments     = 3;
 dt_sim            = 0.00025; %s
-exp_sim_factor    = 0.7686;%0.7686;      % RR ratio between exp and sim, put to 1 for having the real simulation timings
+exp_sim_factor    = 1;%0.7686;      % RR ratio between exp and sim, put to 1 for having the real simulation timings
 dt_sim_out        = dt_sim * exp_sim_factor;
 
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
-pecg_name         = 'pECG_precord_manual.mat';
+pecg_name         = 'pECG_precord_manual_v6_rot3.mat';
 nLeads            = 12;
 
 tot_time_ms          = 500;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_diff_intra_cs_precord_manual/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_precord_manual_v6_rot3_40_best/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end
@@ -251,7 +231,7 @@ for i=1:nLeads
     results_exp{i}{4,1} = 't_dur';
     results_exp{i}{4,2} = (positionqrs_exp.Toff(5)   - positionqrs_exp.Ton(5))   * 1/fs_exp*1000; 
     
-%     before = round((ms_to_qrs(1,i)/1000) * fs_exp); %Add X ms before for aligning with sims
+    before = round((ms_to_qrs(1,i)/1000) * fs_exp); %Add X ms before for aligning with sims
     before = round((mean(ms_to_qrs)/1000) * fs_exp);
     after  = round(0.01*fs_exp); %Add 10 ms after for having the complete T wave
     
@@ -282,7 +262,7 @@ for i=1:nLeads
     
     hold on
     
-    legend(experiments_names,'FontSize',8)
+    legend(experiments_names,'FontSize',8, 'Location', 'bestoutside')
     title(ECG_headers{i}), xlim tight, xlabel('time (ms)'),ylabel('norm V')
 
 end
@@ -323,7 +303,14 @@ for i=1:n_experiments
         single_ecg_sim = squeeze(pECG_tot_ecgs(1:round(fs_sim/fs_exp):end,j,i));
         single_ecg_exp = final_exp_ecgs{j}';
         chunk_size = size(single_ecg_sim,1) - size(single_ecg_exp,1);
-        single_ecg_exp = [single_ecg_exp; ones(chunk_size,1)*single_ecg_exp(end)];
+        if (chunk_size > 0)
+            single_ecg_exp = [single_ecg_exp; ones(chunk_size,1)*single_ecg_exp(end)];
+        elseif (chunk_size < 0)
+            single_ecg_sim = [single_ecg_sim; ones(abs(chunk_size),1)*single_ecg_sim(end)];
+        else
+
+        end
+        
         C = corrcoef(single_ecg_sim, single_ecg_exp);
         results_sim{i,j}{6,2} = C(1,2);
     end

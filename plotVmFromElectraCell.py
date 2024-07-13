@@ -24,7 +24,8 @@ def main():
         #     vms[:,i] = data[int(args.starts[i]/args.dt):int(args.ends[i]/args.dt), 1]
         with h5py.File(filePath, "r") as f:
             vm = np.asarray(f['V'])   # f['time'] can be also obtained
-            vms[:,i] = vm[0,int(args.starts[i]/args.dt):int(args.ends[i]/args.dt)]
+            vm = np.squeeze(vm)
+            vms[:,i] = vm[int(args.starts[i]/args.dt):int(args.ends[i]/args.dt)]
 
     time = np.arange(args.starts[0]/args.dt, args.ends[0]/args.dt, 1)
     time = (time - args.starts[0]/args.dt) * args.dt

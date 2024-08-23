@@ -8,12 +8,12 @@ clc
 addpath Tools/
 
 root_path         = 'D:/Paper3/Simulations/invivo/he/';
-sample            = 'best_ecg';
+sample            = 'sample3';
 
-experiments_names = {'s1', 's2', 's3', 'exp'};
-result_names      = {'sample1', ...
-                     'sample2', ...
-                     'sample3'};
+experiments_names = {'base', 'endoepi', 'heterogeneo'};
+result_names      = {'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769', ...
+                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_gk1plus15endoepi', ...
+                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_meijbord'};
 
 n_experiments     = 3;
 dt_sim            = 0.00025; %s
@@ -22,13 +22,15 @@ dt_sim_out        = dt_sim * exp_sim_factor;
 
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
-pecg_name         = 'pECG_precord_manual_v6_rot3.mat';
+pecg_name         = {'pECG_electrodesprecordmanual_final_rot3.mat', ...
+                     'pECG_electrodesprecordmanual_final_rot3.mat', ...
+                     'pECG_electrodesprecordmanual_final_rot3.mat'};
 nLeads            = 12;
 
 tot_time_ms          = 500;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_precord_manual_v6_rot3_40_best/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesprecordmanual_final_rot3_transmural/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end
@@ -45,7 +47,7 @@ pECG_tot_time = zeros(samples_per_beat_sim, n_experiments);
 % dropping
 
 for i=1:n_experiments
-    load(append(root_path, sample,'/', result_names{i}, '/', pecg_name));
+    load(append(root_path, sample,'/', result_names{i}, '/', pecg_name{i}));
     pECG_tot_ecgs(:,:,i) = pECG(1:samples_per_beat_sim,:);
     pECG_tot_time(:,i) = time(1:samples_per_beat_sim) * exp_sim_factor;
 end

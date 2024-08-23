@@ -4,6 +4,9 @@ the divide is only present when we say we are in a MI case
 
 oneCycleSamples  = (the period in ms in opmap)/exposure (generally exposure 2ms for Madrid)
 startFrame and endFrame must be taken when doing the Omap analysis
+
+We observed in this specific case of the Manu experiments from Perth that APD is higher than the normals value so it seems 
+it will be better to use the apd from omap
 '''
 
 
@@ -19,12 +22,11 @@ from utilsCV import getLocalCvBayly, getLocalCvVanilla
 import pickle
 import pandas as pd
 
-np.seterr(all='raise')
 
 parser = argparse.ArgumentParser(description="Options")
 parser.add_argument('--folderPath',type=str, required=True, help='path to data')
 parser.add_argument('--videoNumber',type=int, required=True)
-parser.add_argument('--infarction',action='store_true')
+parser.add_argument('--getSubRegions',action='store_true')
 parser.add_argument('--roisName',type=str, required=True)
 
 # CV
@@ -39,6 +41,7 @@ parser.add_argument('--cvCalcMethod', type=str, required=True, help='bayly or va
 parser.add_argument('--scaleVectors', type=float, required=True, help='scale of the vectors in quiver plot, usually 100 is ok but it depends on the magnitude of the CV')
 
 # APD
+parser.add_argument('--getAPDfromVideo',action='store_true')
 parser.add_argument('--startFrame',type=int, required=True)
 parser.add_argument('--endFrame',type=int, required=True)
 parser.add_argument('--oneCycleSamples',type=int, required=True)
@@ -55,8 +58,10 @@ args = parser.parse_args()
 samplePath = os.path.join(args.folderPath, str(args.videoNumber))
 videoPath = os.path.join(samplePath, "FileTag{}_video_filtered.mat".format(str(args.videoNumber).zfill(3))) # already filtered from omap
 atmapPath = os.path.join(samplePath, "actmap_FileTag{}_video.mat".format(str(args.videoNumber).zfill(3)))
+apdmapPath = os.path.join(samplePath, "adpmap_FileTag{}_video.mat".format(str(args.videoNumber).zfill(3)))
 video = scipy.io.loadmat(videoPath)['wholav_images']
 atmap = scipy.io.loadmat(atmapPath)['map']
+apdmap = scipy.io.loadmat(apdmapPath)['apmap']
 
 outPath = os.path.join(args.folderPath, str(args.videoNumber), "myresults")
 if not os.path.exists(outPath): os.makedirs(outPath)
@@ -71,7 +76,10 @@ plt.figure()
 plt.plot(np.arange(0,video.shape[2]),video[int(video.shape[0]/2),int(video.shape[1]/2),:])
 plt.savefig(os.path.join(secondaryOutFolder, "see_reversed_or_not.png"))
 
-#Cropping Space--------------------------------------------------------------------
+nameMap = ['A', 'L', 'M', 'S']  # name of the regions to analyse, A = all, L = Large, M = medium, S = small
+
+#Cropping Space-------------------------------------------------------------------- 
+# ALWAYS DRAW IN THE INNER REGION OF THE AT MAP!!!
 if len(os.listdir(roisFolder))<1:
     img0 = atmap
     plt.figure(); plt.imshow(img0); plt.title("Select Area, Nans here are nans already in ATs inside the ROI from omap, 0s are pixels outside the ROI in omap") 
@@ -80,69 +88,88 @@ if len(os.listdir(roisFolder))<1:
         mask_overall = my_roi.get_mask(img0)
     except IndexError:
         mask_overall = (img0>0).astype(int)
-    with open(os.path.join(roisFolder,'overall_mask.pkl'), 'wb') as file: pickle.dump(mask_overall, file) 
+    with open(os.path.join(roisFolder,'A_mask.pkl'), 'wb') as file: pickle.dump(mask_overall, file) 
 
     # Now select infarcted area over the already cropped
-    if args.infarction: 
-        img0 = img0 * mask_overall.astype(int)
-        plt.figure(); plt.imshow(img0); plt.title("Select MI") 
-        my_roi = RoiPoly(color='r') # draw new ROI in red color
-        try:
-            mask_mi = my_roi.get_mask(img0)
-        except IndexError:
-            mask_mi = (img0>0).astype(int)
-        mask_mi      = mask_mi.astype(int) * mask_overall.astype(int)
-        mask_healthy = (mask_mi.astype(int) + mask_overall.astype(int)).astype(int)
-        mask_healthy[mask_healthy!=1] = 0
-        with open(os.path.join(roisFolder,'mi_mask.pkl'), 'wb') as file: pickle.dump(mask_mi, file) 
-        with open(os.path.join(roisFolder,'healthy_mask.pkl'), 'wb') as file: pickle.dump(mask_healthy, file) 
+    if args.getSubRegions: 
+        masks = []
+        tmp_mask_overall = copy.deepcopy(mask_overall)
+        for m in range(len(nameMap)-1):
+            img0 = img0 * tmp_mask_overall.astype(int)
+            plt.figure(); plt.imshow(img0); plt.title("Select {} mask".format(nameMap[m+1])) 
+            my_roi = RoiPoly(color='r') # draw new ROI in red color
+            try:
+                mask = my_roi.get_mask(img0)
+            except IndexError:
+                mask = (img0>0).astype(int)
+            
+            masks.append(mask.astype(int) * tmp_mask_overall.astype(int))
+            # tmp_mask_overall = (mask.astype(int) + tmp_mask_overall.astype(int)).astype(int)
+            # tmp_mask_overall[tmp_mask_overall!=1] = 0
+            tmp_mask_overall = (tmp_mask_overall.astype(int) - mask.astype(int)).astype(int)
+            with open(os.path.join(roisFolder,'{}_mask.pkl'.format(nameMap[m+1])), 'wb') as file: pickle.dump(mask, file) 
 
 else:
-    with open(os.path.join(roisFolder,'overall_mask.pkl'), 'rb') as file: mask_overall = pickle.load(file) 
-    if args.infarction: 
-        with open(os.path.join(roisFolder,'mi_mask.pkl'), 'rb') as file: mask_mi = pickle.load(file) 
-        with open(os.path.join(roisFolder,'healthy_mask.pkl'), 'rb') as file: mask_healthy = pickle.load(file) 
+    with open(os.path.join(roisFolder,'A_mask.pkl'), 'rb') as file: mask_overall = pickle.load(file) 
+    if args.getSubRegions:
+        masks = [] 
+        for m in range(len(nameMap)-1):
+            with open(os.path.join(roisFolder,'{}_mask.pkl'.format(nameMap[m+1])), 'rb') as file: masks.append(pickle.load(file))
 
-# Get the Data 
+# If subregions flag is up we have in masks the mask for the Large, Medium and Small pore regions 
+
+# Get the Data -------------------------------------------------------------------------------
 videos = {}
 atmaps = {}
+apdmaps = {}
 minV = np.min(video)
 maxV = np.max(video)
 videoNorm = (video - minV) / (maxV - minV)
 if args.reverse:
     videoNorm = np.abs(videoNorm - 1)
+
+# See for selecting the sample, even if it will be better to use the value of the mean in Omap
+# plt.close()
+# plt.figure
+# plt.plot(videoNorm[int(video.shape[0]/2),int(video.shape[1]/2),:])
+# plt.show()
+
+
 v_overall = np.zeros(videoNorm.shape)
 for i in range(v_overall.shape[2]):
     v_overall[:,:,i] = videoNorm[:,:,i] * mask_overall.astype(int)
-videos['overall'] = v_overall
-atmaps['overall'] = atmap * mask_overall.astype(int)
-if args.infarction: 
-    v_mi      = np.zeros(videoNorm.shape)
-    v_healthy = np.zeros(videoNorm.shape)
-    for i in range(video.shape[2]):
-        v_mi[:,:,i] = videoNorm[:,:,i] * mask_mi.astype(int)
-        v_healthy[:,:,i] = videoNorm[:,:,i] * mask_healthy.astype(int)
-    videos['mi']      = v_mi
-    videos['healthy'] = v_healthy
-    atmaps['mi']      = atmap * mask_mi.astype(int)
-    atmaps['healthy'] = atmap * mask_healthy.astype(int)
+videos['A'] = v_overall
+atmaps['A'] = atmap * mask_overall.astype(int)
+apdmaps['A'] = apdmap * mask_overall.astype(int)
+
+if args.getSubRegions:
+    for m in range(len(nameMap)-1):    
+        v_tmp = np.zeros(videoNorm.shape)
+   
+        for i in range(video.shape[2]):
+            v_tmp[:,:,i] = videoNorm[:,:,i] * masks[m].astype(int)
+        
+        videos[nameMap[m+1]] = v_tmp
+        atmaps[nameMap[m+1]] = atmap * masks[m].astype(int)
+        apdmaps[nameMap[m+1]] = apdmap * masks[m].astype(int)
     
-if args.infarction:
-    fig, axs = plt.subplots(1,3)
-    axs[0].imshow(v_overall[:,:,0])
-    axs[1].imshow(v_healthy[:,:,0])
-    axs[2].imshow(v_mi[:,:,0])
+if args.getSubRegions:
+    fig, axs = plt.subplots(1,len(nameMap))
+    for m in range(len(nameMap)): 
+        axs[m].imshow(videos[nameMap[m]][:,:,0])
+
 else:
     fig, axs = plt.subplots(1)
     axs.imshow(v_overall[:,:,0])
 plt.savefig(os.path.join(secondaryOutFolder, "firstFrameVideoWithMask.png"))
+plt.close()
 
 
 # Compute ---------------------------------------------------------------
-nameMap = ['Myo', 'MI', 'HE']
 for i, key in enumerate(videos.keys()):
 
     i_atmap = atmaps[key]
+    i_apdmap = apdmaps[key]
     i_video = videos[key]
     res = {}
     #ATs --------------------------------------------------------------------
@@ -179,15 +206,15 @@ for i, key in enumerate(videos.keys()):
     plotHistAndBoxPlotSeaBorn(i_ats, "AT (ms)", path=os.path.join(secondaryOutFolder, "outliers4Block.png"))
 
     boxplotData = calculateBoxPlotParams(i_ats)
-    res["AT_{} mean".format(nameMap[i])]   = np.mean(i_ats)
-    res["AT_{} std".format(nameMap[i])]    = np.std(i_ats)
-    res["AT_{} median".format(nameMap[i])] = np.median(i_ats)
-    res["AT_{} min".format(nameMap[i])]    = np.min(i_ats)
-    res["AT_{} max".format(nameMap[i])]    = np.max(i_ats)
-    res["AT_{} lowQuart".format(nameMap[i])]   = boxplotData[1]
-    res["AT_{} upQuart".format(nameMap[i])]    = boxplotData[2]
-    res["AT_{} lowWhisker".format(nameMap[i])] = boxplotData[3]
-    res["AT_{} upWhisker".format(nameMap[i])]  = boxplotData[4]
+    res["AT mean"]   = np.mean(i_ats)
+    res["AT std"]    = np.std(i_ats)
+    res["AT median"] = np.median(i_ats)
+    res["AT min"]    = np.min(i_ats)
+    res["AT max"]    = np.max(i_ats)
+    res["AT lowQuart"]   = boxplotData[1]
+    res["AT upQuart"]    = boxplotData[2]
+    res["AT lowWhisker"] = boxplotData[3]
+    res["AT upWhisker"]  = boxplotData[4]
 
     # Nice Plot of ATs (map and statistics)
     plotHistAndBoxPlotSeaBorn(i_ats, "AT (ms)", path=os.path.join(outPath, '{}_at_stats.png'.format(nameMap[i])))
@@ -223,18 +250,18 @@ for i, key in enumerate(videos.keys()):
     i_cvsmags = CVmagnitudes[~np.isnan(CVmagnitudes)]        #Without Nans
 
     boxplotData = calculateBoxPlotParams(i_cvsmags)
-    res["CVmag_{} mean".format(nameMap[i])]       = np.mean(i_cvsmags)
-    res["CVmag_{} std".format(nameMap[i])]        = np.std(i_cvsmags)
-    res["CVmag_{} median".format(nameMap[i])]     = np.median(i_cvsmags)
-    res["CVmag_{} min".format(nameMap[i])]        = np.min(i_cvsmags)
-    res["CVmag_{} max".format(nameMap[i])]        = np.max(i_cvsmags)
-    res["CVmag_{} lowQuart".format(nameMap[i])]   = boxplotData[1]
-    res["CVmag_{} upQuart".format(nameMap[i])]    = boxplotData[2]
-    res["CVmag_{} lowWhisker".format(nameMap[i])] = boxplotData[3]
-    res["CVmag_{} upWhisker".format(nameMap[i])]  = boxplotData[4]
-    # res["CVdir_{} mean".format(nameMap[i])]       = np.nanmean(CVversors, axis=0)
-    # res["CVvec_{} mean".format(nameMap[i])]       = np.nanmean(CVvectors, axis=0)
-    # res["CVvec_{} meanAbs".format(nameMap[i])]    = np.nanmean(np.abs(CVvectors), axis=0)
+    res["CVmag mean"]       = np.mean(i_cvsmags)
+    res["CVmag std"]        = np.std(i_cvsmags)
+    res["CVmag median"]     = np.median(i_cvsmags)
+    res["CVmag min"]        = np.min(i_cvsmags)
+    res["CVmag max"]        = np.max(i_cvsmags)
+    res["CVmag lowQuart"]   = boxplotData[1]
+    res["CVmag upQuart"]    = boxplotData[2]
+    res["CVmag lowWhisker"] = boxplotData[3]
+    res["CVmag upWhisker"]  = boxplotData[4]
+    # res["CVdir mean"]       = np.nanmean(CVversors, axis=0)
+    # res["CVvec mean"]       = np.nanmean(CVvectors, axis=0)
+    # res["CVvec meanAbs"]    = np.nanmean(np.abs(CVvectors), axis=0)
 
     # PLOTS 
     #Some CV on x and y plotting
@@ -263,62 +290,70 @@ for i, key in enumerate(videos.keys()):
     q = ax.quiver(X, Y, U, -V, color=c, pivot='mid', angles='xy', scale_units='xy', scale=args.scaleVectors)
     ax.set_ylim(ax.get_ylim()[1], ax.get_ylim()[0]); plt.axis('off'); ax.set_title('Versors')
     plt.savefig(os.path.join(outPath, "{}_cvversor_map.png".format(nameMap[i])), dpi=500)
+    plt.close()
 
 
     #Compute APD--------------------------------------------------------------------
-    periods = np.arange(args.startFrame+args.oneCycleSamples, args.endFrame-args.oneCycleSamples, args.oneCycleSamples) # as in omap we not use the first and last AP
-    i_p_apds    = np.ones((i_video.shape[0], i_video.shape[1], periods.shape[0]-1)) * np.nan
-    for p in range(periods.shape[0]-1):
-        
-        i_p_video = i_video[:,:,periods[p]:periods[p+1]]
+    if args.getAPDfromVideo:
 
-        diff = np.diff(i_p_video, axis=2)
-        upstrokeIdxs = np.argmax(diff, axis=2)
+        periods = np.arange(args.startFrame+args.oneCycleSamples, args.endFrame-args.oneCycleSamples, args.oneCycleSamples) # as in omap we not use the first and last AP
+        i_p_apds    = np.ones((i_video.shape[0], i_video.shape[1], periods.shape[0]-1)) * np.nan
+        for p in range(periods.shape[0]-1):
+            
+            i_p_video = i_video[:,:,periods[p]:periods[p+1]]
 
-        peakIdxs = np.argmax(i_p_video, axis=2)
-        peaks    = np.max(i_p_video, axis=2)
-        baselinelvls = np.zeros((i_p_video.shape[0],i_p_video.shape[1]))
-        for j in range(i_p_video.shape[0]):
-            for k in range(i_p_video.shape[1]):
-                baselinelvls[j,k] = np.min(i_p_video[j,k,peakIdxs[j,k]:])
+            diff = np.diff(i_p_video, axis=2)
+            upstrokeIdxs = np.argmax(diff, axis=2)
 
-        Voi = baselinelvls + (1 - (args.apdtype/100)) * (peaks - baselinelvls)
-        tin = np.ones((i_p_video.shape[0],i_p_video.shape[1])) * np.nan
-        for j in range(i_p_video.shape[0]):
-            for k in range(i_p_video.shape[1]):
-                try:
-                    tin[j,k] = (i_p_video[j,k,peakIdxs[j,k]:]<Voi[j,k]).nonzero()[0][0] 
-                except IndexError:
-                    pass
-        tin = tin + peakIdxs
-        
-        i_p_apds[:,:,p] = tin - upstrokeIdxs
-        i_p_apds[:,:,p][i_p_apds[:,:,p]<0] = np.nan
+            peakIdxs = np.argmax(i_p_video, axis=2)
+            peaks    = np.max(i_p_video, axis=2)
+            baselinelvls = np.zeros((i_p_video.shape[0],i_p_video.shape[1]))
+            for j in range(i_p_video.shape[0]):
+                for k in range(i_p_video.shape[1]):
+                    baselinelvls[j,k] = np.min(i_p_video[j,k,peakIdxs[j,k]:])
 
-    # Get median per pixel as the final APD value
-    i_apdImg = np.nanmedian(i_p_apds, axis=2)
-    i_apdImg = (i_apdImg / args.fps) * 1000          # Make ms and with Nans 
+            Voi = baselinelvls + (1 - (args.apdtype/100)) * (peaks - baselinelvls)
+            tin = np.ones((i_p_video.shape[0],i_p_video.shape[1])) * np.nan
+            for j in range(i_p_video.shape[0]):
+                for k in range(i_p_video.shape[1]):
+                    try:
+                        tin[j,k] = (i_p_video[j,k,peakIdxs[j,k]:]<Voi[j,k]).nonzero()[0][0] 
+                    except IndexError:
+                        pass
+            tin = tin + peakIdxs
+            
+            i_p_apds[:,:,p] = tin - upstrokeIdxs
+            i_p_apds[:,:,p][i_p_apds[:,:,p]<0] = np.nan
+
+        # Get median per pixel as the final APD value
+        i_apdImg = np.nanmedian(i_p_apds, axis=2)
+        i_apdImg = (i_apdImg / args.fps) * 1000          # Make ms and with Nans 
+    else:
+        # If we do not get it from the video we use the apd computed from Omap software in matlab
+        i_apdmap = i_apdmap.astype(float)
+        i_apdmap[i_apdmap<=0] = np.nan
+        i_apdImg = i_apdmap
+
     i_apds = i_apdImg[~np.isnan(i_apdImg)]         # Without Nans
-    
     boxplotData = calculateBoxPlotParams(i_apds)
-    res["APD{}_{} mean".format(args.apdtype, nameMap[i])]       = np.mean(i_apds)
-    res["APD{}_{} std".format(args.apdtype, nameMap[i])]        = np.std(i_apds)
-    res["APD{}_{} median".format(args.apdtype, nameMap[i])]     = np.median(i_apds)
-    res["APD{}_{} min".format(args.apdtype, nameMap[i])]        = np.min(i_apds)
-    res["APD{}_{} max".format(args.apdtype, nameMap[i])]        = np.max(i_apds)
-    res["APD{}_{} lowQuart".format(args.apdtype, nameMap[i])]   = boxplotData[1]
-    res["APD{}_{} upQuart".format(args.apdtype, nameMap[i])]    = boxplotData[2]
-    res["APD{}_{} lowWhisker".format(args.apdtype, nameMap[i])] = boxplotData[3]
-    res["APD{}_{} upWhisker".format(args.apdtype, nameMap[i])]  = boxplotData[4]
-
-    apdName = '$APD_{'+ str(args.apdtype) +'} (ms)$'
+    res["APD{} mean".format(args.apdtype)]       = np.mean(i_apds)
+    res["APD{} std".format(args.apdtype)]        = np.std(i_apds)
+    res["APD{} median".format(args.apdtype)]     = np.median(i_apds)
+    res["APD{} min".format(args.apdtype)]        = np.min(i_apds)
+    res["APD{} max".format(args.apdtype)]        = np.max(i_apds)
+    res["APD{} lowQuart".format(args.apdtype)]   = boxplotData[1]
+    res["APD{} upQuart".format(args.apdtype)]    = boxplotData[2]
+    res["APD{} lowWhisker".format(args.apdtype)] = boxplotData[3]
+    res["APD{} upWhisker".format(args.apdtype)]  = boxplotData[4]
 
     # Nice Plot (map and statistics)
+    apdName = '$APD_{'+ str(args.apdtype) +'} (ms)$'
     plotHistAndBoxPlotSeaBorn(i_apds, apdName, path=os.path.join(outPath, '{}_apd_stats.png'.format(nameMap[i])))
     plotColorbar(i_apdImg, apdName, os.path.join(outPath, '{}_apd_map.png'.format(nameMap[i])))
 
 
-    # SAVE ALL, maybe to post-process in another way again
+    # SAVE ALL, maybe to post-process in another way again -----------------------------------------------------------------
+
     with open(os.path.join(outPath,'{}_ats.pkl'.format(nameMap[i])), 'wb') as file: pickle.dump(i_atmap, file) 
     with open(os.path.join(outPath,'{}_cvs.pkl'.format(nameMap[i])), 'wb') as file: pickle.dump(CVvectors, file) 
     with open(os.path.join(outPath,'{}_apds.pkl'.format(nameMap[i])), 'wb') as file: pickle.dump(i_apdImg, file) 

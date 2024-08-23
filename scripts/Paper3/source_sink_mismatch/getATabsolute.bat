@@ -141,15 +141,15 @@ call conda activate simOmPP
 @REM --nDigits     4 ^
 @REM --dt          0.25
 
-python D:/Simulations/simOmPP/addAbsoluteAT.py ^
---resPath     D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_tentusscher_pmjratio15/tissue ^
---meshPath    D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_tentusscher_pmjratio15/myresults.vtk ^
---timeStart   0 ^
---timeEnd     250 ^
---soluName    tissue_solution ^
---maxMem      40 ^
---nDigits     4 ^
---dt          0.25
+@REM python D:/Simulations/simOmPP/addAbsoluteAT.py ^
+@REM --resPath     D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_tentusscher_pmjratio15/tissue ^
+@REM --meshPath    D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_tentusscher_pmjratio15/myresults.vtk ^
+@REM --timeStart   0 ^
+@REM --timeEnd     250 ^
+@REM --soluName    tissue_solution ^
+@REM --maxMem      40 ^
+@REM --nDigits     4 ^
+@REM --dt          0.25
 
 @REM python D:/Simulations/simOmPP/addAbsoluteAT.py ^
 @REM --resPath     D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_tentusscher_pmjratio20/tissue ^

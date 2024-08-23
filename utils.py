@@ -227,6 +227,7 @@ def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
     sns.despine(ax=ax_hist)
     sns.despine(ax=ax_box, left=True)
     plt.savefig(path, dpi=500) if path else plt.show(block=True)
+    plt.close()
 
 
 def plotColorbar(mymap, label, outName):
@@ -249,3 +250,4 @@ def plotColorbar(mymap, label, outName):
     cbar.ax.ticklabel_format(useOffset=False)
     cbar.ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
     plt.savefig(outName, dpi=500)
+    plt.close()

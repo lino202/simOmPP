@@ -339,8 +339,8 @@ for i, key in enumerate(videos.keys()):
     res["APD{} mean".format(args.apdtype)]       = np.mean(i_apds)
     res["APD{} std".format(args.apdtype)]        = np.std(i_apds)
     res["APD{} median".format(args.apdtype)]     = np.median(i_apds)
-    res["APD{} min".format(args.apdtype)]        = np.min(i_apds)
-    res["APD{} max".format(args.apdtype)]        = np.max(i_apds)
+    res["APD{} min".format(args.apdtype)]        = np.min(i_apds) if i_apds.size != 0 else np.nan
+    res["APD{} max".format(args.apdtype)]        = np.max(i_apds) if i_apds.size != 0 else np.nan
     res["APD{} lowQuart".format(args.apdtype)]   = boxplotData[1]
     res["APD{} upQuart".format(args.apdtype)]    = boxplotData[2]
     res["APD{} lowWhisker".format(args.apdtype)] = boxplotData[3]

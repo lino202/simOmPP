@@ -157,12 +157,20 @@ def keepBigIsland(img, show=False):
         raise ValueError('There is not only one huge cluster')
 
 def calculateBoxPlotParams(data):
-    median = np.median(data)
-    upQuart = np.percentile(data, 75)
-    lowQuart = np.percentile(data, 25)
-    iqr = upQuart - lowQuart
-    upWhisker = data[data<=upQuart+1.5*iqr].max()
-    lowWhisker = data[data>=lowQuart-1.5*iqr].min()
+    if data.size != 0:
+        median = np.median(data)
+        upQuart = np.percentile(data, 75)
+        lowQuart = np.percentile(data, 25)
+        iqr = upQuart - lowQuart
+        upWhisker = data[data<=upQuart+1.5*iqr].max()
+        lowWhisker = data[data>=lowQuart-1.5*iqr].min()
+    else:
+        median      = np.nan
+        lowQuart    = np.nan
+        upQuart     = np.nan
+        lowWhisker  = np.nan
+        upWhisker   = np.nan
+
     return median, lowQuart, upQuart, lowWhisker, upWhisker
 
 

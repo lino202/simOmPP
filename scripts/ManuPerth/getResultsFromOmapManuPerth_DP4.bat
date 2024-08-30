@@ -4,84 +4,96 @@
 @REM @REM S is stimulated and B is basal, L is longitudinal and T is transversal, C is central
 
 @REM @REM DP4 ----------------------------------------------
-
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/DP4 ^
-@REM --videoNumber               126 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_126 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  2503 ^
-@REM --stimType                  B ^
-@REM --faceView                  B ^
-@REM --pigNumber                 DP4
-
-
-
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/DP4 ^
-@REM --videoNumber               127 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_127 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  2000 ^
-@REM --stimType                  S ^
-@REM --faceView                  L ^
-@REM --pigNumber                 DP4
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/DP4 ^
+--videoName                 126 ^
+--fileName                  FileTag126_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_126 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 2000 ^
+--endTime                   7000 ^
+--before                    1250 ^
+--after                     1250 ^
+--nBeats                    2 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    2503 ^
+--stimType                  Basal ^
+--sampleType                Diam ^
+--sampleName                DP4
 
 
 
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/DP4 ^
-@REM --videoNumber               128 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_127 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  1000 ^
-@REM --stimType                  S ^
-@REM --faceView                  L ^
-@REM --pigNumber                 DP4
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/DP4 ^
+--videoName                 127 ^
+--fileName                  FileTag127_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_127 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 1000 ^
+--endTime                   6800 ^
+--before                    1000 ^
+--after                     1000 ^
+--nBeats                    3 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    2000 ^
+--stimType                  Long ^
+--sampleType                Diam ^
+--sampleName                DP4
 
 
+
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/DP4 ^
+--videoName                 128 ^
+--fileName                  FileTag128_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_127 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 200 ^
+--endTime                   5800 ^
+--before                    550 ^
+--after                     550 ^
+--nBeats                    5 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    1000 ^
+--stimType                  Long ^
+--sampleType                Diam ^
+--sampleName                DP4

@@ -1,141 +1,162 @@
-@REM @ECHO OFF
-call conda activate simOmPP
+@REM @REM @ECHO OFF
+@REM call conda activate simOmPP
 
-@REM S is stimulated and B is basal, L is longitudinal and T is transversal, C is central
-
-
-@REM @REM AR2 ----------------------------------------------
-
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
-@REM --videoNumber               15 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_15 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  1704 ^
-@REM --stimType                  B ^
-@REM --faceView                  B ^
-@REM --pigNumber                 AR2
+@REM @REM S is stimulated and B is basal, L is longitudinal and T is transversal, C is central
 
 
+@REM @REM @REM AR2 ----------------------------------------------
 
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
-@REM --videoNumber               16 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_15 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  2000 ^
-@REM --stimType                  S ^
-@REM --faceView                  L ^
-@REM --pigNumber                 AR2
-
-
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
-@REM --videoNumber               17 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_15 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  1000 ^
-@REM --stimType                  S ^
-@REM --faceView                  L ^
-@REM --pigNumber                 AR2
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
+--videoName                 15 ^
+--fileName                  FileTag015_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_15 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 0 ^
+--endTime                   8920 ^
+--before                    850 ^
+--after                     850 ^
+--nBeats                    5 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    1704 ^
+--stimType                  Basal ^
+--sampleType                Rect ^
+--sampleName                AR2
 
 
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
+--videoName                 16 ^
+--fileName                  FileTag016_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_15 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 3300 ^
+--endTime                   8900 ^
+--before                    850 ^
+--after                     850 ^
+--nBeats                    3 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    2000 ^
+--stimType                  Long ^
+--sampleType                Rect ^
+--sampleName                AR2
 
 
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
-@REM --videoNumber               19 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_19 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  2000 ^
-@REM --stimType                  S ^
-@REM --faceView                  T ^
-@REM --pigNumber                 AR2
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
+--videoName                 17 ^
+--fileName                  FileTag017_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_15 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 4500 ^
+--endTime                   9900 ^
+--before                    550 ^
+--after                     550 ^
+--nBeats                    5 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    1000 ^
+--stimType                  Long ^
+--sampleType                Rect ^
+--sampleName                AR2
 
 
 
-@REM python D:/Code/simOmPP/getResultsFromOmapResultsPerth.py ^
-@REM --folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
-@REM --videoNumber               20 ^
-@REM --getSubRegions             ^
-@REM --roisName                  roi_19 ^
-@REM --shouldNotHaveAllPoints    ^
-@REM --cleanProcess              2 ^
-@REM --blockDown                 0 ^
-@REM --blockUp                   0 ^
-@REM --pixRes                    0.0136 ^
-@REM --maxDist                   3 ^
-@REM --maxCV                     300 ^
-@REM --cvCalcMethod              vanilla ^
-@REM --scaleVectors              1. ^
-@REM --startFrame                -1000000 ^
-@REM --endFrame                  -1000000 ^
-@REM --oneCycleSamples           -1000000 ^
-@REM --apdtype                   90 ^
-@REM --fps                       100 ^
-@REM --reverse                   ^
-@REM --stimFreq                  1000 ^
-@REM --stimType                  S ^
-@REM --faceView                  T ^
-@REM --pigNumber                 AR2
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
+--videoName                 19 ^
+--fileName                  FileTag019_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_19 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 10100 ^
+--endTime                   13800 ^
+--before                    850 ^
+--after                     850 ^
+--nBeats                    2 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    2000 ^
+--stimType                  Trans ^
+--sampleType                Rect ^
+--sampleName                AR2
 
+
+python D:/Code/simOmPP/getResultsFromOmapFiltered.py ^
+--folderPath                D:/Data/OM_BioVAD/Perth_24062024/total/AR2 ^
+--videoName                 20 ^
+--fileName                  FileTag020_video_filtered ^
+--matVarName                wholav_images ^
+--getSubRegions             ^
+--subregionNames            L M S ^
+--roisName                  roi_19 ^
+--exposure                  10 ^
+--reverse                   ^
+--startTime                 4800 ^
+--endTime                   10100 ^
+--before                    550 ^
+--after                     550 ^
+--nBeats                    5 ^
+--cleanProcess              0 ^
+--blockDown                 0 ^
+--blockUp                   0 ^
+--shouldNotHaveAllPoints    ^
+--pixRes                    0.0136 ^
+--maxDist                   3 ^
+--maxCV                     300 ^
+--cvCalcMethod              vanilla ^
+--scaleVectors              1. ^
+--apdtype                   90 ^
+--stimCL                    1000 ^
+--stimType                  Trans ^
+--sampleType                Rect ^
+--sampleName                AR2

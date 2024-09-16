@@ -10,9 +10,9 @@ addpath Tools/
 root_path         = 'D:/Paper3/Simulations/invivo/he/';
 sample            = 'sample3';
 
-experiments_names = {'base', 'endoepi', 'heterogeneo'};
+experiments_names = {'base', 'meijbord-transmural', 'meijbord-complete'};
 result_names      = {'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769', ...
-                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_gk1plus15endoepi', ...
+                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_meijbord_onlytransmural', ...
                      'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_meijbord'};
 
 n_experiments     = 3;
@@ -22,15 +22,15 @@ dt_sim_out        = dt_sim * exp_sim_factor;
 
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
-pecg_name         = {'pECG_electrodesprecordmanual_final_rot3.mat', ...
-                     'pECG_electrodesprecordmanual_final_rot3.mat', ...
-                     'pECG_electrodesprecordmanual_final_rot3.mat'};
+pecg_name         = {'pECG_electrodesprecordmanual_rot3.mat', ...
+                     'pECG_electrodesprecordmanual_rot3.mat', ...
+                     'pECG_electrodesprecordmanual_rot3'};
 nLeads            = 12;
 
 tot_time_ms          = 500;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesprecordmanual_final_rot3_transmural/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesprecordmanual_rot3_APDHETER/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end

@@ -31,7 +31,7 @@ def main():
     res = {}
 
     # If I have layers it means I have the MI and maybe the patch otherwise I just have myo HE nodes
-    if "layers" in mesh.point_data.keys():
+    if ("layers" in mesh.point_data.keys()) and (not "cs" in args.meshPath.split('/')[-1]):
         layers = mesh.point_data['layers']
         idxmyo = np.where((layers==layers_endo_flag) | (layers==layers_mid_flag) | (layers==layers_epi_flag))[0]
         idxpatch = np.where(layers==layers_patch_flag)[0]

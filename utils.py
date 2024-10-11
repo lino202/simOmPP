@@ -129,9 +129,9 @@ def meanFilter(img, size=2):
 def cleanMap(img, kernelSize=2):
     import cv2
     kernel = np.ones((kernelSize,kernelSize),np.uint8)
-    median = median_filter(img, kernelSize+1)
     opening = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel)
     closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+    closing = median_filter(closing, kernelSize+1)
     return closing
 
 
@@ -228,13 +228,13 @@ def plotHistAndBoxPlotSeaBorn(array, arrayName, path=None):
     sns.boxplot(x=array, ax=ax_box)
     sns.histplot(x=array, ax=ax_hist, bins=binsNum, kde=True)
     ax_box.set(yticks=[])
-    ax_hist.set_ylabel("Frequencies")
+    ax_hist.set_ylabel("Count")
     ax_hist.set_xlabel(arrayName)
     ax_hist.ticklabel_format(useOffset=False)
     ax_hist.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
     sns.despine(ax=ax_hist)
     sns.despine(ax=ax_box, left=True)
-    plt.savefig(path, dpi=500) if path else plt.show(block=True)
+    plt.savefig(path, dpi=400) if path else plt.show(block=True)
     plt.close()
 
 

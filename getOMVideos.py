@@ -5,6 +5,8 @@ import scipy.io
 import cv2
 import pickle
 import math
+import matplotlib.pyplot as plt
+import os
 
 def main():
 
@@ -37,6 +39,7 @@ def main():
 
     new_video = new_video * roi
     new_video[np.isnan(new_video)] = 0
+    new_video[new_video<0.65] = 0
 
     img_back = np.repeat(img_back[:,:,np.newaxis],video.shape[2], axis=2)
 
@@ -49,7 +52,7 @@ def main():
     new_video = (new_video + img_back)/2
     new_video = (new_video * 255).astype(np.uint8)
 
-    video=cv2.VideoWriter(args.outPath,cv2.VideoWriter_fourcc(*'mp4v'),fps=args.fps, frameSize=new_video[:,:,0,0].shape, isColor=True)
+    video=cv2.VideoWriter(os.path.join(args.outPath,'video.mp4'),cv2.VideoWriter_fourcc(*'mp4v'),fps=args.fps, frameSize=new_video[:,:,0,0].shape, isColor=True)
 
     for j in range(new_video.shape[2]):
         video.write(new_video[:,:,j,:])
@@ -57,6 +60,12 @@ def main():
     
     video.release()
 
+    # samples_to_save_img = np.arange(3700,3810,10)
+    # for i in samples_to_save_img:
+    #     plt.figure()
+    #     plt.imshow(new_video[:,:,i,:])
+    #     plt.savefig(os.path.join(args.outPath, "sample_{}.png".format(i)), dpi=300)
+    #     plt.close()
 
 if __name__ == '__main__':
     startTime = time.time()

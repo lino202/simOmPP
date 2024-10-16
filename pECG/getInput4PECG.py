@@ -25,7 +25,7 @@ cells  = mesh.cells_dict["tetra"]
 H = { "xyz": points, "tri": cells+1, "celltype": 10}
 
 #Transform mesh
-if hasattr(args, 'transMatrix'):
+if args.transMatrix != None:
     transMatrix = np.loadtxt(args.transMatrix)
     H["xyz"] = np.matmul(np.concatenate((points, np.ones((points.shape[0],1))), axis=1) , transMatrix.T)[:,:3]
     if hasattr(args, 'saveAlignedPath'):

@@ -10,10 +10,11 @@ addpath Tools/
 root_path         = 'D:/Paper3/Simulations/invivo/mi/cx/';
 sample            = 'sample6';
 
-experiments_names = {'he_scar', 'he_scar_scarinit'};
-result_names      = {'results_he_scar', 'results_he_scar_scarinit'};
+experiments_names = {'he', 'he scar', 'only gk1', 'only INa', 'only D', 'MI'};
+result_names      = {'results_he', 'results_he_scar_noscar', 'results_mi_bz_ONLY_GK1_noscar',...
+                    'results_mi_bz_ONLY_INA_noscar', 'results_mi_bz_ONLY_LDC_noscar', 'results_mi_CL898_2694ms_AVERAGE_noscar' };
 
-n_experiments     = 2;
+n_experiments     = 6;
 dt_sim            = 0.00025; %s
 exp_sim_factor    = 1;%0.7686;      % RR ratio between exp and sim, put to 1 for having the real simulation timings
 dt_sim_out        = dt_sim * exp_sim_factor;
@@ -21,13 +22,17 @@ dt_sim_out        = dt_sim * exp_sim_factor;
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
 pecg_name         = {'pECG_electrodesoriginal_norot.mat', ...
+                    'pECG_electrodesoriginal_norot.mat', ...
+                    'pECG_electrodesoriginal_norot.mat', ...
+                    'pECG_electrodesoriginal_norot.mat', ...
+                    'pECG_electrodesoriginal_norot.mat', ...
                     'pECG_electrodesoriginal_norot.mat'};
 nLeads            = 12;
 
 tot_time_ms          = 700;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesoriginal_norot_REMODELLING_scar/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesoriginal_norot_REMODELLING_NOscar/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end

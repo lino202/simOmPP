@@ -57,7 +57,7 @@ def main():
 
     for i in tqdm(range(idxs_pmj.shape[0])):
         if len(idxs_tissue_pmjs[i]) != 0:
-            activated_tissue_nodes = tissue_ats[idxs_tissue_pmjs[i]] - cs_ats[idxs_pmj[i]]
+            activated_tissue_nodes = tissue_ats[idxs_tissue_pmjs[i]] - cs_ats[pmj_edges[i,0]]
             activated_tissue_nodes = np.where((activated_tissue_nodes <= args.activationDelay) & (activated_tissue_nodes>=0))[0]
                              
 

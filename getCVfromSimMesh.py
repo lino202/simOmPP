@@ -5,18 +5,12 @@ import meshio
 from utilsCV import getLocalGradsVanillaMeshPerNodePool, getLocalGradsVanillaMeshPerNode
 import pandas as pd
 import time
+from regions import regions, layers_patch_flag
 
 params = ["CVM mean", "CVM median", "CVM min", "CVM max", "CVP mean", "CVP median", "CVP min", "CVP max", "CVBZ mean", "CVBZ median", "CVBZ min", "CVBZ max",]
 
-layers_myo_flag = 1
-layers_endo_flag = 3
-layers_mid_flag  = 4
-layers_epi_flag  = 5
-layers_bz_flag   = 7
-layers_scar_flag = 8
-layers_patch_flag = 9
 
-def main():
+def main(regions, layers_patch_flag):
 
     np.seterr(divide='raise', invalid='raise')
     parser = argparse.ArgumentParser(description="Options")
@@ -28,6 +22,7 @@ def main():
     parser.add_argument('--maxDist',  type=float, help='distance radius', default=0.5)
     parser.add_argument('--maxCV',    type=float, help='max CV in cm/s', default=300)
     parser.add_argument('--resExcel', type=str, required=True, help='Excel for saving results')
+    parser.add_argument('--oldLayers', action='store_true', help='If selected we use the old nomenclature for layers')
     args = parser.parse_args()
 
 
@@ -39,11 +34,32 @@ def main():
 
     # If I have layers it means I have the MI and maybe the patch otherwise I just have myo HE nodes
     if "layers" in mesh.point_data.keys():
+
         layers   = mesh.point_data['layers']
-        idxmyo   = np.where((layers==layers_endo_flag) | (layers==layers_mid_flag) | (layers==layers_epi_flag))[0]
-        idxpatch = np.where(layers==layers_patch_flag)[0]
-        idxbz    = np.where(layers==layers_bz_flag)[0]
-        idxscar  = np.where(layers==layers_scar_flag)[0]
+    
+        if args.oldLayers:
+
+
+            layers_myo_flag = 1
+            layers_endo_flag = 3
+            layers_mid_flag  = 4
+            layers_epi_flag  = 5
+            layers_bz_flag   = 7
+            layers_scar_flag = 8
+            layers_patch_flag = 9
+            idxmyo   = np.where((layers==layers_endo_flag) | (layers==layers_mid_flag) | (layers==layers_epi_flag))[0]
+            idxbz    = np.where(layers==layers_bz_flag)[0]
+            idxscar  = np.where(layers==layers_scar_flag)[0]
+            idxpatch = np.where(layers==layers_patch_flag)[0]
+
+        else:
+    
+            idxmyo = np.where((layers>=regions['base_endo_flag']) & (layers<=regions['apex_epi_flag']))[0]
+            idxbz = np.where((layers>=regions['bz_base_endo_flag']) & (layers<=regions['bz_apex_epi_flag']))[0]
+            idxscar  = np.where((layers>=regions['scar_base_endo_flag']) & (layers<=regions['scar_apex_epi_flag']))[0]
+            idxpatch = np.where(layers==layers_patch_flag)[0]
+            
+        
 
         if idxpatch.size:
             patch_flag = 1
@@ -149,5 +165,5 @@ def main():
 
 if __name__ == '__main__':
     startTime = time.time()
-    main()
+    main(regions, layers_patch_flag)
     print("Total time was {0:.2f}".format(time.time()-startTime))

@@ -8,13 +8,12 @@ clc
 addpath Tools/
 
 root_path         = 'D:/Paper3/Simulations/invivo/mi/cx/';
-sample            = 'sample6';
+sample            = 'sample6_x';
 
-experiments_names = {'he', 'he scar', 'only gk1', 'only INa', 'only D', 'MI'};
-result_names      = {'results_he', 'results_he_scar_noscar', 'results_mi_bz_ONLY_GK1_noscar',...
-                    'results_mi_bz_ONLY_INA_noscar', 'results_mi_bz_ONLY_LDC_noscar', 'results_mi_CL898_2694ms_AVERAGE_noscar' };
+experiments_names = {'EAM-endo', 'EAM-intramyo', 'Exp'};
+result_names      = {'results_mi_CL898_2694ms_AVERAGE_noscar_EAM_endo_rbf_bipolar', 'results_mi_CL898_2694ms_AVERAGE_noscar_EAM_intramyo_rbf_bipolar'};
 
-n_experiments     = 6;
+n_experiments     = 2;
 dt_sim            = 0.00025; %s
 exp_sim_factor    = 1;%0.7686;      % RR ratio between exp and sim, put to 1 for having the real simulation timings
 dt_sim_out        = dt_sim * exp_sim_factor;
@@ -22,17 +21,14 @@ dt_sim_out        = dt_sim * exp_sim_factor;
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
 pecg_name         = {'pECG_electrodesoriginal_norot.mat', ...
-                    'pECG_electrodesoriginal_norot.mat', ...
-                    'pECG_electrodesoriginal_norot.mat', ...
-                    'pECG_electrodesoriginal_norot.mat', ...
-                    'pECG_electrodesoriginal_norot.mat', ...
                     'pECG_electrodesoriginal_norot.mat'};
 nLeads            = 12;
+linewidth         = 2;
 
 tot_time_ms          = 700;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesoriginal_norot_REMODELLING_NOscar/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesoriginal_norot_REMODELLING_NOscar_EAM_RBF/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end
@@ -187,16 +183,17 @@ for i=1:nLeads
         
         pECG_tot_ecgs(:,i,j) = pECG_tot_ecgs(:,i,j) - pECG_tot_ecgs(1,i,j);
         pECG_tot_time(:,j)   = pECG_tot_time(:,j) - min(pECG_tot_time(:,j));
-        plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j));
+        plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j), 'LineWidth',linewidth);
         hold on
     end
-    ylabel("Norm V"),xlabel("t(ms)");
+    ylabel("Norm V (a.u.)"),xlabel("t(ms)");
     title(pECGLabels(i));
-    legend(experiments_names,'Location','best','FontSize',8)
+    legend(experiments_names,'Location','best','FontSize',12)
     hold off
 end
 set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
 exportgraphics(gcf,append(ecg_path_results, 'simulations_filtered_norm.png'),'Resolution',400);
+exportgraphics(gcf,append(ecg_path_results, 'simulations_filtered_norm.pdf'),'Resolution',400);
 %% Load experimental
 
 exp_path = 'D:/Paper3/Experimental/Mapping/Study_13_12_2023/map2/median_beats/';
@@ -236,7 +233,7 @@ for i=1:nLeads
     results_exp{i}{4,2} = (positionqrs_exp.Toff(5)   - positionqrs_exp.Ton(5))   * 1/fs_exp*1000; 
     
     before = round((ms_to_qrs(1,i)/1000) * fs_exp); %Add X ms before for aligning with sims
-    before = round((mean(ms_to_qrs)/1000) * fs_exp);
+    %before = round((mean(ms_to_qrs)/1000) * fs_exp);
     after  = round(0.01*fs_exp); %Add 10 ms after for having the complete T wave
     
     % We re normalize even if that was done before and start for 0 the
@@ -259,19 +256,20 @@ fig=figure;
 for i=1:nLeads
     subplot(4,3,i)
     for j=1:n_experiments
-        plot(pECG_tot_time(1:end-(100*fs_sim/1000),j), pECG_tot_ecgs(1:end-(100*fs_sim/1000),i,j)) % We throw the last 100 ms
+        plot(pECG_tot_time(1:end-(100*fs_sim/1000),j), pECG_tot_ecgs(1:end-(100*fs_sim/1000),i,j), 'LineWidth',linewidth) % We throw the last 100 ms
         hold on
     end
-    plot(final_exp_time{i}, final_exp_ecgs{i}, 'k--')
+    plot(final_exp_time{i}, final_exp_ecgs{i}, 'k', 'LineWidth',linewidth)
     
     hold on
     
-    legend(experiments_names,'FontSize',8, 'Location', 'bestoutside')
-    title(ECG_headers{i}), xlim tight, xlabel('time (ms)'),ylabel('norm V')
+    legend(experiments_names,'FontSize',12, 'Location', 'bestoutside')
+    title(ECG_headers{i}), xlim tight, xlabel('time (ms)'),ylabel('norm V (a.u.)')
 
 end
 set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
 exportgraphics(gcf,append(ecg_path_results, 'simulations_final_filtered_', num2str(cutoff), '.png'),'Resolution',400);
+exportgraphics(gcf,append(ecg_path_results, 'simulations_final_filtered_', num2str(cutoff), '.pdf'),'Resolution',400);
 
 
 
@@ -286,7 +284,7 @@ for i=1:nLeads
     hold on
     
     legend(experiments_names,'FontSize',8)
-    title(ECG_headers{i}), xlim tight, xlabel('time (ms)'),ylabel('norm V')
+    title(ECG_headers{i}), xlim tight, xlabel('time (ms)'),ylabel('norm V a.u.')
     set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
     exportgraphics(gcf,append(ecg_path_results, 'simulations_final_', ECG_headers{i}, '.png'),'Resolution',400);
 

@@ -4,26 +4,21 @@ import numpy as np
 import meshio
 import pandas as pd
 import time
+from regions import regions, layers_patch_flag
 
 params = ["ATM mean", "ATM median", "ATM min", "ATM max", "ATP mean", "ATP median", "ATP min", "ATP max", "ATBZ mean", "ATBZ median", "ATBZ min", "ATBZ max",
         "APD90M mean", "APD90M median", "APD90M min", "APD90M max", "APD90P mean", "APD90P median", "APD90P min", "APD90P max", "APD90BZ mean", "APD90BZ median", "APD90BZ min", "APD90BZ max",  
         "CVM mean", "CVM median", "CVM min", "CVM max", "CVP mean", "CVP median", "CVP min", "CVP max", "CVBZ mean", "CVBZ median", "CVBZ min", "CVBZ max",
         "RTGM mean", "RTGM median", "RTGM min", "RTGM max", "RTGP mean", "RTGP median", "RTGP min", "RTGP max", "RTGBZ mean", "RTGBZ median", "RTGBZ min", "RTGBZ max"]
 
-layers_myo_flag = 1
-layers_endo_flag = 3
-layers_mid_flag  = 4
-layers_epi_flag  = 5
-layers_bz_flag   = 7
-layers_scar_flag = 8
-layers_patch_flag = 9
 
-def main():
+def main(regions, layers_patch_flag):
 
     np.seterr(divide='raise', invalid='raise')
     parser = argparse.ArgumentParser(description="Options")
     parser.add_argument('--meshPath', type=str, required=True)
     parser.add_argument('--resExcel', type=str, required=True, help='Excel for saving results')
+    parser.add_argument('--oldLayers', action='store_true', help='If selected we use the old nomenclature for layers')
     args = parser.parse_args()
 
     # Get mesh, myo , patch and other idxs as well as required memory for partially computation of things to avoid memory overload
@@ -32,10 +27,28 @@ def main():
 
     # If I have layers it means I have the MI and maybe the patch otherwise I just have myo HE nodes
     if ("layers" in mesh.point_data.keys()) and (not "cs" in args.meshPath.split('/')[-1]):
+
         layers = mesh.point_data['layers']
-        idxmyo = np.where((layers==layers_endo_flag) | (layers==layers_mid_flag) | (layers==layers_epi_flag))[0]
-        idxpatch = np.where(layers==layers_patch_flag)[0]
-        idxbz = np.where(layers==layers_bz_flag)[0]
+
+        if args.oldLayers:
+
+            layers_myo_flag = 1
+            layers_endo_flag = 3
+            layers_mid_flag  = 4
+            layers_epi_flag  = 5
+            layers_bz_flag   = 7
+            layers_scar_flag = 8
+            layers_patch_flag = 9
+
+
+            idxmyo = np.where((layers==layers_endo_flag) | (layers==layers_mid_flag) | (layers==layers_epi_flag))[0]
+            idxbz = np.where(layers==layers_bz_flag)[0]
+            idxpatch = np.where(layers==layers_patch_flag)[0]
+            
+        else:
+            idxmyo = np.where((layers>=regions['base_endo_flag']) & (layers<=regions['apex_epi_flag']))[0]
+            idxbz = np.where((layers>=regions['bz_base_endo_flag']) & (layers<=regions['bz_apex_epi_flag']))[0]
+            idxpatch = np.where(layers==layers_patch_flag)[0]
 
         if idxpatch.size:
             patch_flag = 1
@@ -211,5 +224,5 @@ def main():
 
 if __name__ == '__main__':
     startTime = time.time()
-    main()
+    main(regions, layers_patch_flag)
     print("Total time was {0:.2f}".format(time.time()-startTime))

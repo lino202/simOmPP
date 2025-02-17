@@ -8,12 +8,10 @@ clc
 addpath Tools/
 
 root_path         = 'D:/Paper3/Simulations/invivo/he/';
-sample            = 'sample3';
+sample            = 'best_ecg';
 
-experiments_names = {'base', 'meijbord-transmural', 'meijbord-complete'};
-result_names      = {'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769', ...
-                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_meijbord_onlytransmural', ...
-                     'results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_meijbord'};
+experiments_names = {'sample 1', 'sample 2', 'sample 3', 'Experiment'};
+result_names      = {'sample1', 'sample2', 'sample3'};
 
 n_experiments     = 3;
 dt_sim            = 0.00025; %s
@@ -22,15 +20,16 @@ dt_sim_out        = dt_sim * exp_sim_factor;
 
 fs_sim            = 1/dt_sim_out; % in Hz;
 cutoff            = 40;
-pecg_name         = {'pECG_electrodesprecordmanual_rot3.mat', ...
-                     'pECG_electrodesprecordmanual_rot3.mat', ...
-                     'pECG_electrodesprecordmanual_rot3'};
+pecg_name         = {'pECG_electrodesprecordmanual_rot3_qrs_t',...
+                    'pECG_electrodesprecordmanual_rot3_qrs_t',...
+                    'pECG_electrodesprecordmanual_rot3_qrs_t'};
 nLeads            = 12;
+linewidth = 2;
 
 tot_time_ms          = 500;
 samples_per_beat_sim = 1 + tot_time_ms / (dt_sim*1000);    % minimum sim duration to be use so cropped to this amount
 
-ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesprecordmanual_rot3_APDHETER/');
+ecg_path_results = append(root_path, sample, '/', 'ecg_results_electrodesprecordmanual_final_rot3/');
 if ~exist(ecg_path_results, 'dir')
     mkdir(ecg_path_results)
 end
@@ -185,16 +184,17 @@ for i=1:nLeads
         
         pECG_tot_ecgs(:,i,j) = pECG_tot_ecgs(:,i,j) - pECG_tot_ecgs(1,i,j);
         pECG_tot_time(:,j)   = pECG_tot_time(:,j) - min(pECG_tot_time(:,j));
-        plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j));
+        plot( pECG_tot_time(:,j) , pECG_tot_ecgs(:,i,j), 'LineWidth',linewidth);
         hold on
     end
     ylabel("Norm V"),xlabel("t(ms)");
     title(pECGLabels(i));
-    legend(experiments_names,'Location','best','FontSize',8)
+    legend(experiments_names,'Location','best','FontSize',12)
     hold off
 end
 set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
 exportgraphics(gcf,append(ecg_path_results, 'simulations_filtered_norm.png'),'Resolution',400);
+exportgraphics(gcf,append(ecg_path_results, 'simulations_filtered_norm.pdf'),'Resolution',400);
 %% Load experimental
 
 exp_path = 'D:/Paper3/Experimental/ECGs/ecg_cerdo_sano_dylan/median_beats/';
@@ -205,7 +205,7 @@ fs_exp = fs;
 final_exp_ecgs  = cell(1,nLeads);
 final_exp_time  = cell(1,nLeads);
 results_exp     = cell(1,nLeads);
-ms_to_qrs = median(sim_qrses_locs) * (1000/fs_sim);
+ms_to_qrs = median(sim_qrses_locs,1) * (1000/fs_sim);
 for i=1:nLeads
     results_exp{i} = cell(4,2);
     results_exp{i}{1,1} = 'name';
@@ -257,20 +257,20 @@ fig=figure;
 for i=1:nLeads
     subplot(4,3,i)
     for j=1:n_experiments
-        plot(pECG_tot_time(1:end-(100*fs_sim/1000),j), pECG_tot_ecgs(1:end-(100*fs_sim/1000),i,j)) % We throw the last 100 ms
+        plot(pECG_tot_time(1:end-(100*fs_sim/1000),j), pECG_tot_ecgs(1:end-(100*fs_sim/1000),i,j), 'LineWidth',linewidth) % We throw the last 100 ms
         hold on
     end
-    plot(final_exp_time{i}, final_exp_ecgs{i}, 'k--')
+    plot(final_exp_time{i}, final_exp_ecgs{i}, 'k','LineWidth',linewidth)
     
     hold on
     
-    legend(experiments_names,'FontSize',8, 'Location', 'bestoutside')
-    title(ECG_headers{i}), xlim tight, xlabel('time (ms)'),ylabel('norm V')
+    legend(experiments_names,'FontSize',10, 'Location', 'bestoutside')
+    title(ECG_headers{i}, 'FontSize',14), xlim tight, xlabel('time (ms)', 'FontSize',12),ylabel('norm V (a.u.)','FontSize',14)
 
 end
 set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
 exportgraphics(gcf,append(ecg_path_results, 'simulations_final_filtered_', num2str(cutoff), '.png'),'Resolution',400);
-
+exportgraphics(gcf,append(ecg_path_results, 'simulations_final_filtered_', num2str(cutoff), '.pdf'),'Resolution',400);
 
 
 for i=1:nLeads

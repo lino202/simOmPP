@@ -6,6 +6,7 @@ import cv2
 import pickle
 import math
 import matplotlib.pyplot as plt
+import hdf5storage
 import os
 
 def main():
@@ -14,18 +15,31 @@ def main():
     parser.add_argument('--videoPath', type=str, required=True)
     parser.add_argument('--roiPath', type=str, required=True)
     parser.add_argument('--outPath', type=str, required=True)
+    parser.add_argument('--threshold', type=float, required=True, help='Value between 0 and 1 defining the baseline')
     parser.add_argument('--fps',     type=int, default=100)
     args = parser.parse_args()
 
-    video = scipy.io.loadmat(args.videoPath)
+    try:
+        video = scipy.io.loadmat(args.videoPath)
+    except NotImplementedError:
+        video = hdf5storage.loadmat(args.videoPath)
     video = video['wholav_images']
 
-    img_back = scipy.io.loadmat(args.videoPath.replace('_filtered', ''))
+    try:
+        img_back = scipy.io.loadmat(args.videoPath.replace('_filtered', ''))
+    except NotImplementedError:
+        img_back = hdf5storage.loadmat(args.videoPath.replace('_filtered', ''))
+
     img_back = img_back['A'][:,:,0]
     img_back = (img_back-np.min(img_back))/(np.max(img_back)-np.min(img_back))
 
-    with open(args.roiPath, 'rb') as f:
-        roi = pickle.load(f)
+    if '.pkl' in args.roiPath:
+        with open(args.roiPath, 'rb') as f:
+            roi = pickle.load(f)
+    elif '.txt' in args.roiPath:
+        roi = np.loadtxt(args.roiPath, delimiter=",", dtype=int)
+    else:
+        raise ValueError('Wrong roi file extension/type')
 
     # Normalize the video and clean with final ROI
     mins = np.min(video,axis=2)
@@ -39,7 +53,7 @@ def main():
 
     new_video = new_video * roi
     new_video[np.isnan(new_video)] = 0
-    new_video[new_video<0.65] = 0
+    new_video[new_video<args.threshold] = 0
 
     img_back = np.repeat(img_back[:,:,np.newaxis],video.shape[2], axis=2)
 

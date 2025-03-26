@@ -3,7 +3,6 @@
 *.log
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
-.vscode/
 __pycache__/
 examples/
 pECG/stable/

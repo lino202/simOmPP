@@ -1,0 +1,1365 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "getMesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getMesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/Purkinje/sampleLE_Control2/DTI/results_cs_endo/", 
+                "--fileName", "posterior_epi.e", 
+            ],
+        },
+
+
+        {
+            "name": "getAPDfromEns",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getAPDfromEns.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/Purkinje/sampleMA_Control2/DTI/results_cs_endo_pigcell/tissue/",
+                "--timeStart", "1000",
+                "--timeEnd", "1600",
+                "--solutionPrefix", "tissue_solution",
+                "--animationPrefix", "tissue_animation",
+                "--apd", "90",
+            ],
+        },
+
+        {
+            "name": "getATfromEns",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getATfromEns.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/results_cs_endo_mi_00095/tissue",
+                "--timeStart", "2000",
+                "--timeEnd", "3000",
+                "--solutionPrefix", "tissue_solution",
+                "--animationPrefix", "tissue_animation",
+                "--method", "zero-cross"
+            ],
+        },
+
+
+        {
+            "name": "getCVfromSimMesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getCVfromSimMesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath", "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_endo_tentusscher/results_anterior_view_prueba.vtu",
+                "--spaceUnit", "mm",
+                "--maxDist", "0.6",  //in space units
+                "--maxCV", "300", // in cm/s
+                "--resExcel", "D:/Paper3/Simulations/invivo/he/results_epi_cv_from_epi_at.xlsx"
+            ],
+        },
+
+        {
+            "name": "getAXfromEpiMesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getAXfromEpiMesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/Purkinje/sampleMA_Control2/DTI/results_cs_endo_pigcell",
+                "--resultsMesh", "epiMeshio.xmf",
+                // "--cleanMesh", "epi.obj",
+                "--layerType", "epi",
+                "--parameterType", "APD90",    //APDX or LAT
+                "--alreadyClean",
+                "--save",
+                "--outType", "png"
+            ],
+        },
+
+        {
+            "name": "getCVfromImageSim",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getCVfromImageSim.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePath", "D:/CV/data/problem/latbandaizq_latcaso4_nuevoscript.mat",
+                "--pixRes", "0.01", //cm
+                "--calcMethod", "vanilla",
+                "--maxDist", "25",  //in px units
+                "--maxCV", "200", // in cm/s
+                "--scaleVectors", "100",
+                "--outType", "png",
+                "--outPath", "D:/CV/data/problem/"
+            ],
+        },
+
+        {
+            "name": "getCVfromImageOM",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getCVfromImageOM.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [ 
+                "--filePath", "D:/Data/OM_PigHeart/Control/20201006_Brave_pig6/15/actmap_FileTag015_video.mat",   //AT in ms
+                "--shouldNotHaveAllPoints",
+                "--atMapName", "map",
+                "--pixRes", "0.1", //cm
+                "--calcMethod", "bayly",
+                "--cleanProcess", "0",
+                "--blockDown", "0", //first with zero
+                "--blockUp", "0", //first with zero
+                "--maxDist", "6",  //in px units
+                "--maxCV", "500", // in cm/s
+                "--scaleVectors", "1.",
+                "--outType", "png",
+                "--outPath", "D:/CV/validation/",//"D:/CV/validation/"
+                
+            ],
+        },
+
+
+        {
+            "name": "getCV2Points",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getCV2Points.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [ 
+                "--filePath", "D:/Data/OM_PigHeart/Control/20201006_Brave_pig6/15/actmap_FileTag015_video.mat", //ms
+                "--atMapName", "map",
+                "--cleanProcess", "0",
+                "--blockDown", "0",
+                "--blockUp", "0",
+                "--pixRes", "0.1", //cm 
+                "--outPath", "0",
+                "--outType", "png"
+                
+            ],
+        },
+
+
+        {
+            "name": "getAPDfromImage",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getAPDfromImage.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePath", "D:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11prueba/adpmap_FileTag011_video.mat",
+                "--cleanProcess", "0",
+                "--blockDown", "0",
+                "--blockUp", "0",
+                "--apdtype", "90",
+                "--blockPlot",
+                "--outType", "png" //pdf or png
+                
+            ],
+        },
+
+
+        {
+            "name": "getAPDfromOMFiltered",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getAPDfromOMFiltered.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePath", "D:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11/FileTag011_video_filtered.mat",
+                "--startFrame", "1340",
+                "--endFrame", "2340",
+                "--apdtype", "90",
+                "--fps", "500",
+                "--reverse",
+                "--outPath", "D:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11/healthyAPD90.png" //pdf or png
+                
+            ],
+        },
+
+
+        {
+            "name": "getResultsFromOmapFiltered",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResultsFromOmapFiltered.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--folderPath",                "D:/Data/OM_BioVAD/Perth_24062024/total/DP4",
+                "--videoName",                 "128",
+                "--fileName",                  "FileTag128_video_filtered",
+                "--matVarName",                "wholav_images",
+                "--getSubRegions",
+                "--subregionNames",            "L", "M", "S",
+                "--roisName",                  "roi_127",
+
+                "--exposure",                  "10",    // in ms
+                "--reverse",
+                "--startTime",                 "200",    // in ms
+                "--endTime",                   "5800",   // in ms
+                "--before",                    "550",    // in ms
+                "--after",                     "550",    // in ms
+                "--nBeats",                    "5",
+
+                "--cleanProcess",              "0", 
+                "--blockDown",                 "0", 
+                "--blockUp",                   "0",
+
+                "--shouldNotHaveAllPoints",
+                "--pixRes",                    "0.0136",   // in cm
+                "--maxDist",                   "3",       // in px
+                "--maxCV",                     "300",     // in cm/s
+                "--cvCalcMethod",              "vanilla",
+                "--scaleVectors",              "1.",
+
+                "--apdtype",                   "90",
+                
+                "--stimCL",                    "1000",  // in ms
+                "--stimType",                  "Long",
+                "--sampleType",                "Diam",
+                "--sampleName",                "DP4"
+            ],
+        },
+
+
+        {
+            "name": "getPlotsOMs",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getPlotsOMs.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--excelFilePath",           "D:/Results/BraveHearts_excel_new.xlsx",
+                "--sheetName",               "MI_Summary",
+                "--headerRow",               "11",
+                "--outFolder",               "D:/Data/OM_PigHeart/MI/results"
+            ],
+        },
+
+
+        {
+            "name": "plotIsocronaPerth",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotIsocronaPerth.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath",           "D:/Data/OM_BioVAD/Perth_24062024/total/DF/40/myresults/overall_results.pkl",
+                "--backgroundPath",     "D:/Data/OM_BioVAD/Perth_24062024/total/DF/40/FileTag040_video.mat",
+                "--cleanProcess",              "1", 
+                "--blockDown",                 "0", 
+                "--blockUp",                   "0",
+                "--outPath",            "D:/Data/OM_BioVAD/Perth_24062024/total/DF/40/myresults/paper/paper_df_basal_1_alpha05.pdf"
+            ],
+        },
+
+        
+        {
+            "name": "plotIsocronaPaper3_MI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotIsocronaPaper3.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath",           "E:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11/myresults/Myo_ats.pkl",
+                "--backgroundPath",     "E:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11/FileTag011_video.mat",
+                "--blockDown",                 "136", 
+                "--blockUp",                   "210",
+                "--outPath",            "E:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11/myresults/paper/AT_alpha08.png"
+            ],
+        },
+
+
+        {
+            "name": "plotIsocronaPaper3_HE",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotIsocronaPaper3.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath",           "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/15/myresults/Myo_ats.pkl",
+                "--backgroundPath",     "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/15/FileTag015_video.mat",
+                "--blockDown",                 "0", 
+                "--blockUp",                   "0",
+                "--outPath",            "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/15/myresults/paper/AT.png"
+            ],
+        },
+
+        {
+            "name": "getPlotsOMsPerth",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getPlotsOMsPerth.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--excelFilePath",           "D:/Data/OM_BioVAD/Perth_24062024/overall_results/results_total.xlsx",
+                "--sheetName",               "Summary",
+                "--headerRow",               "10",
+                "--outFolder",               "D:/Data/OM_BioVAD/Perth_24062024/overall_results"
+            ],
+        },
+
+
+        {
+            "name": "getOMVideos",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getOMVideos.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--videoPath",           "E:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/50/FileTag050_video_filtered.mat",
+                "--roiPath",             "E:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/50/roi.txt",
+                "--threshold",           "0.96",
+                "--outPath",             "E:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/50",
+                "--fps",                 "30"    //power point likes 30 fps
+            ],
+        },
+
+
+        {
+            "name": "normalizeAT",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/normalizeAT.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath", "D:/Paper3/Simulations/invivo/mi/la/sample12/results_mi_CL1000_3000ms_CUSTOM/results_anterior_view.vtk",
+                "--pointDataName",  "ATs_(ms)"
+                
+            ],
+        },
+
+        {
+            "name": "getATFromMesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getATFromMesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/Britt_ellipsoid/results_cs_endo/tissue",
+                "--resPath", "D:/Simulations/electra_sims/Heart/Purkinje/sampleMA_Control2/DTI/results_cs_endo_pigcell"
+            ],
+        },
+
+
+        {
+            "name": "addLATensToMesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/addLATensToMesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath", "D:/HeartModelling/Britt_ideal_ellipsoide/tetmesh_complete.vtk",
+                "--latPath",  "D:/Simulations/electra_sims/Heart/Britt_ellipsoid/results_cs_subendo_intramyo/tissue",
+                "--outPath",  "D:/Simulations/electra_sims/Heart/Britt_ellipsoid/results_cs_subendo_intramyo/tetmesh_ats.vtk",
+            ],
+        },
+
+        {
+            "name": "getRTFromMesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getRTFromMesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/Purkinje/sampleLE_Control3/DTI/results_cs_subendo_intramyo_LV/tissue/",
+                "--animationPrefix", "tissue_animation",
+                "--apdType", "90"
+            ],
+        },
+
+        {
+            "name": "getSotoIglesiasParams",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getSotoIglesiasParams.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/Purkinje/sampleMA_Control2/DTI/results_cs_subendo_intramyo_LV",
+                "--nbins", "20",
+                "--save",
+            ],
+        },
+
+
+        {
+            "name": "compareDataFrom2Mesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/compareDataFrom2Mesh.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath1", "D:/Simulations/electra_sims/Heart/Purkinje/sampleMA_Control2/DTI/results_cs_endo/tissue/lat.ens",
+                "--dataPath2", "D:/Simulations/electra_sims/Heart/Purkinje/sampleMA_Control2/DTI/results_cs_subendo_intramyo_LV/tissue/lat.ens",
+                "--nameData1", "s-CS",
+                "--nameData2", "i-CS",
+                "--histSteps", "75",
+                "--outPath", "D:/Simulations/electra_sims/Heart/Purkinje/sampleMA_Control2/DTI/",
+                "--outType", "pdf", //pdf or png
+                "--outName", "CS_endo_vs_intramyoLV"
+            ],
+        },
+
+        {
+            "name": "interpATs",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/interpATs.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath1", "D:/Simulations/electra_sims/Heart/Britt_ellipsoid/results_cs_subendo_intramyo/tetmesh_ats.vtk",
+                "--dataPath2", "D:/HeartModelling/Britt_ideal_ellipsoide/mesh_refine/lv_britt_refined_cm_fibers.vtk",
+                "--interpType", "rbf",
+                "--nameValue",  "ATs_(ms)",
+                "--outPath", "D:/Simulations/electra_sims/Heart/Britt_ellipsoid/results_cs_subendo_intramyo/tetmesh_lowres.vtk",
+            ],
+        },
+
+
+        {
+            "name": "rotateInp",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/rotateInp.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePath", "D:/Simulations/electra_sims/pruebaLaura/mesh_Epi_islasMid_3x3_res001_stim_cuadrado.inp",
+                "--angle", "0",
+                "--outPath", "D:/Simulations/electra_sims/pruebaLaura/mesh_Epi_islasMid_3x3_res001_stim_cuadrado_equal",
+            ],
+        },
+
+        
+
+        {
+            "name": "boxPlots4DisseminationSimOM",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/boxPlots4DisseminationSimOM.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPaths", 
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/results_cs_endo_mi_00095/CV/anterior/anterior_cv.vtk",
+                "D:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11/CV/vanilla_entire/cvMags",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/results_cs_endo_mi_00095/CV/anterior_apex/anterior_apex_cv.vtk",
+                "D:/Data/OM_PigHeart/MI/20211214_PigInfarcted5/11/CV/vanilla_MI/cvMags",
+
+                "--dataNames", "Sim AV MI", "Ex AV MI", "Sim Apex MI", "Ex Apex MI",
+                "--palette", "tab:blue", "tab:blue", "tab:green", "tab:green",
+                "--variableName", "CV (cm/s)",
+                "--outPath", "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/sim_vs_exp_cv.png",
+                "--save",
+            ],
+        },
+
+        {
+            "name": "boxPlots4DisseminationVtk",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/boxPlots4DisseminationVtk.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPaths", 
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_random/results_patchrandom_EHTc10/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_perpendicular/results_patchperpendicular_EHTc10/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_parallel/results_patchparallel_EHTc10/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_random/results_patchrandom_EHTc50/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_perpendicular/results_patchperpendicular_EHTc50/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_parallel/results_patchparallel_EHTc50/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_random/results_patchrandom_EHTc90/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_perpendicular/results_patchperpendicular_EHTc90/myresults_dist_2mm_07mm_cinc2024.vtk",
+                "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_parallel/results_patchparallel_EHTc90/myresults_dist_2mm_07mm_cinc2024.vtk",
+                
+                "--dataNames", "10_R", "10_Pe", "10_Pa", 
+                                "50_R", "50_Pe", "50_Pa",
+                                "90_R", "90_Pe", "90_Pa",
+                "--layersFlag", "9",
+                "--variableName", "RTgrad_[ms/mm]",
+                // "--threshold", "60", "30", "20",
+                "--xlabel", "Relative EHTc (%)",
+                "--ylabel", "RTG (ms/mm)",
+                "--huelabel", "EHTal",
+                "--outPath", "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/rtgs_cinc2024.pdf",
+            ],
+        },
+
+
+        {
+            "name": "getResultsPruebaAPD",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",     "D:/Simulations/electra_sims/prueba_APD/sims/results_OHara_3beats_epi",
+                "--myResPath",   "D:/Simulations/electra_sims/prueba_APD/sims/results_OHara_3beats_epi/results.vtk",
+                "--meshPath",    "D:/HeartModeling/basic/test/tetmesh_S_mm.inp",
+                "--timeStart",   "2000",
+                "--timeEnd",     "2600",
+                "--nDigits",     "4",
+                // "--apd",      "90",
+                "--maxMem",      "4",
+                "--dt",          "1",
+                // "--usePool",
+                "--spaceUnit",   "mm",
+                "--maxDist",     "0.5",  //in space units
+                "--maxCV",       "300", // in cm/s
+                "--resExcel",    "D:/Simulations/electra_sims/prueba_APD/sims/results.xlsx",
+            ],
+        },
+
+        {
+            "name": "getResultsFassina",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",     "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/generic/perpendicular/results_lowdt",
+                "--myResPath",   "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/generic/perpendicular/myresults_lowdt/pruebaAPD2.vtk",
+                "--meshPath", "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/tissue.inp",
+                "--timeStart",   "900",
+                "--timeEnd",     "6000",
+                "--nDigits",     "5",
+                // "--apd",      "90",
+                "--maxMem",      "3",
+                "--dt",          "0.1",
+                "--usePool",
+                "--spaceUnit",   "mm",
+                "--maxDist",     "0.5",  //in space units
+                "--maxCV",       "300", // in cm/s
+                "--resExcel",    "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/results_baseline_lowdt.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResultsFassina1ms",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",     "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/case2_0.4mm2/Quad/results_baseline",
+                "--myResPath",   "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/case2_0.4mm2/Quad/myResults/rt_grad_correction_1ms_baseline_maxDist02.vtk",
+                "--meshPath",    "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/tissue.inp",
+                "--timeStart",   "2000",
+                "--timeEnd",     "3000",
+                "--nDigits",     "4",
+                // "--apd",      "90",
+                "--maxMem",      "3",
+                "--dt",          "1",
+                "--usePool",
+                "--spaceUnit",   "mm",
+                "--maxDist",     "0.21",  //in space units
+                "--maxCV",       "300", // in cm/s
+                "--resExcel",    "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/results.xlsx",
+            ],
+        },
+
+        {
+            "name": "getResultsFassina01ms",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",     "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/case2_0.4mm2/Quad/results_realdiff_lowdt_woManualInit",
+                "--myResPath",   "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/case2_0.4mm2/Quad/myResults/rt_grad_correction_lowdt_woManualInit_maxDist05.vtk",
+                "--meshPath",    "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/tissue.inp",
+                "--timeStart",   "900",
+                "--timeEnd",     "7000",
+                "--nDigits",     "5",
+                // "--apd",      "90",
+                "--maxMem",      "4",
+                "--dt",          "0.1",
+                "--usePool",
+                "--spaceUnit",   "mm",
+                "--maxDist",     "0.5",  //in space units
+                "--maxCV",       "300", // in cm/s
+                "--resExcel",    "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/results.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResultsPaperEHT_OnlyEHT",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [   
+                "--resPath",     "D:/Simulations/electra_sims/Biovad/Paper/Thickness/Quad/06/results",
+                "--myResPath",   "D:/Simulations/electra_sims/Biovad/Paper/Thickness/Quad/06/myResults/4paperEHTCV.vtk",
+                "--meshPath",    "D:/Simulations/electra_sims/Biovad/Paper/Thickness/Quad/06/mesh.inp",
+                "--timeStart",   "2000",
+                "--timeEnd",     "3000",
+                "--nDigits",     "4",
+                // "--apd",      "90",
+                "--maxMem",      "4",
+                "--dt",          "1",
+                // "--usePool",
+                "--soluName",    "solution",
+                "--stimLabel",   "set1",
+                "--spaceUnit",   "mm",
+                "--maxDist",     "0.21",  //in space units
+                "--maxCV",       "300", // in cm/s
+                "--resExcel",    "D:/Simulations/electra_sims/Biovad/Paper/resultsOnlyEHT.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResultsPaperEHT_OnlyEHT_2Points",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getCV2PointsMesh.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath",      "D:/Simulations/electra_sims/Biovad/Paper/Thickness/Quad/02/myResults/4paperEHTCV.vtk",
+                "--atName",        "ATs_(ms)",
+                "--initPoints",    "65928", "53265", "41004", "29145", "15477",
+                "--finalPoints",   "66128", "53465", "41204", "29345", "15677",
+            ],
+        },
+
+
+        {
+            "name": "getResultsPaperEHT_Fassina_2Points",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getCV2PointsMesh.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath",      "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/generic/random_EHTc80/myResults/goodRTG_1ms_maxDist021.vtk",
+                "--atName",        "ATs_(ms)",
+                "--initPoints",    "67968", "69704", "73764", "75404", "80971",
+                "--finalPoints",   "120097", "120335", "121245", "121108", "122608",
+            ],
+        },
+
+        {
+            "name": "getResultsMariaFlandes",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/MariaFlandes/Quad_tissueVAD_pig/results",
+                "--myResPath", "D:/MariaFlandes/Quad_tissueVAD_pig/myresults/results.vtk",
+                "--meshPath",  "D:/MariaFlandes/tissuePatchMeshio.inp",
+                "--timeStart", "4000",
+                "--timeEnd",   "4800",
+                "--nDigits",   "5",
+                // "--apd", "90",
+                "--dt", "0.1",
+                "--spaceUnit", "mm",
+                "--maxDist", "0.09",  //in space units, 100um as dx=50um
+                "--maxCV", "300", // in cm/s
+                "--resExcel", "D:/MariaFlandes/results.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResultsMIPatch",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/mi/results_cs_endo_mi_00095/tissue",
+                "--myResPath", "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/mi/results_cs_endo_mi_00095/myresults_dist2mm.vtk",
+                "--meshPath",  "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/mi/layers_mesh_mi.inp",
+                "--timeStart", "2000",
+                "--timeEnd",   "3000",
+                "--nDigits" ,  "4",
+                "--apd",       "90",
+                "--dt",        "1",
+                "--spaceUnit", "mm",
+                "--maxMem",    "6",
+                "--nCores",    "7",  
+                "--maxDist",   "2",  //in space units
+                "--maxCV",     "300", // in cm/s
+                "--resExcel",  "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_random/results_unattach_percent.xlsx",
+            ],
+        },
+
+        {
+            "name": "getResultsWithEHT",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResultsWithEHT.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_parallel/results_patchparallel_EHTc10/tissue",
+                "--myResPath", "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/patch_parallel/results_patchparallel_EHTc10/myresults_dist_2mm_07mm_cinc2024_new.vtk",
+                "--meshPath",  "D:/HeartModelling/Data_OM_MI/sampleP21_389/BioVAD/final_data/heartPatch_tetmesh_layers_fibs.inp",
+                "--ensType",   "ascii",
+                "--timeStart", "2000",
+                "--timeEnd",   "3000",
+                "--nDigits" ,  "4",
+                "--apd",       "90",
+                "--dt",        "1",
+                "--spaceUnit", "mm",
+                "--maxMem",    "6",
+                "--nCores",    "7",  
+                "--maxDist",   "2", "0.7",  //in space units
+                "--maxCV",     "300", // in cm/s
+                "--resExcel",  "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/BioVAD/results_cinc2024_new.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResultsOpenCARP",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "/home/sims/simOmPP/openCARP/getResults.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "/home/sims/opencarp_sims/prueba_APD/sims/results_tenTusscherPanfilov_3beats",
+                "--myResPath", "/home/sims/opencarp_sims/prueba_APD/sims/results_tenTusscherPanfilov_3beats/results.vtk",
+                "--meshPath",  "/home/sims/opencarp_sims/prueba_APD/mesh/tetmesh_SF_mm.vtk",
+                // "--timeStart", "0",
+                // "--timeEnd",   "1000",
+                // "--nDigits" ,  "4",
+                // "--apd",    "90",
+                "--dt",        "1",
+                "--spaceUnit", "um",
+                // "--maxDist",   "0.7",  //in space units
+                // "--maxCV",     "300", // in cm/s
+                "--resExcel",  "/home/sims/opencarp_sims/prueba_APD/results.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResults_Paper3_HE",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/Paper3/Simulations/invivo/he/sample1/results_fib_standard_cs_intra_gaur_CL769/cs",
+                "--myResPath", "D:/Paper3/Simulations/invivo/he/sample1/results_fib_standard_cs_intra_gaur_CL769/cs_myresults.vtk",
+                "--meshPath",  "D:/Paper3/Models/invivo/he/sample1/stim/cs/base/cs_subendo_intramyo.inp",
+                "--timeStart", "1538",
+                "--timeEnd",   "2107",
+                "--soluName",  "cs_solution",
+                "--nDigits" ,  "4",
+                "--apd",       "90",
+                "--dt",        "0.25",
+                "--spaceUnit", "mm",
+                "--maxMem",    "30",
+                "--nCores",    "1",  
+                "--maxDist",   "0.48",   //in space units
+                "--maxCV",     "600", // in cm/s
+                "--resExcel",  "D:/Paper3/Simulations/invivo/he/sample1/results_fib_standard_cs_intra_gaur_CL769/cs_results.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResults_Cinc2025",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/Cinc2025/opencarp/cs/paraview",
+                "--myResPath", "D:/Cinc2025/opencarp/cs/cs_myresults.vtk",
+                "--meshPath",  "D:/Cinc2025/opencarp/cs/cs_subendo.vtk",
+                "--timeStart", "2000",
+                "--timeEnd",   "3000",
+                "--soluName",  "cs_vm_",
+                "--nDigits" ,  "4",
+                "--apd",       "90",
+                "--dt",        "1",
+                "--spaceUnit", "um",
+                "--maxMem",    "30",
+                "--nCores",    "1",  
+                "--maxDist",   "0.48",   //in space units
+                "--maxCV",     "600", // in cm/s
+                "--resExcel",  "D:/Cinc2025/opencarp/cs/results.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResults_Paper3_HEMI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_tentusscher_pmjratio20/cs",
+                "--myResPath", "D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_tentusscher_pmjratio20/cs_myresults.vtk",
+                "--meshPath",  "D:/Paper3/Models/invivo/he/sample1/stim/cs/cs_endo.inp",
+                "--soluName",  "cs_solution",
+                "--timeStart", "0",
+                "--timeEnd",   "250",
+                "--nDigits" ,  "4",
+                "--apd",       "90",
+                "--dt",        "0.25",
+                "--spaceUnit", "mm",
+                "--maxMem",    "30",
+                "--nCores",    "1",  
+                "--maxDist",   "0.6",   //in space units
+                "--maxCV",     "600", // in cm/s
+                "--resExcel",  "D:/Paper3/Simulations/invivo/he/results_vol_source_sink_mismatch.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "percentagePMJactivated",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/percentagePMJactivated.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--csMeshPath",       "D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_gaur_pmjratio20/cs_myresults.vtk",
+                "--tissueMeshPath",   "D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_gaur_pmjratio20/myresults.vtk",
+                "--pmjRatio",         "0.5",
+                "--activationDelay",  "1.5",
+                "--resExcel",         "D:/Paper3/Simulations/invivo/he/hola.xlsx",
+
+            ],
+        },
+
+
+
+
+        {
+            "name": "getResults_Paper3_HE_Epis",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getEpiSimsResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath",   "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_endo_tentusscher/results_posterior_view.vtu",
+                "--resExcel",  "D:/Paper3/Simulations/invivo/he/results_epi.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getResultsToExcel",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResultsToExcel.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath",   "D:/Paper3/Simulations/invivo/mi/la/sample8/results_mi_CL1000_3000ms_CUSTOM_noscar/myresults_complete.vtk",
+                "--resExcel",   "D:/Paper3/Simulations/invivo/mi/la/results_vol_askcjbas.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "cleanElectraResults",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cleanElectraResults.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath",         "D:/Paper3/Simulations/invivo/he/sample3/results_fib_standard_cs_intra_gaur_rv_septum_lv_down_final_qrs_CL769/tissue",
+                "--timeStart",        "1538", //time in .json
+                "--timeEnd",          "2107",  //time in .json
+                "--nDigits",          "4",  //digits in solution files
+                "--solutionPrefix",   "tissue_solution",
+                "--animationPrefix",  "tissue_animation",
+
+            ],
+        },
+
+
+        {
+            "name": "combineEnsight",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/combineEnsight.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resultFolders",    "D:/Paper4/Simulations/invivo/mi/sample12/S2_265/results_mi_CL600_1800ms_stimAHA6_S2_265",
+                                      "D:/Paper4/Simulations/invivo/mi/sample12/S2_265/results_mi_CL600_1800ms_stimAHA6_S2_265_continue",
+                "--resPath",          "D:/Paper4/Simulations/invivo/mi/sample12/S2_265/results_mi_CL600_1800ms_stimAHA6_S2_265_total", 
+                "--simType",          "cs",
+                "--dt",               "1." 
+
+
+            ],
+        },
+
+
+        {
+            "name": "getInput4PECG",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/pECG/getInput4PECG.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshPath",          "D:/Paper3/Models/invivo/mi/cx/sample6_x/mesh_he.vtk",
+                // "--transMatrix",       "D:/Paper3/Models/invivo/mi/cx/sample6_x/matrix_to_sampleX.txt",
+                "--saveAlignedPath",   "D:/Paper3/Simulations/invivo/mi/cx/sample6_x/mesh_aligned_sampleX.vtk",
+                // "--addVs",
+                // "--resPath",           "D:/Paper3/Simulations/invivo/he/sample1/results_fib_standard_cs_endo_tentusscher/tissue",
+                // "--timeStart",         "08000",
+                // "--timeEnd",           "10400",
+                "--outPath",           "D:/Paper3/Simulations/invivo/mi/cx/sample6_x/mesh_aligned_sampleX.mat",
+
+ 
+
+
+            ],
+        },
+
+        {
+            "name": "getPercentagePointDataFassina",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getPercentagePointData.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Biovad/Paper/fassina_05_thick/generic/perpendicular/myresults_lowdt/results.vtk",
+                "--threshold", "10",
+                "--varName", "RTgrad_[ms/mm]",
+            ],
+        },
+
+        {
+            "name": "getPercentagePointDataHeartBioVAD",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getPercentagePointData.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Simulations/electra_sims/Heart/OM_RM_MI/sampleP21_389/maxvol/mi/results_cs_endo_mi_00095/myresults/results.vtk",
+                "--threshold", "20",
+                "--varName", "RTgrad_[ms/mm]",
+
+            ],
+        },
+
+
+
+        {
+            "name": "seeDatVariable",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/openCARP/seeDatVariable.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--inDatFile", "D:/Paper3/ComparisonGaur/gaur_base/Trace_0.dat",
+
+            ],
+        },
+
+
+        {
+            "name": "plotVs",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVs.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",     
+                "D:/Simulations/electra_sims/prueba_APD/sims/results_OHara_3beats_epi",
+                "--meshPath",    
+                "D:/HeartModeling/basic/test/tetmesh_S_mm.inp",
+                "--timeStart",   "2000",
+                "--timeEnd",     "2600",
+                "--nDigits",     "4",
+                "--nodeList",    "6",
+                "--dt",          "1",
+            ],
+        },
+
+
+        {
+            "name": "plotVsDiffMesh",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVsDiffMesh.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",     
+                // "D:/Simulations/electra_sims/prueba_APD/sims/results_OHara_3beats",
+                "D:/Simulations/electra_sims/prueba_APD/sims/results_Gaur_3beats",
+                "D:/Simulations/electra_sims/prueba_APD/sims/results_TenTusscher_3beats",
+
+                "--meshPath",    
+                "D:/HeartModeling/basic/test/tetmesh_S_mm.inp",
+                "--timeStart",   "2000",
+                "--timeEnd",     "2600",
+                "--nDigits",     "4",
+                "--node",        "11313",
+                "--dt",          "1",
+                "--labels",       "Gaur (pig)", "TenTusscher (human-epi)"
+            ],
+        },
+
+        // ---------------------------AIDA AUTOMATIC APD ----------------------------------------
+        {
+            "name": "Aida_getScaffoldMask",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/aidaAuto/getScaffoldMask.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePath",     "D:/pruebaAidaMeshAPDRecons/27A/27A-0frm.bmp",
+            ],
+        },
+
+        {
+            "name": "Aida_getInnerVsWallValues",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/aidaAuto/getInnerVsWallValues.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--variableMap", "D:/pruebaAidaMeshAPDRecons/27A/27Alist.csv",
+                "--meshMask",    "D:/pruebaAidaMeshAPDRecons/27A/res_images/Segmentation-Segment_1-label.nrrd",
+                "--tissueMask",  "D:/pruebaAidaMeshAPDRecons/27A/res_images/27A-0frm_li.png",
+                "--resPath",     "D:/pruebaAidaMeshAPDRecons/27A/res_images/",
+                "--label",       "APD (ms)",
+                "--resExcel",    "D:/pruebaAidaMeshAPDRecons/results.xlsx",
+                "--save"
+            ],
+        },
+
+
+
+        {
+            "name": "plotVmFromElectraCell",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmFromElectraCell.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePaths", 
+                "D:/Paper3/Cell_sims/final/he/Gaur/transmural_gaur/meijbord/898CL/gaur_mid_mid_898CL_1796s_Vm.mat",
+                "D:/Paper3/Cell_sims/final/mi/CL898/gaur_bz_gk1_312_898CL_1796s_Vm.mat",
+                "D:/Paper3/Cell_sims/final/mi/CL898/gaur_bz_onlyGK1_312_898CL_1796s_Vm.mat",
+                "D:/Paper3/Cell_sims/final/mi/CL898/gaur_bz_onlyINA_898CL_1796s_Vm.mat",
+
+
+                "--starts",    //en ms
+                "1795000",
+                "1795000",
+                "1795000",
+                "1795000",
+                
+
+                "--ends",    //en ms
+                "1796000",
+                "1796000",
+                "1796000",
+                "1796000",
+
+
+                "--dt", "0.01",
+                "--apdType", "90",
+
+                "--names", "he", "gNa 42 & gk1 31.2", "only gk1", "only gNa",
+
+                "--outPath",  "D:/Paper3/Cell_sims/final/mi/last_beats_MI_sample6.png"
+            ],
+        },
+
+
+        {
+            "name": "compareGaur",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/compareGaur.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePaths", 
+                "D:/Paper3/ComparisonGaur/100s/gaur_endo_100s_Vm.txt",
+                "D:/Paper3/ComparisonGaur/100s/gaur_endo_mi_100s_Vm.txt",
+                "D:/Paper3/ComparisonGaur/100s/gaur_endo_mi_100s_gk1_Vm.txt",
+                "D:/Paper3/ComparisonGaur/100s/gaur_base_opencarp_100s/Trace_0.dat",
+                "D:/Paper3/ComparisonGaur/100s/gaur_mi_opencarp_100s/Trace_0.dat",
+                "D:/Paper3/ComparisonGaur/100s/gaur_mi_opencarp_100s_gk1/Trace_0.dat",
+
+                "--starts",    //en ms
+                "99000",
+                "99000",
+                "99000",
+                "99000",
+                "99000",
+                "99000",
+
+
+                "--ends",    //en ms
+                "100000",
+                "100000",
+                "100000",
+                "100000",
+                "100000",
+                "100000",
+
+                "--dt", "0.01",
+                "--apdType", "90",
+
+                "--names", "Gaur Electra", "Gaur mi Electra", "Gaur mi 25% gk1 Electra", "Gaur Opencarp", "Gaur mi Opencarp", "Gaur mi 25% gk1 Opencarp", 
+                "--outPath",  "D:/Paper3/ComparisonGaur/100s/100s_lastbeat.png"
+            ],
+        },
+
+
+        {
+            "name": "getDWIStats_MDFA",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getDWIStats_MDFA.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath", "D:/Paper3/DWI/mi/sample8/rm",
+                "--resExcel", "D:/Paper3/DWI/mi/results.xlsx",
+            ]
+        },
+
+
+        
+        {
+            "name": "plotEdgeLength",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotEdgeLength.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePath",           "D:/Paper3/Models/invivo/mi/la/sample10/mesh_he.vtk",
+                "--outPath",            "D:/Paper3/Models/invivo/mi/la/sample10/edge_length_hist.pdf",
+            ],
+        },
+
+
+        {
+            "name": "plot_boxplot_paper3_HE_SimOM_CV",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plot_boxplot_paper3_HE_SimOM.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPaths", 
+                "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/16/myresults/Myo_cvs.pkl",
+                "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/18/myresults/Myo_cvs.pkl",
+                
+                "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "D:/Paper3/Simulations/invivo/he/sample2/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample2/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "D:/Paper3/Simulations/invivo/he/sample3/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample3/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "--dataNames", "Exp_A", "Exp_P", "pig1_A", "pig1_P", "pig2_A", "pig2_P",  "pig3_A", "pig3_P",
+
+
+                "--variableName", "CVMag_(cm/s)_epi",
+
+                "--xlabel", "Case",
+                "--ylabel", "CV [cm/s]",
+                "--huelabel", "View",
+                "--outPath", "C:/Maxi/Documents/PhD_Main/Papers/Paper3/images/results_fibers/results_HE_OM/CV.svg",
+            ],
+        },
+
+
+        {
+            "name": "plot_boxplot_paper3_HE_SimOM_AT",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plot_boxplot_paper3_HE_SimOM.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPaths", 
+                "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/16/myresults/Myo_ats.pkl",
+                "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/18/myresults/Myo_ats.pkl",
+                
+                "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "D:/Paper3/Simulations/invivo/he/sample2/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample2/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "D:/Paper3/Simulations/invivo/he/sample3/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample3/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "--dataNames", "Exp_A", "Exp_P", "pig1_A", "pig1_P", "pig2_A", "pig2_P",  "pig3_A", "pig3_P",
+
+
+                "--variableName", "ATs_(ms)",
+
+                "--xlabel", "Case",
+                "--ylabel", "AT [ms]",
+                "--huelabel", "View",
+                "--outPath", "C:/Maxi/Documents/PhD_Main/Papers/Paper3/images/results_fibers/results_HE_OM/AT.svg",
+            ],
+        },
+
+
+        {
+            "name": "plot_boxplot_paper3_HE_SimOM_APD90",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plot_boxplot_paper3_HE_SimOM.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPaths", 
+                "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/16/myresults/Myo_apds.pkl",
+                "E:/Data/OM_PigHeart/Control/20201006_Brave_pig6/18/myresults/Myo_apds.pkl",
+                
+                "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "D:/Paper3/Simulations/invivo/he/sample2/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample2/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "D:/Paper3/Simulations/invivo/he/sample3/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_anterior_view.vtk",
+                "D:/Paper3/Simulations/invivo/he/sample3/results_fib_fromdwi_cs_intra_gaur_rv_septum_lv_down_CL1000_meijbord/results_posterior_view.vtk",
+                
+                "--dataNames", "Exp_A", "Exp_P", "pig1_A", "pig1_P", "pig2_A", "pig2_P",  "pig3_A", "pig3_P",
+
+
+                "--variableName", "APD90_(ms)",
+
+                "--xlabel", "Case",
+                "--ylabel", "APD90 [ms]",
+                "--huelabel", "View",
+                "--outPath", "C:/Maxi/Documents/PhD_Main/Papers/Paper3/images/results_fibers/results_HE_OM/APD90.svg",
+            ],
+        },
+
+
+        {
+            "name": "addResultsToCompleteMeshWithScar",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/addResultsToCompleteMeshWithScar.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resultsMesh",  "D:/Paper3/Simulations/invivo/mi/la/sample10/results_mi_CL1000_3000ms_CUSTOM_noscar/myresults.vtk",
+                "--completeMesh", "D:/Paper3/Models/invivo/mi/la/sample10/mesh_full_segmented.vtk",
+                "--outMesh",      "D:/Paper3/Simulations/invivo/mi/la/sample10/results_mi_CL1000_3000ms_CUSTOM_noscar/myresults_complete.vtk",
+            ],
+        },
+
+
+        {
+            "name": "makeVideosWithParaview",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/makeVideosWithParaview.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resultsFolderPath",  "D:/Paper4/Simulations/invivo/mi/sample4/S2_265/results_mi_CL600_1800ms_stimAHA1_S2_265_total",
+                "--paraviewScriptPath", "D:/Paper4/Simulations/invivo/mi/sample4/S2_265/make_cs_tissue_video.py",
+            ],
+        },
+
+        {
+            "name": "prepareParaviewScriptsForVideos",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/prepareParaviewScriptsForVideos.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resultsFolderPath",  "D:/Paper4/Simulations/invivo/mi/sample4/S2_295/results_mi_CL600_1800ms_stimAHA1_S2_295",
+                                        "D:/Paper4/Simulations/invivo/mi/sample4/S2_295/results_mi_CL600_1800ms_stimAHA17_S2_295",
+                "--paraviewScriptPath", "D:/Paper4/Simulations/invivo/mi/sample4/S2_295/make_cs_tissue_video",
+            ],
+        },
+        
+        {
+            "name": "changeVideoFps",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/changeVideoFps.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--videoPath",     "D:/Paper4/Simulations/invivo/mi/sample10/S2_280/results_mi_CL600_1800ms_stimAHA9_S2_280_total/video_fps5ms.mp4",
+                "--videoOutPath",  "C:/Maxi/Documents/PhD_Main/JournalClub/data/sample10_s2280_AHA9_30fps.mp4",
+                "--fps",           "50"
+            ],
+        },
+
+
+    ]
+}

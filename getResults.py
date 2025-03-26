@@ -196,9 +196,10 @@ def main():
     CVversors = np.empty((CVmagnitudes.shape[0],3)); CVversors[:] = np.nan
     np.divide(CVvectors, np.expand_dims(CVmagnitudes, axis=1), out=CVversors, where=np.expand_dims(CVmagnitudes, axis=1) != 0.)
 
-    # Add units and get rid of CVs which are too high and stimulated
+    # Add units and get rid of CVs which are too high and stimulated, we suppose dt is in ms
     if args.spaceUnit == "mm": CVmagnitudes = CVmagnitudes * 100
     elif args.spaceUnit == "cm": CVmagnitudes = CVmagnitudes * 1000
+    elif args.spaceUnit == "um": CVmagnitudes = CVmagnitudes * 0.1
     else: raise ValueError("Wrong space unit")
     idxs2Nan = np.where(CVmagnitudes>args.maxCV)
     if args.stimLabel in mesh.point_sets.keys(): 

@@ -805,12 +805,13 @@
             ],
         },
 
+        //  ---------------------------------------------Cinc 2025 ----------------------------------------------------------------------
 
         {
-            "name": "getResults_Cinc2025",
+            "name": "getResults_Cinc2025_CS",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/getResults.py",
+            "program": "${workspaceFolder}/getResultsATAPD.py",
             "console": "externalTerminal",
             "justMyCode": true,
             "args": [
@@ -831,6 +832,91 @@
                 "--resExcel",  "D:/Cinc2025/opencarp/cs/results.xlsx",
             ],
         },
+
+        {
+            "name": "getResults_Cinc2025_BiV_cocoro",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResultsATAPD.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/Cinc2025/cocoro/results_sigmaL01195_03transcond",
+                "--myResPath", "D:/Cinc2025/cocoro/myresults_sigmaL01195_03transcond.vtk",
+                "--meshPath",  "D:/Cinc2025/cocoro/3D_heart_400um_cinc.vtk",
+                "--timeStart", "0",
+                "--timeEnd",   "1000",
+                "--soluName",  "tissue_sim_state",
+                "--nDigits" ,  "4",
+                "--apd",       "90",
+                "--dt",        "1",
+                "--maxMem",    "40",
+                "--nCores",    "8",  
+                "--resExcel",  "D:/Cinc2025/cocoro/results.xlsx",
+            ],
+        },
+
+        {
+            "name": "getResults_Cinc2025_BiV_opencarp",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResultsATAPD.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resPath",   "D:/Cinc2025/opencarp/biv/paraview_03transcond",
+                "--myResPath", "D:/Cinc2025/opencarp/biv/myresults_03transcond.vtk",
+                "--meshPath",  "D:/Cinc2025/cocoro/3D_heart_400um_cinc.vtk",
+                "--timeStart", "2000",
+                "--timeEnd",   "3000",
+                "--soluName",  "3D_heart_400um_cinc_vm_",
+                "--nDigits" ,  "4",
+                "--apd",       "90",
+                "--dt",        "1",
+                "--maxMem",    "40",
+                "--nCores",    "8",  
+                "--resExcel",  "D:/Cinc2025/cocoro/results.xlsx",
+            ],
+        },
+
+
+        {
+            "name": "getATAPDErrors",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getATAPDErrors.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--mesh1",     "D:/Cinc2025/opencarp/biv/myresults_03transcond.vtk",
+                "--mesh2",     "D:/Cinc2025/cocoro/myresults_sigmaL01195_03transcond.vtk",
+                "--histSteps", "90",
+                "--imgType",   "png",
+                "--outPath",   "D:/Cinc2025",
+            ],
+        },
+
+
+        {
+            "name": "getATAPDPlotsDissemination",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getATAPDPlotsDissemination.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--meshes",     //"D:/Cinc2025/opencarp/biv/myresults_03transcond.vtk",
+                                //"D:/Cinc2025/cocoro/myresults_sigmaL01195_03transcond.vtk",
+                                "D:/Cinc2025/opencarp/biv/myresults_1transcond.vtk",
+                                "D:/Cinc2025/cocoro/myresults_sigmaL01195_1transcond.vtk",
+
+                "--meshNames",  "opencarp", "cocoro", //"1_opencarp", "1_cocoro", 
+                "--imgType",    "pdf",
+                "--outPath",    "D:/Cinc2025",
+            ],
+        },
+
+        //  ---------------------------------------------End ----------------------------------------------------------------------
 
 
         {
@@ -935,10 +1021,10 @@
             "console": "externalTerminal",
             "justMyCode": true,
             "args": [
-                "--resultFolders",    "D:/Paper4/Simulations/invivo/mi/sample12/S2_265/results_mi_CL600_1800ms_stimAHA6_S2_265",
-                                      "D:/Paper4/Simulations/invivo/mi/sample12/S2_265/results_mi_CL600_1800ms_stimAHA6_S2_265_continue",
-                "--resPath",          "D:/Paper4/Simulations/invivo/mi/sample12/S2_265/results_mi_CL600_1800ms_stimAHA6_S2_265_total", 
-                "--simType",          "cs",
+                "--resultFolders",    "D:/Paper4/Simulations/invivo/mi/sample12/S2_295/results_mi_CL600_1800ms_stimAHA18_S2_295",
+                                      "D:/Paper4/Simulations/invivo/mi/sample12/S2_295/results_mi_CL600_1800ms_stimAHA18_S2_295_continue",
+                "--resPath",          "D:/Paper4/Simulations/invivo/mi/sample12/S2_295/results_mi_CL600_1800ms_stimAHA18_S2_295_total", 
+                "--simType",          "tissue", "cs",
                 "--dt",               "1." 
 
 

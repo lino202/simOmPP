@@ -16,6 +16,10 @@ def main():
     parser.add_argument('--roiPath', type=str, required=True)
     parser.add_argument('--outPath', type=str, required=True)
     parser.add_argument('--threshold', type=float, required=True, help='Value between 0 and 1 defining the baseline')
+    parser.add_argument('--sampleStart', type=int, required=True, help='select this different to 0 to drop some values', default=-1)
+    parser.add_argument('--sampleEnd', type=int, required=True, help='select this different to -1 to drop some values', default=-1)
+    parser.add_argument('--sampleStartImages', type=int, default=-1)
+    parser.add_argument('--sampleEndImages', type=int, default=-1)
     parser.add_argument('--fps',     type=int, default=100)
     args = parser.parse_args()
 
@@ -24,6 +28,8 @@ def main():
     except NotImplementedError:
         video = hdf5storage.loadmat(args.videoPath)
     video = video['wholav_images']
+    if args.sampleStart!=-1 and args.sampleEnd!=-1:
+        video = video[:,:,args.sampleStart:args.sampleEnd]
 
     try:
         img_back = scipy.io.loadmat(args.videoPath.replace('_filtered', ''))
@@ -57,7 +63,7 @@ def main():
 
     img_back = np.repeat(img_back[:,:,np.newaxis],video.shape[2], axis=2)
 
-    # we make colored for habing the back image in gray and color fluorescence (COLOR_GRAY2BGR)
+    # we make colored for having the back image in gray and color fluorescence (COLOR_GRAY2BGR)
     new_video = np.repeat(new_video[:,:,:,np.newaxis],3, axis=3)  
     new_video[:,:,:,0] = 0
     new_video[:,:,:,2] = 0
@@ -74,12 +80,13 @@ def main():
     
     video.release()
 
-    # samples_to_save_img = np.arange(3700,3810,10)
-    # for i in samples_to_save_img:
-    #     plt.figure()
-    #     plt.imshow(new_video[:,:,i,:])
-    #     plt.savefig(os.path.join(args.outPath, "sample_{}.png".format(i)), dpi=300)
-    #     plt.close()
+    if args.sampleStartImages!=-1 and args.sampleEndImages!=-1:
+        samples_to_save_img = np.arange(args.sampleStartImages,args.sampleEndImages,10)
+        for i in samples_to_save_img:
+            plt.figure()
+            plt.imshow(new_video[:,:,i,:])
+            plt.savefig(os.path.join(args.outPath, "sample_{}.png".format(i)), dpi=300)
+            plt.close()
 
 if __name__ == '__main__':
     startTime = time.time()

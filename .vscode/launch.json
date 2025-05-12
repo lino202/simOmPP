@@ -203,28 +203,28 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--folderPath",                "D:/Data/OM_BioVAD/Perth_24062024/total/DP4",
-                "--videoName",                 "128",
-                "--fileName",                  "FileTag128_video_filtered",
+                "--folderPath",                "G:/Data/OM_PigHeart/MI/20211112_PigInfarcted3",
+                "--videoName",                 "48",
+                "--fileName",                  "FileTag048_video_filtered",
                 "--matVarName",                "wholav_images",
-                "--getSubRegions",
-                "--subregionNames",            "L", "M", "S",
-                "--roisName",                  "roi_127",
+                // "--getSubRegions",
+                // "--subregionNames",            "L", "M", "S",
+                "--roisName",                  "roi_48",
 
-                "--exposure",                  "10",    // in ms
+                "--exposure",                  "2",    // in ms
                 "--reverse",
-                "--startTime",                 "200",    // in ms
-                "--endTime",                   "5800",   // in ms
-                "--before",                    "550",    // in ms
-                "--after",                     "550",    // in ms
-                "--nBeats",                    "5",
+                "--startTime",                 "6800",    // in ms
+                "--endTime",                   "7478",   // in ms
+                "--before",                    "150",    // in ms
+                "--after",                     "150",    // in ms
+                "--nBeats",                    "2",
 
                 "--cleanProcess",              "0", 
                 "--blockDown",                 "0", 
                 "--blockUp",                   "0",
 
                 "--shouldNotHaveAllPoints",
-                "--pixRes",                    "0.0136",   // in cm
+                "--pixRes",                    "0.073",   // in cm
                 "--maxDist",                   "3",       // in px
                 "--maxCV",                     "300",     // in cm/s
                 "--cvCalcMethod",              "vanilla",
@@ -232,10 +232,10 @@
 
                 "--apdtype",                   "90",
                 
-                "--stimCL",                    "1000",  // in ms
-                "--stimType",                  "Long",
-                "--sampleType",                "Diam",
-                "--sampleName",                "DP4"
+                "--stimCL",                    "300",  // in ms
+                "--stimType",                  "AI",
+                "--sampleType",                "AV",
+                "--sampleName",                "Pig9"
             ],
         },
 
@@ -1445,6 +1445,128 @@
                 "--fps",           "50"
             ],
         },
+
+
+
+        // --------------------------------------------------- Paper 4 ---------------------------------------------------------------
+
+
+        {
+            "name": "getResultsFromOmapFiltered_Paper4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResultsFromOmapFiltered.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--folderPath",                "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2",
+                "--videoName",                 "36",
+                "--fileName",                  "FileTag036_video_filtered",
+                "--matVarName",                "wholav_images",
+                // "--getSubRegions",
+                // "--subregionNames",            "L", "M", "S",
+                "--roisName",                  "roi_48",
+
+                "--exposure",                  "2",    // in ms
+                "--reverse",
+                "--startTime",                 "6800",    // in ms
+                "--endTime",                   "7478",   // in ms
+                "--before",                    "150",    // in ms
+                "--after",                     "150",    // in ms
+                "--nBeats",                    "2",
+
+                "--cleanProcess",              "0", 
+                "--blockDown",                 "0", 
+                "--blockUp",                   "0",
+
+                "--shouldNotHaveAllPoints",
+                "--pixRes",                    "0.073",   // in cm
+                "--maxDist",                   "3",       // in px
+                "--maxCV",                     "300",     // in cm/s
+                "--cvCalcMethod",              "vanilla",
+                "--scaleVectors",              "1.",
+
+                "--apdtype",                   "90",
+                
+                "--stimCL",                    "300",  // in ms
+                "--stimType",                  "AI",
+                "--sampleType",                "AV",
+                "--sampleName",                "Pig9"
+            ],
+        },
+
+
+        //plot isocrona perth search results in overall_results.pkl, this occurs because for paper3 we used getResultsFromOmapResults and for perth and paper4
+        // we used getResultsFromOmapFiltered so results are saved differently, anyways the plot isocronas codes almost equal/equivalent
+        // {
+        //     "name": "plotIsocronaPaper4",
+        //     "type": "debugpy",
+        //     "request": "launch",
+        //     "program": "${workspaceFolder}/plotIsocronaPerth.py",    
+        //     "console": "integratedTerminal",
+        //     "justMyCode": true,
+        //     "args": [
+        //         "--dataPath",           "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/37/myresults/overall_results.pkl",
+        //         "--backgroundPath",     "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/37/FileTag037_video.mat",
+        //         "--cleanProcess",              "0", 
+        //         "--blockDown",                 "0", 
+        //         "--blockUp",                   "0",
+        //         "--outPath",            "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/37/myresults/isocrona.pdf"
+        //     ],
+        // },
+
+        {
+            "name": "plotIsocronaPaper4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotIsocronaPerth.py",    
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath",           "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/36/myresults/overall_results.pkl",
+                "--backgroundPath",     "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/36/FileTag036_video.mat",
+                "--cleanProcess",              "2", 
+                "--blockDown",                 "0", 
+                "--blockUp",                   "240",
+                "--outPath",            "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/36/myresults/isocrona.png"
+            ],
+        },
+
+
+        // {
+        //     "name": "plotIsocronaPaper4",
+        //     "type": "debugpy",
+        //     "request": "launch",
+        //     "program": "${workspaceFolder}/plotIsocronaPerth.py",    
+        //     "console": "integratedTerminal",
+        //     "justMyCode": true,
+        //     "args": [
+        //         "--dataPath",           "G:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/48/myresults/overall_results.pkl",
+        //         "--backgroundPath",     "G:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/48/FileTag048_video.mat",
+        //         "--cleanProcess",              "0", 
+        //         "--blockDown",                 "20", 
+        //         "--blockUp",                   "100",
+        //         "--outPath",            "G:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/48/myresults/isocrona.png"
+        //     ],
+        // },
+
+
+        {
+            "name": "vtAnalysisFromExcelPaper4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/vtAnalysisFromExcelPaper4.py",    
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--excelFile",          "D:/Paper4/Main_Info.xlsx",
+                "--outPath",            "D:/Paper4/Results"
+            ],
+        },
+
+
+        
+        //  ---------------------------------------------END Paper4 -----------------------------
 
 
     ]

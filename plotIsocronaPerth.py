@@ -6,6 +6,7 @@ from matplotlib.ticker import FormatStrFormatter
 import scipy.io
 import copy
 from utils import cleanMap, meanFilter, keepBigIsland
+import hdf5storage
 
 def main():
 
@@ -22,7 +23,10 @@ def main():
     with open(args.dataPath, 'rb') as f:
         atmap = pickle.load(f)['at_map']
 
-    back_image = scipy.io.loadmat(args.backgroundPath)['A'][:,:,0]
+    try:
+        back_image = scipy.io.loadmat(args.backgroundPath)['A'][:,:,0]
+    except NotImplementedError:
+        back_image = hdf5storage.loadmat(args.backgroundPath, variable_names=['A'])['A'][:,:,0]        
     back_image = (back_image-np.min(back_image))/(np.max(back_image) - np.min(back_image))
 
     #CLEAN
@@ -65,7 +69,7 @@ def main():
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.imshow(back_image, cmap='gray')
-    plt.imshow(atmap, vmin=np.nanmin(atmap), vmax=np.nanmax(atmap), cmap='viridis', alpha=0.5)
+    plt.imshow(atmap, vmin=np.nanmin(atmap), vmax=np.nanmax(atmap), cmap='viridis', alpha=0.7)
     plt.axis('off')
     cbar = plt.colorbar(ax=[ax], ticks=np.linspace(np.nanmin(atmap),np.nanmax(atmap),4), location="right", pad=0.02, shrink=0.9)
     # cbar.ax.tick_params(labelsize=fontsize)

@@ -11,21 +11,29 @@ import plotly.graph_objects as go
 
 font = {'family' : "Times New Roman",
     'weight' : 'normal',
-    'size'   : 10}
+    'size'   : 14}
 plt.rc('font', **font)
 plt.rcParams.update({'mathtext.default':  'regular' })
 
+count_NC = 0
+count_NR = 0
+count_UVT = 0
+count_VT = 0
 def custom_logic(value):
     if pd.isna(value):
         return value
     
     if value == "x":
+        globals()['count_NC'] += 1
         return "NC"
     elif "unsustained" in value:
+        globals()['count_UVT'] += 1
         return "UVT"
     elif "no" in value:
+        globals()['count_NR'] += 1
         return "NR"
     else:
+        globals()['count_VT'] += 1
         return "VT"  # for unknown or irrelevant values
     
 def createEHTPositionColumn(value):
@@ -44,9 +52,9 @@ def createStateColumn(value):
     
 def createConductivityColumn(value):
     if ("EHT1L" in value) or ("EHT2L" in value):
-        return "Low_c"
+        return "Low EHTc"
     elif ("EHT1H" in value) or ("EHT2H" in value):
-        return "High_c"
+        return "High EHTc"
     else:
         return "No EHT"
     
@@ -66,6 +74,12 @@ replacement2 = {
     "VT": 3,
 }
 
+replacement3 = {
+    "NC": 0,
+    "NR": 0,
+    "UVT": 0,
+    "VT": 3,
+}
 
 
 def addHorizontalLinesToPlot(fig):
@@ -92,6 +106,10 @@ def main():
     parser.add_argument('--outPath',type=str, required=True, help='path to data')
     args = parser.parse_args()
 
+    VTonlyResultsPath = os.path.join(args.outPath, "VTonlyResults")
+    if not os.path.exists(VTonlyResultsPath):
+        os.makedirs(VTonlyResultsPath)
+
     # Load the Excel file
     df_categories = pd.read_excel(args.excelFile, sheet_name='Main', header=15, usecols='A,C,D,E,F,G,H,K,O,T,W,Z')
     df_categories = df_categories.dropna(how='all')
@@ -100,6 +118,14 @@ def main():
     columns_to_change = ["s2 250ms", "s2 265ms", "s2 280ms", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms", "without CS"]
     for col in columns_to_change:
         df_categories[col] = df_categories[col].apply(custom_logic)
+    print("Count of NC:", count_NC)
+    print("Count of NR:", count_NR)
+    print("Count of UVT:", count_UVT)
+    print("Count of VT:", count_VT)
+
+    # Set the default color palette
+    custom_palette = ['#2ca02c', '#9467bd', '#d62728', '#1f77b4', '#ff7f0e'] # gren, purple, red, blue, orange
+    sns.set_palette(custom_palette)
 
     # Make some plots 
     # MI versus all MI arrhtymias -> evaluates arrhtymicity on the MI baseline ---------------------------------------------------------
@@ -108,11 +134,18 @@ def main():
     tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
     # tmp_df = tmp_df.loc[tmp_df["value"] != "NR"]
 
-
     sns.catplot(data=tmp_df, x="MI", y="pig", hue="value", kind="swarm", s=60)
-    plt.savefig(os.path.join(args.outPath, "figure1.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure1.pdf"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure1.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure1.pdf"), dpi=500)
     # plt.show()
+
+    # Print the mean arrhythmicity for each pig 
+    tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    tmp_df = tmp_df.groupby(["pig"])["Inducibility"].mean().reset_index()
+    tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
+
+    print(tmp_df)
 
     # MI on baseline no patch and EHT1 and EHT2 -------------------------------------------------------------------------------------
     # We pass results to numbers:
@@ -122,8 +155,37 @@ def main():
     tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms"]) # we put all together and drop the Not captured values
     tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
     tmp_df = tmp_df.dropna(how='any')
+
     tmp_df["variable"] = tmp_df["variable"].map(replacement)
     tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+
+    tmp_df1 = tmp_df.groupby(["pig", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df1['Inducibility'] = tmp_df1['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
+    tmp_df1['pig'] = tmp_df1['pig'].astype(int)
+    fig2 = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", hue_order=["No EHT", "EHT1L", "EHT2L"])
+    addHorizontalLinesToPlot(fig2)
+    #plt.savefig(os.path.join(args.outPath, "figure2.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure2.pdf"), dpi=500)
+
+
+    tmp_df2 = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df2['Inducibility'] = tmp_df2['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
+    fig2b = sns.catplot(data=tmp_df2, x="MI", y="Inducibility", hue="variable", kind="bar", hue_order=["No EHT", "EHT1L", "EHT2L"], order=["LCx", "LAD"])
+    addHorizontalLinesToPlot(fig2b)
+    #plt.savefig(os.path.join(args.outPath, "figure2b.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure2b.pdf"), dpi=500)
+    # plt.show()
+
+    print(tmp_df2)
+
+    # The same but UVT is equal to 0 
+    tmp_df = copy.deepcopy(df_categories)
+    tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms"]) # we put all together and drop the Not captured values
+    tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
+    tmp_df = tmp_df.dropna(how='any')
+    tmp_df["variable"] = tmp_df["variable"].map(replacement)
+    tmp_df["value"]    = tmp_df["value"].map(replacement3)
 
     tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
 
@@ -132,17 +194,18 @@ def main():
     tmp_df1['pig'] = tmp_df1['pig'].astype(int)
     fig2 = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", hue_order=["No EHT", "EHT1L", "EHT2L"])
     addHorizontalLinesToPlot(fig2)
-    plt.savefig(os.path.join(args.outPath, "figure2.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure2.pdf"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure2.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure2.pdf"), dpi=500)
 
 
     tmp_df2 = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
     tmp_df2['Inducibility'] = tmp_df2['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
-    fig2b = sns.catplot(data=tmp_df2, x="MI", y="Inducibility", hue="variable", kind="bar", hue_order=["No EHT", "EHT1L", "EHT2L"])
+    fig2b = sns.catplot(data=tmp_df2, x="MI", y="Inducibility", hue="variable", kind="bar", hue_order=["No EHT", "EHT1L", "EHT2L"], order=["LCx", "LAD"])
     addHorizontalLinesToPlot(fig2b)
-    plt.savefig(os.path.join(args.outPath, "figure2b.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure2b.pdf"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure2b.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure2b.pdf"), dpi=500)
     # plt.show()
+
 
 
     # with and without CS -------------------------------------------------------------------------------------
@@ -154,28 +217,51 @@ def main():
     tmp_df = tmp_df[tmp_df["pig"].isin([6, 7, 11, 12])]
 
     tmp_df["variable"] = tmp_df["variable"].map({"s2 295ms": "With CS", "without CS": "Without CS"})
+    tmp_df["pig"] = tmp_df["pig"].replace(6, "LCx LI")
+    tmp_df["pig"] = tmp_df["pig"].replace(7, "LCx HI")
+    tmp_df["pig"] = tmp_df["pig"].replace(11, "LAD HI")
+    tmp_df["pig"] = tmp_df["pig"].replace(12, "LAD LI")
 
-    sns.catplot(data=tmp_df, x="variable", y="pig", hue="value", kind="swarm", s=60, hue_order=["NR", "UVT", "VT"])
-    plt.savefig(os.path.join(args.outPath, "figure3.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure3.pdf"), dpi=500)
+    # sns.catplot(data=tmp_df, x="variable", y="pig", hue="value", kind="swarm", s=60, hue_order=["NR", "UVT", "VT"])
+    # #plt.savefig(os.path.join(args.outPath, "figure3.png"), dpi=500)
+    # #plt.savefig(os.path.join(args.outPath, "figure3.pdf"), dpi=500)
 
     tmp_df["value"]    = tmp_df["value"].map(replacement2)
     tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
 
     tmp_df1 = tmp_df.groupby(["pig", "variable"])["Inducibility"].mean().reset_index()
     tmp_df1['Inducibility'] = tmp_df1['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
-    fig3b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar")
+    fig3b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", order=["LCx LI", "LCx HI", "LAD LI", "LAD HI"])
     addHorizontalLinesToPlot(fig3b)
-    plt.savefig(os.path.join(args.outPath, "figure3b.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure3b.pdf"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure3b.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure3b.pdf"), dpi=500)
 
+    print(tmp_df1)
 
-    tmp_df2 = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
-    tmp_df2['Inducibility'] = tmp_df2['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
-    fig3c = sns.catplot(data=tmp_df2, x="MI", y="Inducibility", hue="variable", kind="bar")
-    addHorizontalLinesToPlot(fig3c)
-    plt.savefig(os.path.join(args.outPath, "figure3c.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure3c.pdf"), dpi=500)
+    # The same but UVT is equal to 0 
+    tmp_df = copy.deepcopy(df_categories)
+    tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 295ms", "without CS"])
+    tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
+    tmp_df = tmp_df.dropna(how='any')
+    tmp_df['pig'] = tmp_df['pig'].astype(int)
+    tmp_df = tmp_df[tmp_df["pig"].isin([6, 7, 11, 12])]
+
+    tmp_df["variable"] = tmp_df["variable"].map({"s2 295ms": "With CS", "without CS": "Without CS"})
+    tmp_df["pig"] = tmp_df["pig"].replace(6, "LCx LI")
+    tmp_df["pig"] = tmp_df["pig"].replace(7, "LCx HI")
+    tmp_df["pig"] = tmp_df["pig"].replace(11, "LAD HI")
+    tmp_df["pig"] = tmp_df["pig"].replace(12, "LAD LI")
+
+    tmp_df["value"]    = tmp_df["value"].map(replacement3)
+    tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+
+    tmp_df1 = tmp_df.groupby(["pig", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df1['Inducibility'] = tmp_df1['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
+    fig3b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", order=["LCx LI", "LCx HI", "LAD LI", "LAD HI"])
+    addHorizontalLinesToPlot(fig3b)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure3b.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure3b.pdf"), dpi=500)
+
 
 
     # More conductive EHT1 and EHT2 -------------------------------------------------------------------------------------
@@ -187,8 +273,8 @@ def main():
     tmp_df['pig'] = tmp_df['pig'].astype(int)
 
     sns.catplot(data=tmp_df, x="variable", y="pig", hue="value", kind="swarm", s=60, hue_order=["NR", "UVT", "VT"])
-    plt.savefig(os.path.join(args.outPath, "figure4.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure4.pdf"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4.pdf"), dpi=500)
 
     tmp_df["value"]    = tmp_df["value"].map(replacement2)
     tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
@@ -196,165 +282,239 @@ def main():
     tmp_df1 = tmp_df.groupby(["pig", "variable"])["Inducibility"].mean().reset_index()
     tmp_df1 = tmp_df1.loc[tmp_df1['variable'] != 'No EHT']
     tmp_df1['Inducibility'] = tmp_df1['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
-    fig4b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", hue_order=["No EHT", "EHT1L", "EHT1H", "EHT2L", "EHT2H"])
+    fig4b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", hue_order=["EHT1L", "EHT1H"])
     addHorizontalLinesToPlot(fig4b)
-    plt.savefig(os.path.join(args.outPath, "figure4b.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure4b.pdf"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4b_EHT1.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4b_EHT1.pdf"), dpi=500)
+    fig4b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", hue_order=["EHT2L", "EHT2H"])
+    addHorizontalLinesToPlot(fig4b)
+    #plt.savefig(os.path.join(args.outPath, "figure4b_EHT2.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4b_EHT2.pdf"), dpi=500)
 
-
-    tmp_df2 = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df["Conductivity"] = tmp_df["variable"].apply(createConductivityColumn)
+    tmp_df2 = tmp_df.groupby(["MI", "Conductivity"])["Inducibility"].mean().reset_index()
+    tmp_df2 = tmp_df2.loc[tmp_df2['Conductivity'] != 'No EHT']
     tmp_df2['Inducibility'] = tmp_df2['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
-    fig4c = sns.catplot(data=tmp_df2, x="MI", y="Inducibility", hue="variable", kind="bar", hue_order=["No EHT", "EHT1L", "EHT1H", "EHT2L", "EHT2H"])
+    fig4c = sns.catplot(data=tmp_df2, x="MI", y="Inducibility", hue="Conductivity", kind="bar", hue_order=["Low EHTc", "High EHTc"], order=["LCx", "LAD"])
     addHorizontalLinesToPlot(fig4c)
-    plt.savefig(os.path.join(args.outPath, "figure4c.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure4c.pdf"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4c.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4c.pdf"), dpi=500)
 
-    tmp_df3 = tmp_df.groupby(["variable"])["Inducibility"].mean().reset_index()
-    tmp_df3['Inducibility'] = tmp_df3['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
-    fig4d = sns.catplot(data=tmp_df3, x="variable", y="Inducibility", kind="bar", order=["No EHT", "EHT1L", "EHT1H", "EHT2L", "EHT2H"])
-    addHorizontalLinesToPlot(fig4d)
-    plt.savefig(os.path.join(args.outPath, "figure4d.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure4d.pdf"), dpi=500)
+    # tmp_df3 = tmp_df.groupby(["variable"])["Inducibility"].mean().reset_index()
+    # tmp_df3['Inducibility'] = tmp_df3['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
+    # fig4d = sns.catplot(data=tmp_df3, x="variable", y="Inducibility", kind="bar", order=["No EHT", "EHT1L", "EHT1H", "EHT2L", "EHT2H"])
+    # addHorizontalLinesToPlot(fig4d)
+    # #plt.savefig(os.path.join(args.outPath, "figure4d.png"), dpi=500)
+    # #plt.savefig(os.path.join(args.outPath, "figure4d.pdf"), dpi=500)
 
     tmp_df4 = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df4 = tmp_df4.loc[tmp_df4['variable'] != 'No EHT']
     tmp_df4['Inducibility'] = tmp_df4['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
-    fig4e = sns.catplot(data=tmp_df4, x="variable", y="Inducibility", hue="MI", kind="bar", order=["No EHT", "EHT1L", "EHT1H", "EHT2L", "EHT2H"])
+    fig4e = sns.catplot(data=tmp_df4, x="variable", y="Inducibility", hue="MI", kind="bar", order=["EHT1L", "EHT1H", "EHT2L", "EHT2H"])
     addHorizontalLinesToPlot(fig4e)
-    plt.savefig(os.path.join(args.outPath, "figure4e.png"), dpi=500)
-    plt.savefig(os.path.join(args.outPath, "figure4e.pdf"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4e.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure4e.pdf"), dpi=500)
 
 
-    # check plotly radar for pigs ------------------------------------------------------------------------------------------
+    # The same but UVT is equal to 0
     tmp_df = copy.deepcopy(df_categories)
-    tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 265ms", "s2 280ms", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"])
-    tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
+    tmp_df = tmp_df[["pig", "MI", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"]]
     tmp_df = tmp_df.dropna(how='any')
-    tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"])
+    tmp_df["variable"] = tmp_df["variable"].map(replacement)
+    tmp_df['pig'] = tmp_df['pig'].astype(int)
+
+    tmp_df["value"]    = tmp_df["value"].map(replacement3)
     tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
-    tmp_df['pig'] = tmp_df['pig'].astype(int).astype(str)
 
-    tmp_df = tmp_df.groupby(["pig"])["Inducibility"].mean().reset_index()
-    tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3 
-    tmp_df['Inducibility VT'] = np.ones(tmp_df.shape[0])*1.0
-    tmp_df['Inducibility UVT'] = np.ones(tmp_df.shape[0])*0.33
+    tmp_df1 = tmp_df.groupby(["pig", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df1 = tmp_df1.loc[tmp_df1['variable'] != 'No EHT']
+    tmp_df1['Inducibility'] = tmp_df1['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
+    fig4b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", hue_order=["EHT1L", "EHT1H"])
+    addHorizontalLinesToPlot(fig4b)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure4b_EHT1.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure4b_EHT1.pdf"), dpi=500)
+    fig4b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", hue_order=["EHT2L", "EHT2H"])
+    addHorizontalLinesToPlot(fig4b)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure4b_EHT2.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure4b_EHT2.pdf"), dpi=500)
 
-    tmp_df.loc[len(tmp_df)] = [tmp_df['pig'][0], tmp_df['Inducibility'][0], 1.0, 0.33]
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(
-        r=tmp_df['Inducibility'],
-        theta=tmp_df['pig'],
-        fill='toself',
-        name='Inducibility'
-    ))
-    fig.add_trace(go.Scatterpolar(
-        r=tmp_df['Inducibility UVT'],
-        theta=tmp_df['pig'],
-        mode='lines',
-        line=dict(color='black', dash='dash', shape='spline', smoothing=1),
-        showlegend=True,
-        name='all UVT'
-    ))
-    fig.add_trace(go.Scatterpolar(
-        r=tmp_df['Inducibility VT'],
-        theta=tmp_df['pig'],
-        mode='lines',
-        line=dict(color='black', dash='solid', shape='spline', smoothing=1, width=6),
-        showlegend=True,
-        name='all VT'
-    ))
-    fig.update_layout(
-    polar=dict(
-        radialaxis=dict(
-        visible=True,
-        range=[0, 1]
-        )),
-    showlegend=True
-    )
-
-    # fig.show()
-    fig.write_image(os.path.join(args.outPath, "figure5.png"), width=800, height=600, scale=3) #this saves with that width and height to dpi 300
-    fig.write_image(os.path.join(args.outPath, "figure5.pdf"))
-
-    # check plotly radar for MI, cond, position -----------------------------------------------------
-    tmp_df = copy.deepcopy(df_categories)
-    tmp_df = tmp_df[["MI", "s2 265ms","s2 280ms", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"]]
-    tmp_df = tmp_df.melt(id_vars=["MI"], value_vars=["s2 265ms","s2 280ms", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"])
-    tmp_df["State"] = tmp_df["variable"].apply(createStateColumn)
     tmp_df["Conductivity"] = tmp_df["variable"].apply(createConductivityColumn)
-    tmp_df["EHTPosition"] = tmp_df["variable"].apply(createEHTPositionColumn)
+    tmp_df2 = tmp_df.groupby(["MI", "Conductivity"])["Inducibility"].mean().reset_index()
+    tmp_df2 = tmp_df2.loc[tmp_df2['Conductivity'] != 'No EHT']
+    tmp_df2['Inducibility'] = tmp_df2['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
+    fig4c = sns.catplot(data=tmp_df2, x="MI", y="Inducibility", hue="Conductivity", kind="bar", hue_order=["Low EHTc", "High EHTc"], order=["LCx", "LAD"])
+    addHorizontalLinesToPlot(fig4c)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure4c.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure4c.pdf"), dpi=500)
+
+
+    # # check plotly radar for pigs ------------------------------------------------------------------------------------------
+    # tmp_df = copy.deepcopy(df_categories)
+    # tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 265ms", "s2 280ms", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"])
+    # tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
+    # tmp_df = tmp_df.dropna(how='any')
+    # tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    # tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    # tmp_df['pig'] = tmp_df['pig'].astype(int).astype(str)
+
+    # tmp_df = tmp_df.groupby(["pig"])["Inducibility"].mean().reset_index()
+    # tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3 
+    # tmp_df['Inducibility VT'] = np.ones(tmp_df.shape[0])*1.0
+    # tmp_df['Inducibility UVT'] = np.ones(tmp_df.shape[0])*0.33
+
+    # tmp_df.loc[len(tmp_df)] = [tmp_df['pig'][0], tmp_df['Inducibility'][0], 1.0, 0.33]
+
+    # fig = go.Figure()
+    # fig.add_trace(go.Scatterpolar(
+    #     r=tmp_df['Inducibility'],
+    #     theta=tmp_df['pig'],
+    #     fill='toself',
+    #     name='Inducibility'
+    # ))
+    # fig.add_trace(go.Scatterpolar(
+    #     r=tmp_df['Inducibility UVT'],
+    #     theta=tmp_df['pig'],
+    #     mode='lines',
+    #     line=dict(color='black', dash='dash', shape='spline', smoothing=1),
+    #     showlegend=True,
+    #     name='all UVT'
+    # ))
+    # fig.add_trace(go.Scatterpolar(
+    #     r=tmp_df['Inducibility VT'],
+    #     theta=tmp_df['pig'],
+    #     mode='lines',
+    #     line=dict(color='black', dash='solid', shape='spline', smoothing=1, width=6),
+    #     showlegend=True,
+    #     name='all VT'
+    # ))
+    # fig.update_layout(
+    # polar=dict(
+    #     radialaxis=dict(
+    #     visible=True,
+    #     range=[0, 1]
+    #     )),
+    # showlegend=True
+    # )
+
+    # # fig.show()
+    # fig.write_image(os.path.join(args.outPath, "figure5.png"), width=800, height=600, scale=3) #this saves with that width and height to dpi 300
+    # fig.write_image(os.path.join(args.outPath, "figure5.pdf"))
+
+    # # check plotly radar for MI, cond, position -----------------------------------------------------
+    # tmp_df = copy.deepcopy(df_categories)
+    # tmp_df = tmp_df[["MI", "s2 265ms","s2 280ms", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"]]
+    # tmp_df = tmp_df.melt(id_vars=["MI"], value_vars=["s2 265ms","s2 280ms", "s2 295ms", "EHT1L s2 295ms", "EHT2L s2 295ms", "EHT1H s2 295ms", "EHT2H s2 295ms"])
+    # tmp_df["State"] = tmp_df["variable"].apply(createStateColumn)
+    # tmp_df["Conductivity"] = tmp_df["variable"].apply(createConductivityColumn)
+    # tmp_df["EHTPosition"] = tmp_df["variable"].apply(createEHTPositionColumn)
+    # tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    # tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    # tmp_df = tmp_df.dropna(how='any')
+
+
+    # # Make the calculations for radar plot and create the dataframe
+    # df_mi = tmp_df.groupby(["MI"])["Inducibility"].mean()
+    # df_state = tmp_df.groupby(["State"])["Inducibility"].mean()
+    # df_conductivity = tmp_df.groupby(["Conductivity"])["Inducibility"].mean()
+    # df_eht_position = tmp_df.groupby(["EHTPosition"])["Inducibility"].mean()
+
+    # combined = pd.concat([df_mi,df_conductivity,df_eht_position,df_state])
+    # combined = combined.drop('No EHT')
+    # tmp_df = pd.DataFrame(combined / 3)
+    # tmp_df['Inducibility VT'] = np.ones(tmp_df.shape[0])*1.0
+    # tmp_df['Inducibility UVT'] = np.ones(tmp_df.shape[0])*0.33
+
+    # # Add the first row to the end of the dataframe for closing the radar plot
+    # tmp_df = pd.concat([tmp_df, tmp_df.loc[[tmp_df.index[0]]]])
+
+    # fig = go.Figure()
+    # fig.add_trace(go.Scatterpolar(
+    #     r=tmp_df['Inducibility'],
+    #     theta=tmp_df.index,
+    #     fill='toself',
+    #     name='Inducibility'
+    # ))
+    # fig.add_trace(go.Scatterpolar(
+    #     r=tmp_df['Inducibility UVT'],
+    #     theta=tmp_df.index,
+    #     mode='lines',
+    #     line=dict(color='black', dash='dash', shape='spline', smoothing=1),
+    #     showlegend=True,
+    #     name='all UVT'
+    # ))
+    # fig.add_trace(go.Scatterpolar(
+    #     r=tmp_df['Inducibility VT'],
+    #     theta=tmp_df.index,
+    #     mode='lines',
+    #     line=dict(color='black', dash='solid', shape='spline', smoothing=1, width=6),
+    #     showlegend=True,
+    #     name='all VT'
+    # ))
+    # fig.update_layout(
+    # polar=dict(
+    #     radialaxis=dict(
+    #     visible=True,
+    #     range=[0, 1]
+    #     )),
+    # showlegend=True
+    # )
+
+    # # fig.show()
+    # fig.write_image(os.path.join(args.outPath, "figure6.png"), width=800, height=600, scale=3) #this saves with that width and height to dpi 300
+    # fig.write_image(os.path.join(args.outPath, "figure6.pdf"))
+
+    # fig.update_layout(
+    # polar=dict(
+    #     radialaxis=dict(
+    #     visible=True,
+    #     range=[0, 0.5]
+    #     )),
+    # showlegend=True
+    # )
+
+    # # fig.show()
+    # fig.write_image(os.path.join(args.outPath, "figure6b.png"), width=800, height=600, scale=3) #this saves with that width and height to dpi 300
+    # fig.write_image(os.path.join(args.outPath, "figure6b.pdf"))
+
+
+    # We add for seeing somethig in the different ST delays used 
+    tmp_df = copy.deepcopy(df_categories)
+    tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 250ms", "s2 265ms", "s2 280ms", "s2 295ms"]) # we put all together and drop the Not captured values
+    tmp_df = tmp_df.dropna(how='any')
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 250ms", "S2-250")
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 265ms", "S2-265")
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 280ms", "S2-280")
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 295ms", "S2-295")
+
     tmp_df["value"]    = tmp_df["value"].map(replacement2)
     tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    tmp_df = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
+
+    fig7 = sns.catplot(data=tmp_df, x="variable", y="Inducibility", hue="MI", kind="bar", hue_order=["LCx", "LAD"])
+    addHorizontalLinesToPlot(fig7)
+    #plt.savefig(os.path.join(args.outPath, "figure7.png"), dpi=500)
+    #plt.savefig(os.path.join(args.outPath, "figure7.pdf"), dpi=500)
+
+    # The same but UVT is equal to 0
+    tmp_df = copy.deepcopy(df_categories)
+    tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 250ms", "s2 265ms", "s2 280ms", "s2 295ms"]) # we put all together and drop the Not captured values
     tmp_df = tmp_df.dropna(how='any')
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 250ms", "S2-250")
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 265ms", "S2-265")
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 280ms", "S2-280")
+    tmp_df["variable"] = tmp_df["variable"].replace("s2 295ms", "S2-295")
 
+    tmp_df["value"]    = tmp_df["value"].map(replacement3)
+    tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    tmp_df = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
 
-    # Make the calculations for radar plot and create the dataframe
-    df_mi = tmp_df.groupby(["MI"])["Inducibility"].mean()
-    df_state = tmp_df.groupby(["State"])["Inducibility"].mean()
-    df_conductivity = tmp_df.groupby(["Conductivity"])["Inducibility"].mean()
-    df_eht_position = tmp_df.groupby(["EHTPosition"])["Inducibility"].mean()
-
-    combined = pd.concat([df_mi,df_conductivity,df_eht_position,df_state])
-    combined = combined.drop('No EHT')
-    tmp_df = pd.DataFrame(combined / 3)
-    tmp_df['Inducibility VT'] = np.ones(tmp_df.shape[0])*1.0
-    tmp_df['Inducibility UVT'] = np.ones(tmp_df.shape[0])*0.33
-
-    # Add the first row to the end of the dataframe for closing the radar plot
-    tmp_df = pd.concat([tmp_df, tmp_df.loc[[tmp_df.index[0]]]])
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(
-        r=tmp_df['Inducibility'],
-        theta=tmp_df.index,
-        fill='toself',
-        name='Inducibility'
-    ))
-    fig.add_trace(go.Scatterpolar(
-        r=tmp_df['Inducibility UVT'],
-        theta=tmp_df.index,
-        mode='lines',
-        line=dict(color='black', dash='dash', shape='spline', smoothing=1),
-        showlegend=True,
-        name='all UVT'
-    ))
-    fig.add_trace(go.Scatterpolar(
-        r=tmp_df['Inducibility VT'],
-        theta=tmp_df.index,
-        mode='lines',
-        line=dict(color='black', dash='solid', shape='spline', smoothing=1, width=6),
-        showlegend=True,
-        name='all VT'
-    ))
-    fig.update_layout(
-    polar=dict(
-        radialaxis=dict(
-        visible=True,
-        range=[0, 1]
-        )),
-    showlegend=True
-    )
-
-    # fig.show()
-    fig.write_image(os.path.join(args.outPath, "figure6.png"), width=800, height=600, scale=3) #this saves with that width and height to dpi 300
-    fig.write_image(os.path.join(args.outPath, "figure6.pdf"))
-
-    fig.update_layout(
-    polar=dict(
-        radialaxis=dict(
-        visible=True,
-        range=[0, 0.5]
-        )),
-    showlegend=True
-    )
-
-    # fig.show()
-    fig.write_image(os.path.join(args.outPath, "figure6b.png"), width=800, height=600, scale=3) #this saves with that width and height to dpi 300
-    fig.write_image(os.path.join(args.outPath, "figure6b.pdf"))
-
-
-
-
+    fig7 = sns.catplot(data=tmp_df, x="variable", y="Inducibility", hue="MI", kind="bar", hue_order=["LCx", "LAD"])
+    addHorizontalLinesToPlot(fig7)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure7.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure7.pdf"), dpi=500)
 
 
 

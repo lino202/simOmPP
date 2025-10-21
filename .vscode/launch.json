@@ -324,18 +324,22 @@
 
 
         {
-            "name": "getOMVideos",
+            "name": "getOMVideos2",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/getOMVideos.py",
+            "program": "${workspaceFolder}/getOMVideos2.py",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--videoPath",           "E:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/50/FileTag050_video_filtered.mat",
-                "--roiPath",             "E:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/50/roi.txt",
-                "--threshold",           "0.96",
-                "--outPath",             "E:/Data/OM_PigHeart/MI/20211112_PigInfarcted3/50",
-                "--fps",                 "30"    //power point likes 30 fps
+                "--videoPath",           "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/36/FileTag036_video_filtered.mat",
+                "--roiPath",             "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/36/roi.txt",
+                "--threshold",           "0.0",
+                "--sampleStart",         "1000",
+                "--sampleEnd",           "10000",
+                "--sampleStartImages",   "1050",
+                "--sampleEndImages",     "1250",
+                "--outPath",             "G:/Data/OM_PigHeart/MI/20211111_PigInfarcted2/36",
+                "--fps",                 "30"
             ],
         },
 
@@ -1282,8 +1286,10 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--filePath",           "D:/Paper3/Models/invivo/mi/la/sample10/mesh_he.vtk",
-                "--outPath",            "D:/Paper3/Models/invivo/mi/la/sample10/edge_length_hist.pdf",
+                "--filePath",           "D:/Paper4/Models/sample12/EHT1/mesh/tetmesh.vtk",
+                "--outPath",            "D:/Paper4/Models/sample12/EHT1/mesh/tetmesh_histedges.pdf",
+                "--numModes",           "3",
+                "--resExcel",           "D:/Paper4/Models/results_edgelengths.xlsx",
             ],
         },
 
@@ -1440,9 +1446,9 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--videoPath",     "D:/Paper4/Simulations/invivo/mi/sample10/S2_280/results_mi_CL600_1800ms_stimAHA9_S2_280_total/video_fps5ms.mp4",
-                "--videoOutPath",  "C:/Maxi/Documents/PhD_Main/JournalClub/data/sample10_s2280_AHA9_30fps.mp4",
-                "--fps",           "50"
+                "--videoPath",     "D:/Paper4/Simulations/invivo/mi_EHT2/sample4/S2_295/results_mi_CL600_1800ms_stimAHA4_S2_295/video_fps5ms.mp4",
+                "--videoOutPath",  "D:/Paper4/Simulations/invivo/mi_EHT2/sample4/S2_295/results_mi_CL600_1800ms_stimAHA4_S2_295/video_fps5ms_10fps.mp4",
+                "--fps",           "10"
             ],
         },
 
@@ -1567,6 +1573,95 @@
 
         
         //  ---------------------------------------------END Paper4 -----------------------------
+
+
+                {
+            "name": "plotVmFromElectraCell_paper4",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmFromElectraCell.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePaths", 
+                "E:/Paper3/Cell_sims/final/he/Stewart_no_stim/stewart_rewritten_1000s_nostim_dt0001_Vm.mat",
+                
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_apex_endo_600CL_1200s_Vm.mat",
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_apex_epi_600CL_1200s_Vm.mat",
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_apex_mid_600CL_1200s_Vm.mat",
+
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_base_endo_600CL_1200s_Vm.mat",
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_base_epi_600CL_1200s_Vm.mat",
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_base_mid_600CL_1200s_Vm.mat",
+
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_mid_endo_600CL_1200s_Vm.mat",
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_mid_epi_600CL_1200s_Vm.mat",
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_mid_mid_600CL_1200s_Vm.mat",
+
+                "E:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_bz_gk1_289_600CL_1200s_Vm.mat",
+                // "E:/Paper3/Cell_sims/final/mi/CL1000/gaur_bz_gk1_289_1000CL_2000s_Vm.mat",
+                
+
+                "D:/Paper4/Cell_sims/paci2020_implementation/paci2020_xf_rush_dt0001_stim55e7_dur5_start10_600CL_1200s_Vm.mat",
+                
+                
+                "--starts",    //en ms
+                "998559",
+
+                "1199400",
+                "1199400",
+                "1199400",
+                
+                "1199400",
+                "1199400",
+                "1199400",
+
+                "1199400",
+                "1199400",
+                "1199400",
+
+                "1199400",
+                // "1999000",
+                
+                "1199400",
+                
+
+                "--ends",    //en ms
+                "999159",
+
+                "1200000",
+                "1200000",
+                "1200000",
+
+                "1200000",
+                "1200000",
+                "1200000",
+                
+                "1200000",
+                "1200000",
+                "1200000",
+
+                "1200000",
+                // "1999600",
+
+                "1200000",
+
+                "--dt", "0.01",
+                "--apdType", "90",
+
+                "--names", 
+                "CS",
+                "Apex Endo", "Apex Epi", "Apex Mid",
+                "Base Endo", "Base Epi", "Base Mid",
+                "Mid Endo",  "Mid Epi",  "Mid Mid",
+                "BZ",
+                // "BZ 1000CL",
+                "EHT",  
+
+
+                "--outPath",  "D:/Paper4/Cell_sims/all_cells.png"
+            ],
+        },
 
 
     ]

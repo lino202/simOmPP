@@ -76,7 +76,13 @@ Maps with CV magnitude per pixel as well as histograms and boxplots are generate
 * outPath                = path to the folder for saving images, if 0 images are plotted and not saved.
 * outType                = png or pdf
 
+### Notes
 
+Videos create with openCV are not well reproduce in power point so we need to change its codec and format using ffmpeg with the following command
+
+   ```
+   ffmpeg -i video.mp4 -vcodec libx264 -pix_fmt yuv420p -movflags +faststart video_ppt.mp4
+   ```
 
 <!-- CONTRIBUTING -->
 ### Contributing

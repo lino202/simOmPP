@@ -1,3 +1,6 @@
 {
-    "python.pythonPath": "C:\\Users\\usuario\\anaconda3\\envs\\simOmPP2\\python.exe"
+    "python.pythonPath": "C:\\Users\\usuario\\anaconda3\\envs\\simOmPP2\\python.exe",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python-envs.pythonProjects": []
 }

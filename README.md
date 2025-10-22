@@ -20,7 +20,7 @@
 
 ### 🚀 Features
 
-- Compute **APDs** from **Electra simulation results** (`.ens` files) or **Optical Mapping** filtered signals (`.mat`).  
+- Compute **APDs** from **[ELECTRA](https://github.com/lino202/ELECTRA) simulation results** (`.ens` files) or **Optical Mapping** filtered signals (`.mat`).  
 - Generate plots of **ATs**, **APDs**, **RT gradients** and **CVs** from optical mapping data and simulations.  
 - Calculation of the pseudo-ECG as reported in [10.3389/fphys.2019.01103](https://doi.org/10.3389/fphys.2019.01103)
 - Export **VTK** files for visualization in [ParaView](https://www.paraview.org/) (RTs, ATs, CVs, and APDs).  
@@ -49,7 +49,10 @@
 
 ## 🧮 Usage
 
-Each script accepts a set of command-line arguments. You can check the [`.vscode/launch.json`](.vscode/launch.json) file for examples of how to run scripts and what arguments they require. Also, you can check available options by running:
+Documentation and code comments are currently limited, as this repository was originally developed for internal research purposes within the [BSICoS group](https://bsicos.i3a.es/es/). 
+Usability improvements and better documentation are planned — and **community contributions are highly appreciated**!
+
+In general, each script accepts a set of command-line arguments. You can check the [`.vscode/launch.json`](.vscode/launch.json) file for examples of how to run scripts and what arguments they require. Also, you can check available options by running:
 ```sh
 python /path-to-script/script.py --help
 ```

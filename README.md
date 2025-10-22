@@ -1,6 +1,6 @@
 # simOMPP
 
-**simOMPP** stands for **Simulation – Optical Mapping Post-Processing**. This repository contains a collection of Python scripts for post-processing **Electra simulation results** and **optical mapping** experiments. Moreover, plotting scripts for creating graphs for publication are integrated.
+**simOMPP** stands for **Simulation – Optical Mapping Post-Processing**. This repository contains a collection of Python scripts for post-processing **[ELECTRA](https://github.com/lino202/ELECTRA) simulation results** and **optical mapping** experiments. Moreover, plotting scripts for creating graphs for publication are integrated.
 
 ---
 

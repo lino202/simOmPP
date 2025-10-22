@@ -22,6 +22,7 @@
 
 - Compute **APDs** from **Electra simulation results** (`.ens` files) or **Optical Mapping** filtered signals (`.mat`).  
 - Generate plots of **ATs**, **APDs**, **RT gradients** and **CVs** from optical mapping data and simulations.  
+- Calculation of the pseudo-ECG as reported in [10.3389/fphys.2019.01103](https://doi.org/10.3389/fphys.2019.01103)
 - Export **VTK** files for visualization in [ParaView](https://www.paraview.org/) (RTs, ATs, CVs, and APDs).  
 - Interpolate scalar data (e.g., ATs) over a mesh.  
 - Include utilities for post-processing and visualization of electrophysiological data. For example, create and modify simulation videos from [ParaView](https://www.paraview.org/).

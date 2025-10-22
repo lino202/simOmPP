@@ -56,7 +56,7 @@ In general, each script accepts a set of command-line arguments. You can check t
 ```sh
 python /path-to-script/script.py --help
 ```
-Read the code carefully to understand argument details — some scripts including advanced functionality described below.
+Read the code carefully to understand argument details — some complex scripts are described below.
 
 ---
 
@@ -84,9 +84,7 @@ The output includes:
 - Vector field plots of CV direction (HSV color-coded versor maps)  
 - Exported images in `.png` or `.pdf` formats  
 
----
-
-### 🧰 CV Script Main Arguments
+CV script main arguments:
 
 | Argument | Description |
 |-----------|--------------|
@@ -106,6 +104,7 @@ The output includes:
 
 
 For more information regarding CV-related or other scripts please read the code carefully.
+
 ---
 
 ### 🎥 Notes

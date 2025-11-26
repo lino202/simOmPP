@@ -1042,20 +1042,17 @@
             "request": "launch",
             "program": "${workspaceFolder}/pECG/getInput4PECG.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
+            "justMyCode": false,
             "args": [
-                "--meshPath",          "D:/Paper3/Models/invivo/mi/cx/sample6_x/mesh_he.vtk",
-                // "--transMatrix",       "D:/Paper3/Models/invivo/mi/cx/sample6_x/matrix_to_sampleX.txt",
-                "--saveAlignedPath",   "D:/Paper3/Simulations/invivo/mi/cx/sample6_x/mesh_aligned_sampleX.vtk",
+                "--meshPath",           "G:/Data/RM/Erica/DTI126V2/myresults/mesh_mi_noscar.vtk",
+                "--transMatrix",        "G:/Data/RM/Erica/DTI126V2/myresults/ecg/trans_matrix_to_anaminchole.txt",
+                "--saveAlignedPath",    "G:/Data/RM/Erica/DTI126V2/myresults/ecg/mesh_minoscar_aligned_anaminchole.vtk",
+                "--saveElectrodesPath", "G:/Data/RM/Erica/DTI126V2/myresults/ecg/electrodes_positions_mm.mat",
                 // "--addVs",
                 // "--resPath",           "D:/Paper3/Simulations/invivo/he/sample1/results_fib_standard_cs_endo_tentusscher/tissue",
                 // "--timeStart",         "08000",
                 // "--timeEnd",           "10400",
-                "--outPath",           "D:/Paper3/Simulations/invivo/mi/cx/sample6_x/mesh_aligned_sampleX.mat",
-
- 
-
-
+                "--outPath",            "G:/Data/RM/Erica/DTI126V2/myresults/ecg/mesh_minoscar_aligned_anaminchole.mat",
             ],
         },
 

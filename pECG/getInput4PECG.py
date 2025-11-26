@@ -6,30 +6,45 @@ import os
 from tqdm import tqdm
 # import h5py
 import hdf5storage
+import copy
 
 parser = argparse.ArgumentParser(description="Options")
-parser.add_argument('--meshPath' ,        type=str, required=True, help='path to mesh for obtaining the geometry (TODO read .geo)')
-parser.add_argument('--transMatrix',      type=str, help='path to transformation matrix in .txt file got from meshlab maybe (ICP alignment)')
-parser.add_argument('--saveAlignedPath',  type=str, help='save a vtk file for seeing the aligned mesh, give the file path')
-parser.add_argument('--addVs'    ,        action='store_true', help='select if you want ot save Vs or not in H')
-parser.add_argument('--resPath'  ,        type=str, help='path to electra ensight results')
-parser.add_argument('--timeStart',        type=str, help='complete time in the ens file to start with')
-parser.add_argument('--timeEnd'  ,        type=str, help='complete time in the ens file to end with')
-parser.add_argument('--outPath'  ,        type=str, required=True, help='path of output with matlab extension')
+parser.add_argument('--meshPath' ,           type=str, required=True, help='path to mesh for obtaining the geometry (TODO read .geo)')
+parser.add_argument('--transMatrix',         type=str, help='path to transformation matrix in .txt file got from meshlab maybe (ICP alignment)')
+parser.add_argument('--saveAlignedPath',     type=str, help='save a vtk file for seeing the aligned mesh, give the file path')
+parser.add_argument('--saveElectrodesPath',  type=str, help='save the electrodes positions after alignment in the vtk output, give the file path')
+parser.add_argument('--addVs'    ,           action='store_true', help='select if you want ot save Vs or not in H')
+parser.add_argument('--resPath'  ,           type=str, help='path to electra ensight results')
+parser.add_argument('--timeStart',           type=str, help='complete time in the ens file to start with')
+parser.add_argument('--timeEnd'  ,           type=str, help='complete time in the ens file to end with')
+parser.add_argument('--outPath'  ,           type=str, required=True, help='path of output with matlab extension')
 args = parser.parse_args()
 
 #Get Geometry
 mesh   = meshio.read(args.meshPath)
 points = mesh.points
 cells  = mesh.cells_dict["tetra"]
-H = { "xyz": points, "tri": cells+1, "celltype": 10}
+H = { 'xyz': points, 'tri': cells+1, 'celltype': 10}
 
 #Transform mesh
 if args.transMatrix != None:
     transMatrix = np.loadtxt(args.transMatrix)
     H["xyz"] = np.matmul(np.concatenate((points, np.ones((points.shape[0],1))), axis=1) , transMatrix.T)[:,:3]
     if hasattr(args, 'saveAlignedPath'):
-        meshAligned = meshio.Mesh(H["xyz"], mesh.cells)
+        new_points = copy.deepcopy(H["xyz"])
+        point_data = {}
+        if hasattr(args, 'saveElectrodesPath'):
+            new_points = np.vstack((new_points, np.zeros((10,3))))  #reserve space for electrodes
+            electrodes = hdf5storage.loadmat(args.saveElectrodesPath)
+            for i, electrode_name in enumerate(electrodes['electrodes_positions'][0].dtype.names):
+                electrode_pos = electrodes['electrodes_positions'][0][0][i]
+                new_points[i+points.shape[0],:] = electrode_pos
+        
+                tmp = np.zeros((new_points.shape[0]))
+                tmp[i+points.shape[0]] = 1
+                point_data[electrode_name] = tmp.astype(np.int64)
+
+        meshAligned = meshio.Mesh(new_points, mesh.cells, point_data=point_data)
         meshAligned.write(args.saveAlignedPath)
 
 #Get Results
@@ -58,5 +73,8 @@ if args.addVs:
 
 # It seems matlab altered the h5 format with some specific metadata so we are using the following package
 # for writing the data
-# https://github.com/frejanordsiek/hdf5storage
-hdf5storage.savemat( args.outPath, {'H': H}, format=7.3, matlab_compatible=True, compress=False )
+# https://github.com/frejanordsiek/hdf5storage (ATTENTION new numpy versions might have issues with this package see https://github.com/lino202/HeartModelling/issues/10
+hdf5storage.savemat(args.outPath, {'H': H}, format=7.3, matlab_compatible=True, compress=False)
+
+
+

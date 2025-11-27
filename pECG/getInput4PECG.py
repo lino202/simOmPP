@@ -73,7 +73,7 @@ if args.addVs:
 
 # It seems matlab altered the h5 format with some specific metadata so we are using the following package
 # for writing the data
-# https://github.com/frejanordsiek/hdf5storage (ATTENTION new numpy versions might have issues with this package see https://github.com/lino202/HeartModelling/issues/10
+# https://github.com/frejanordsiek/hdf5storage (ATTENTION new numpy versions might have issues with this package see https://github.com/lino202/simOmPP/issues/4
 hdf5storage.savemat(args.outPath, {'H': H}, format=7.3, matlab_compatible=True, compress=False)
 
 

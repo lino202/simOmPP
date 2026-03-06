@@ -65,6 +65,7 @@ def main():
         patch_flag = 0
     if patch_flag: idxpatch = mesh.point_sets["patch_nodes"]
 
+    # Get border zone idxs, old style all bz_nodes in one set
     if "bz_nodes" in mesh.point_sets.keys():
         if mesh.point_sets["bz_nodes"].size!=0:
             bz_flag = 1 
@@ -74,6 +75,17 @@ def main():
         bz_flag = 0
     if bz_flag: idxbz = mesh.point_sets["bz_nodes"]
 
+    # When the Bz is divided into bz_endo, bz_mid, bz_epi or whatever
+    if not bz_flag:
+        bz_keys = [key for key in mesh.point_sets.keys() if "bz_" in key]
+        if len(bz_keys)>0:
+            bz_flag = 1
+            idxbz = []
+            for key in bz_keys:
+                idxbz = np.append(idxbz, mesh.point_sets[key])
+            idxbz = np.unique(idxbz)
+
+    
     # We compute the memory reqs for the Vs most memory-wise heavy variable
     # but more memory can be consumed! even if this reqMem is lower than the one we set
     totNodes = mesh.points.shape[0]

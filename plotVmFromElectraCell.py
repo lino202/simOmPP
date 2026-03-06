@@ -12,36 +12,50 @@ def main():
     parser.add_argument('--starts',     type=int, nargs='+', required=True, help='')
     parser.add_argument('--ends',       type=int, nargs='+', required=True, help='')
     parser.add_argument('--names',      type=str, nargs='+', required=True, help='')
-    parser.add_argument('--dt',         type=float, required=True, help='')
+    parser.add_argument('--dt',         type=float, nargs='+', required=True, help='')
     parser.add_argument('--apdType',    type=int, required=True, help='')
     parser.add_argument('--outPath',    type=str, required=True, help='')
     args = parser.parse_args()
 
-    vms = np.zeros((int((args.ends[0] - args.starts[0] ) / args.dt), len(args.filePaths)))
+    cases = {}
     for i, filePath in enumerate(args.filePaths):
-        # with open(filePath, 'r') as file:
-        #     data = np.loadtxt(file)
-        #     vms[:,i] = data[int(args.starts[i]/args.dt):int(args.ends[i]/args.dt), 1]
-        with h5py.File(filePath, "r") as f:
-            vm = np.asarray(f['V'])   # f['time'] can be also obtained
-            vm = np.squeeze(vm)
-            vms[:,i] = vm[int(args.starts[i]/args.dt):int(args.ends[i]/args.dt)]
+        cases[filePath] = {}
+        if '.mat' in filePath:   # ElectraCell results can be saved in .mat format
+            with h5py.File(filePath, "r") as f:
+                vm = np.asarray(f['V'])   # f['time'] can be also obtained
+                vm = np.squeeze(vm)
+                vms = vm[int(args.starts[i]/args.dt[i]):int(args.ends[i]/args.dt[i])]
+        elif '.txt' in filePath:  # ElectraCell results can be saved in .txt format
+            with open(filePath, 'r') as file:
+                data = np.loadtxt(file)
+                vms = data[int(args.starts[i]/args.dt[i]):int(args.ends[i]/args.dt[i]), 1]
+        elif '.dat' in filePath: # OpenCARP results can be saved in .dat format
+            with open(filePath, 'r') as file:
+                data = np.loadtxt(file)
+                vms = data[int(args.starts[i]/args.dt[i]):int(args.ends[i]/args.dt[i]), -1]   # opencarp results must be save every 1 ms and the Vm is the last column
+        else:
+            raise ValueError("Unsupported file format: {}".format(filePath))
+        
 
-    time = np.arange(args.starts[0]/args.dt, args.ends[0]/args.dt, 1)
-    time = (time - args.starts[0]/args.dt) * args.dt
+        time = np.arange(args.starts[i]/args.dt[i], args.ends[i]/args.dt[i], 1)
+        time = (time - args.starts[i]/args.dt[i]) * args.dt[i]
 
-    apds = calcAPDXFromV(vms.T, args.dt, args.apdType)
-    for i in range(vms.shape[1]):
-        args.names[i] = "{0}, APD{1} {2:.2f}".format(args.names[i], args.apdType, apds[i])
-        print(args.names[i])
+        # Calculate APDX
+        apd = calcAPDXFromV(vms[:, np.newaxis].T, args.dt[i], args.apdType)[0]
+        print("APD{0} of {1} is {2:.2f} ms".format(args.apdType, args.names[i], apd))
+        args.names[i] = "{0}, APD{1}: {2:.2f}".format(args.names[i], args.apdType, apd)
+        
+        # Save Vm and time for plotting
+        cases[filePath] = {"vms": vms, "time": time, "apd": apd}
+
 
     font = {'family' : "Times New Roman",
         'weight' : 'normal',
         'size'   : 10}
     plt.rc('font', **font)
     plt.figure()
-    for i in range(vms.shape[1]):
-        plt.plot(time, vms[:,i], label=args.names[i])
+    for i, key in enumerate(cases.keys()):
+        plt.plot(cases[key]["time"], cases[key]["vms"], label=args.names[i])
     plt.legend(loc="upper right")
     plt.ylabel("Vm (mV)")
     plt.xlabel("time (ms)")

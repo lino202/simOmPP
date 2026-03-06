@@ -69,5 +69,3 @@ lines = ["-","-","--","--",":",":","-.","-.","-","-"];
 
 function_processSampleECG_NoExp(root_path, experiments_names, result_names, dt_sim, pecg_name, results_folder_name, colors, lines);
 
-
-

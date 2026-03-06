@@ -25,6 +25,7 @@ tot_time_ms       = 500;
 qrs_width = 50;
 t_width = 100;
 linewidth = 2;
+qrs_plus_t_width = 400;
 
 n_experiments     = size(result_names,2);
 fs_sim            = 1/dt_sim; % in Hz;
@@ -270,8 +271,6 @@ for i=1:nLeads
 
 end
 
-
-
 %% Cut QRS and T, save and plot
 % We can only use fs_exp here because the simulations were sampled at a
 % higher freq than the experiment
@@ -284,6 +283,75 @@ t_exp   = zeros(round(t_width*2*(fs_exp/1000)+1),nLeads);
 qrs_time = 0:1/fs_exp*1000:qrs_width*2;
 t_time = 0:1/fs_exp*1000:t_width*2;
 
+
+%% Review - before cutting we plot the entire QRS - T sim and exp together
+
+signal_sim = zeros(round(qrs_plus_t_width*(fs_sim/1000))+1, nLeads, n_experiments);
+signal_time_sim = 0:1/fs_sim*1000:qrs_plus_t_width;
+
+signal_exp = zeros(round(qrs_plus_t_width*(fs_exp/1000))+1, nLeads);
+signal_time_exp = 0:1/fs_exp*1000:qrs_plus_t_width;
+
+fig=figure;
+for i=1:nLeads
+    subplot(4,3,i);
+    
+    % Experimental
+    median_qrs_loc_exp = round(median(exp_qrs_locs(1,:,2)));
+    signal_exp(:,i) = median_beats(median_qrs_loc_exp-round(qrs_width*(fs_exp/1000)):median_qrs_loc_exp-round(qrs_width*(fs_exp/1000))+round(qrs_plus_t_width*(fs_exp/1000)),i);
+
+    for j=1:n_experiments
+        if alignment == 2
+            median_qrs_loc_sim = round(median(sim_qrs_locs(j,:,2)));
+        else
+            median_qrs_loc_sim = sim_qrs_locs(j,i,2);
+        end
+
+        % We only use alignment 2 so for now alignment 1 is not implemented
+%         if median_qrs_loc_sim - round(qrs_width*(fs_sim/1000)) < 0
+%             samples_to_add = abs(median_qrs_loc_sim-round(qrs_width*(fs_sim/1000)));
+%             tmp_sim = [ones(1,samples_to_add)*pECG_tot_ecgs(1,i,j) pECG_tot_ecgs(1:round(qrs_width*2*(fs_sim/1000))-samples_to_add+1,i,j)'];
+%         elseif median_qrs_loc_sim - round(qrs_width*(fs_sim/1000)) == 0
+%             tmp_sim = pECG_tot_ecgs(median_qrs_loc_sim-round(qrs_width*(fs_sim/1000))+1:median_qrs_loc_sim+round(qrs_width*(fs_sim/1000)+1),i,j);
+%         else
+%             tmp_sim = pECG_tot_ecgs(median_qrs_loc_sim-round(qrs_width*(fs_sim/1000)):median_qrs_loc_sim+round(qrs_width*(fs_sim/1000)),i,j);
+%         end
+        
+        signal_sim(:,i,j) = pECG_tot_ecgs(median_qrs_loc_sim-round(qrs_width*(fs_sim/1000)):median_qrs_loc_sim-round(qrs_width*(fs_sim/1000))+round(qrs_plus_t_width*(fs_sim/1000)),i,j);
+
+%         if alignment == 1
+%             % Align with xcorr for having the max correlation
+%             tmp_sim = qrs_sim(:,i,j);
+%             [corrs, lags]= xcorr(qrs_exp(:,i), tmp_sim, 'normalized');
+%             [~,idx] = max(abs(corrs));
+%             delay = lags(idx);
+% 
+%             % we checked with circshift this is ok
+%             if delay<0
+%                 qrs_sim(:,i,j) = [tmp_sim(-delay+1:end); ones(-delay,1)*tmp_sim(end)]; % add one as matlab uses not 0 index
+%             else
+%                 qrs_sim(:,i,j) = [ones(delay,1)*tmp_sim(1); tmp_sim(1:end-(delay))];
+%             end
+%         end
+
+
+        
+        plot(signal_time_sim, signal_sim(:,i,j), 'LineWidth',linewidth)
+        hold on
+    end
+    
+    plot(signal_time_exp, signal_exp(:,i), 'k--', 'LineWidth',linewidth)
+    hold on
+    legend(experiments_names,'FontSize',font_size-4, 'Location', 'bestoutside', 'Interpreter','latex')
+    title(ECG_headers{i}, 'FontSize',font_size), xlim tight, xlabel('time (ms)', 'FontSize',font_size),ylabel('norm V (a.u.)','FontSize',font_size)
+
+end
+set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
+exportgraphics(gcf,append(ecg_path_results, 'complete_final_filtered_', num2str(cutoff), '.pdf'),'Resolution',400);
+exportgraphics(gcf,append(ecg_path_results, 'complete_final_filtered_', num2str(cutoff), '.png'),'Resolution',400);
+
+
+%% 
 
 % QRS
 fig=figure;
@@ -438,6 +506,9 @@ end
         
 writecell(tot_resuls_4_excel, excel_file);
 
-save(append(ecg_path_results,'results.mat'), 'qrs_sim', 't_sim', 'qrs_exp', 't_exp', 'qrs_time', 't_time', 'pECG_tot_ecgs', 'pECG_tot_time')
+
+
+save(append(ecg_path_results,'results.mat'), 'qrs_sim', 't_sim', 'qrs_exp', 't_exp', 'qrs_time', 't_time', 'pECG_tot_ecgs', 'pECG_tot_time', ...
+                                        'signal_time_sim', 'signal_time_exp', 'signal_sim', 'signal_exp');
 end
 

@@ -479,8 +479,73 @@ def main():
 
 
     # We add for seeing somethig in the different ST delays used 
+    # tmp_df = copy.deepcopy(df_categories)
+    # tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 250ms", "s2 265ms", "s2 280ms", "s2 295ms"]) # we put all together and drop the Not captured values
+    # tmp_df = tmp_df.dropna(how='any')
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 250ms", "S2-250")
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 265ms", "S2-265")
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 280ms", "S2-280")
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 295ms", "S2-295")
+
+    # tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    # tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    # tmp_df = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    # tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
+
+    # fig7 = sns.catplot(data=tmp_df, x="variable", y="Inducibility", hue="MI", kind="bar", hue_order=["LCx", "LAD"])
+    # addHorizontalLinesToPlot(fig7)
+    # plt.savefig(os.path.join(args.outPath, "figure7.png"), dpi=500)
+    # plt.savefig(os.path.join(args.outPath, "figure7.pdf"), dpi=500)
+
+    # The same but UVT is equal to 0
+    # tmp_df = copy.deepcopy(df_categories)
+    # tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 250ms", "s2 265ms", "s2 280ms", "s2 295ms"]) # we put all together and drop the Not captured values
+    # tmp_df = tmp_df.dropna(how='any')
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 250ms", "S2-250")
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 265ms", "S2-265")
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 280ms", "S2-280")
+    # tmp_df["variable"] = tmp_df["variable"].replace("s2 295ms", "S2-295")
+
+    # tmp_df["value"]    = tmp_df["value"].map(replacement3)
+    # tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    # tmp_df = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    # tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
+
+    # fig7 = sns.catplot(data=tmp_df, x="variable", y="Inducibility", hue="MI", kind="bar", hue_order=["LCx", "LAD"])
+    # addHorizontalLinesToPlot(fig7)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure7.png"), dpi=500)
+    #plt.savefig(os.path.join(VTonlyResultsPath, "figure7.pdf"), dpi=500)
+
+    # Review ---------------------------------------------------------------------------------------------------------------------------------
+    # Set the default color palette
+    custom_palette = ['#C0C0C0', '#2ca02c', '#9467bd', '#d62728', '#1f77b4', '#ff7f0e'] # gren, purple, red, blue, orange
+    sns.set_palette(custom_palette)
+
+    # tmp_df = copy.deepcopy(df_categories)
+    # tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 265ms", "s2 280ms", "s2 295ms"]) # we put all together and drop the Not captured values
+    # # tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
+    # # tmp_df = tmp_df.loc[tmp_df["value"] != "NR"]
+
+    # sns.catplot(data=tmp_df, x="MI", y="pig", hue="value", kind="swarm", s=30, hue_order=["NC", "NR", "UVT", "VT"])
+    # plt.savefig(os.path.join(args.outPath, "figure5left.png"), dpi=500)
+    # plt.savefig(os.path.join(args.outPath, "figure5left.pdf"), dpi=500)
+    # # plt.show()
+
+    # # Print the mean arrhythmicity for each pig 
+    # tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    # tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+    # tmp_df = tmp_df.groupby(["pig"])["Inducibility"].mean().reset_index()
+    # tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
+
+    # print("Results figure 5 left: {0}".format(tmp_df))
+
+    # Fig5 rig disaggregated
+    custom_palette = ['#2ca02c', '#9467bd', '#d62728', '#1f77b4', '#ff7f0e'] # gren, purple, red, blue, orange
+    sns.set_palette(custom_palette)
+
     tmp_df = copy.deepcopy(df_categories)
     tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 250ms", "s2 265ms", "s2 280ms", "s2 295ms"]) # we put all together and drop the Not captured values
+    tmp_df = tmp_df.loc[tmp_df["value"] != "NC"]
     tmp_df = tmp_df.dropna(how='any')
     tmp_df["variable"] = tmp_df["variable"].replace("s2 250ms", "S2-250")
     tmp_df["variable"] = tmp_df["variable"].replace("s2 265ms", "S2-265")
@@ -489,32 +554,48 @@ def main():
 
     tmp_df["value"]    = tmp_df["value"].map(replacement2)
     tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
-    tmp_df = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
+    tmp_df = tmp_df.groupby(["pig", "variable"])["Inducibility"].mean().reset_index()
     tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
 
-    fig7 = sns.catplot(data=tmp_df, x="variable", y="Inducibility", hue="MI", kind="bar", hue_order=["LCx", "LAD"])
+    
+
+    fig7 = sns.catplot(data=tmp_df, x="pig", y="Inducibility", hue="variable", kind="bar")
     addHorizontalLinesToPlot(fig7)
-    #plt.savefig(os.path.join(args.outPath, "figure7.png"), dpi=500)
-    #plt.savefig(os.path.join(args.outPath, "figure7.pdf"), dpi=500)
+    plt.savefig(os.path.join(args.outPath, "figure5right.png"), dpi=500)
+    plt.savefig(os.path.join(args.outPath, "figure5right.pdf"), dpi=500)
 
-    # The same but UVT is equal to 0
-    tmp_df = copy.deepcopy(df_categories)
-    tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 250ms", "s2 265ms", "s2 280ms", "s2 295ms"]) # we put all together and drop the Not captured values
-    tmp_df = tmp_df.dropna(how='any')
-    tmp_df["variable"] = tmp_df["variable"].replace("s2 250ms", "S2-250")
-    tmp_df["variable"] = tmp_df["variable"].replace("s2 265ms", "S2-265")
-    tmp_df["variable"] = tmp_df["variable"].replace("s2 280ms", "S2-280")
-    tmp_df["variable"] = tmp_df["variable"].replace("s2 295ms", "S2-295")
+    print("Results figure 5 right: {0}".format(tmp_df))
 
-    tmp_df["value"]    = tmp_df["value"].map(replacement3)
-    tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
-    tmp_df = tmp_df.groupby(["MI", "variable"])["Inducibility"].mean().reset_index()
-    tmp_df['Inducibility'] = tmp_df['Inducibility'] / 3
 
-    fig7 = sns.catplot(data=tmp_df, x="variable", y="Inducibility", hue="MI", kind="bar", hue_order=["LCx", "LAD"])
-    addHorizontalLinesToPlot(fig7)
-    #plt.savefig(os.path.join(VTonlyResultsPath, "figure7.png"), dpi=500)
-    #plt.savefig(os.path.join(VTonlyResultsPath, "figure7.pdf"), dpi=500)
+    # with and without CS -------------------------------------------------------------------------------------
+    # tmp_df = copy.deepcopy(df_categories)
+    # tmp_df = tmp_df.melt(id_vars=["pig", "MI"], value_vars=["s2 295ms", "without CS"])
+    # tmp_df = tmp_df.dropna(how='any')
+    # tmp_df['pig'] = tmp_df['pig'].astype(int)
+    # tmp_df = tmp_df[tmp_df["pig"].isin([6, 7, 11, 12])]
+
+    # tmp_df["variable"] = tmp_df["variable"].map({"s2 295ms": "With CS", "without CS": "Without CS"})
+    # tmp_df["pig"] = tmp_df["pig"].replace(6, "LCx LI")
+    # tmp_df["pig"] = tmp_df["pig"].replace(7, "LCx HI")
+    # tmp_df["pig"] = tmp_df["pig"].replace(11, "LAD HI")
+    # tmp_df["pig"] = tmp_df["pig"].replace(12, "LAD LI")
+    # tmp_df = tmp_df.loc[~((tmp_df["value"] == "NC") & (tmp_df["variable"] == "With CS"))]
+
+    # sns.catplot(data=tmp_df, x="variable", y="pig", hue="value", kind="swarm", s=60, hue_order=["NC", "NR", "UVT", "VT"])
+    # plt.savefig(os.path.join(args.outPath, "figure3.png"), dpi=500)
+    # plt.savefig(os.path.join(args.outPath, "figure3.pdf"), dpi=500)
+
+    # tmp_df["value"]    = tmp_df["value"].map(replacement2)
+    # tmp_df = tmp_df.rename(columns={"value": "Inducibility"})
+
+    # tmp_df1 = tmp_df.groupby(["pig", "variable"])["Inducibility"].mean().reset_index()
+    # tmp_df1['Inducibility'] = tmp_df1['Inducibility'] / 3    # so due to the assigned we have 3 for the maximum arrhthmicity and 0 for none at all so we normalize to have 0-1 range
+    # fig3b = sns.catplot(data=tmp_df1, x="pig", y="Inducibility", hue="variable", kind="bar", order=["LCx LI", "LCx HI", "LAD LI", "LAD HI"])
+    # addHorizontalLinesToPlot(fig3b)
+    # plt.savefig(os.path.join(args.outPath, "figure3b.png"), dpi=500)
+    # plt.savefig(os.path.join(args.outPath, "figure3b.pdf"), dpi=500)
+
+    # print(tmp_df1)
 
 
 

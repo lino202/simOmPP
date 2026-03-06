@@ -166,30 +166,6 @@ python D:/Simulations/simOmPP/getResultsFromOmapResults.py ^
 --pigNumber                 4
 
 
-python D:/Simulations/simOmPP/getResultsFromOmapResults.py ^
---folderPath                D:/Data/OM_PigHeart/MI/20220223_PigInfarcted6 ^
---videoNumber               24 ^
---infarction                ^
---roisName                  anterior_view_masks ^
---shouldNotHaveAllPoints    ^
---cleanProcess              2 ^
---blockDown                 0 ^
---blockUp                   0 ^
---pixRes                    0.08851 ^
---maxDist                   3 ^
---maxCV                     300 ^
---cvCalcMethod              vanilla ^
---scaleVectors              1. ^
---startFrame                352 ^
---endFrame                  6900 ^
---oneCycleSamples           247 ^
---apdtype                   90 ^
---fps                       500 ^
---reverse                   ^
---stimFreq                  500 ^
---stimType                  VD ^
---faceView                  AV ^
---pigNumber                 4
 
 
 @REM Check this also as the APD is really strange (M like signals)
@@ -272,33 +248,6 @@ python D:/Simulations/simOmPP/getResultsFromOmapResults.py ^
 --reverse                   ^
 --stimFreq                  1000 ^
 --stimType                  VD ^
---faceView                  PV ^
---pigNumber                 4
-
-
-
-python D:/Simulations/simOmPP/getResultsFromOmapResults.py ^
---folderPath                D:/Data/OM_PigHeart/MI/20220223_PigInfarcted6 ^
---videoNumber               31 ^
---infarction                ^
---roisName                  posterior_view_masks ^
---shouldNotHaveAllPoints    ^
---cleanProcess              2 ^
---blockDown                 0 ^
---blockUp                   0 ^
---pixRes                    0.08851 ^
---maxDist                   3 ^
---maxCV                     300 ^
---cvCalcMethod              vanilla ^
---scaleVectors              1. ^
---startFrame                250 ^
---endFrame                  7050 ^
---oneCycleSamples           346 ^
---apdtype                   90 ^
---fps                       500 ^
---reverse                   ^
---stimFreq                  700 ^
---stimType                  VI ^
 --faceView                  PV ^
 --pigNumber                 4
 

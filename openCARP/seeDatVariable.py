@@ -16,12 +16,13 @@ parser.add_argument('--inDatFile',type=str, required=True, help='path to data')
 args = parser.parse_args()
 
 v = np.loadtxt(args.inDatFile)[1:,-1]
-
+time = np.loadtxt(args.inDatFile)[1:,0]
 
 fig, axes = plt.subplots(1, 1, sharex=False, sharey=False)
-axes.plot(v)
+axes.plot(time, v)
 axes.set_title("Last AP of 10s with BCL=1000ms")
 axes.set_ylabel("V (mV)")
+axes.set_xlabel("t (ms)")
 # axes.set_xlabel("t (ms)")
 # axes.legend(["Gaur, pig", "O'hara, human (epi)"])
 axes.grid()

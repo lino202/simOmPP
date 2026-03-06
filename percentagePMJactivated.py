@@ -21,11 +21,11 @@ def main():
     args = parser.parse_args()
 
     cs_mesh  = meshio.read(args.csMeshPath)
-    cs_ats   = cs_mesh.point_data['ATs_absolute_(ms)']
+    cs_ats   = cs_mesh.point_data['ATs_absolute_(ms)'] if 'ATs_absolute_(ms)' in cs_mesh.point_data else np.zeros(cs_mesh.points.shape[0]) # if no ats, all zeros and all pmjs activated!!
     cs_cells = cs_mesh.cells_dict['line']
 
     tissue_mesh  = meshio.read(args.tissueMeshPath)
-    tissue_ats   = tissue_mesh.point_data['ATs_absolute_(ms)']
+    tissue_ats   = tissue_mesh.point_data['ATs_absolute_(ms)'] if 'ATs_absolute_(ms)' in tissue_mesh.point_data else np.zeros(tissue_mesh.points.shape[0])
     tissue_cells = tissue_mesh.cells_dict['tetra'] 
 
     res = {}
@@ -41,8 +41,8 @@ def main():
     pmj_edges_ats = cs_ats[pmj_edges]
     activated_pmjs = np.diff(pmj_edges_ats, axis=1) # should have positive value and less than threshold if it is activated correctly
     activated_pmjs = np.where((activated_pmjs <= args.activationDelay) & (activated_pmjs>=0))[0] # does not count nans, perfect!
-    print("The total amount of pmjs is {:d}".format(idxs_pmj.shape[0]))
-    print("The amount of activated cs-pmjs are {:d}".format(activated_pmjs.shape[0]))
+    # print("The total amount of pmjs is {:d}".format(idxs_pmj.shape[0]))
+    # print("The amount of activated cs-pmjs are {:d}".format(activated_pmjs.shape[0]))
 
     res["CS ends"] = idxs_pmj.shape[0]
     res["CS ends activated"] = activated_pmjs.shape[0]
@@ -67,9 +67,9 @@ def main():
                 n_pmjs_activated += 1; 
 
     
-    print("The amount of cs-pmjs unconnected with tissue are {:d}".format(np.count_nonzero(np.isnan(pmjs_activated_percentage))))
-    print("From the cs-pmjs connected with tissue the mean number of connected nodes {:.2f}".format(np.nanmean(n_pmjs_tissue_connections)))
-    print("The amount of activated cs-tissue pmjs are {:d}".format(n_pmjs_activated))
+    # print("The amount of cs-pmjs unconnected with tissue are {:d}".format(np.count_nonzero(np.isnan(pmjs_activated_percentage))))
+    # print("From the cs-pmjs connected with tissue the mean number of connected nodes {:.2f}".format(np.nanmean(n_pmjs_tissue_connections)))
+    # print("The amount of activated cs-tissue pmjs are {:d}".format(n_pmjs_activated))
 
     res["CS ends unconnected"]        = np.count_nonzero(np.isnan(pmjs_activated_percentage))
     res["CS-Tissue mean connections"] = np.nanmean(n_pmjs_tissue_connections)

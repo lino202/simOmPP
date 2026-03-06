@@ -233,7 +233,7 @@ set(fig, 'Position', [0, 0, 2000, 1200]); % [left, bottom, width, height]
 exportgraphics(gcf,append(ecg_path_results, 'simulations_filtered_norm.png'),'Resolution',400);
 %% Load experimental
 
-exp_path = 'D:/Paper3/Experimental/Mapping/Study_13_12_2023/map2/median_beats/';
+exp_path = 'F:/Paper3/Experimental/Mapping/Study_13_12_2023/map2/median_beats/';
 load(append(exp_path, 'median_beats.mat'), 'median_beats','ECG_headers', 'fs');
 fs_exp = 1000; %round(fs);
 

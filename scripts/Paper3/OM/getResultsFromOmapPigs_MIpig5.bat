@@ -161,6 +161,7 @@ python D:/Simulations/simOmPP/getResultsFromOmapResults.py ^
 
 
 @REM This has just three pulses and it was really not following th stim freq so check!
+@REM REVIEW not used 
 python D:/Simulations/simOmPP/getResultsFromOmapResults.py ^
 --folderPath                D:/Data/OM_PigHeart/MI/20211214_PigInfarcted5 ^
 --videoNumber               20 ^

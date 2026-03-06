@@ -62,11 +62,11 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--meshPath", "D:/Paper3/Simulations/invivo/he/sample1/results_fib_fromdwi_cs_endo_tentusscher/results_anterior_view_prueba.vtu",
+                "--meshPath", "D:/Paper4/Simulations/invivo/mi_EHT1/sample6_x/S2_295/results_mi_CL600_1800ms_stimAHA17_S2_295_total/sample6x_ATs_CVs_ epi_lateral_view.vtk",
                 "--spaceUnit", "mm",
-                "--maxDist", "0.6",  //in space units
-                "--maxCV", "300", // in cm/s
-                "--resExcel", "D:/Paper3/Simulations/invivo/he/results_epi_cv_from_epi_at.xlsx"
+                "--maxDist", "3",  //in space units
+                "--maxCV", "1000", // in cm/s
+                "--resExcel", "D:/Paper4/Simulations/invivo/mi_EHT1/sample6_x/S2_295/results_mi_CL600_1800ms_stimAHA17_S2_295_total/results_epi_cv_from_epi_at.xlsx"
             ],
         },
 
@@ -958,8 +958,8 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--csMeshPath",       "D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_gaur_pmjratio20/cs_myresults.vtk",
-                "--tissueMeshPath",   "D:/Paper3/Simulations/invivo/he/source_sink_mismatch/results_fib_standard_cs_endo_gaur_pmjratio20/myresults.vtk",
+                "--csMeshPath",       "F:/Paper3/Models/invivo/mi/cx/sample6_x/stim/cs/final/cs_subendo_intramyo.vtk",
+                "--tissueMeshPath",   "F:/Paper3/Models/invivo/mi/cx/sample6_x/mesh_mi_noscar.vtk",
                 "--pmjRatio",         "0.5",
                 "--activationDelay",  "1.5",
                 "--resExcel",         "D:/Paper3/Simulations/invivo/he/hola.xlsx",
@@ -992,11 +992,23 @@
             "console": "externalTerminal",
             "justMyCode": true,
             "args": [
-                "--meshPath",   "D:/Paper3/Simulations/invivo/mi/la/sample8/results_mi_CL1000_3000ms_CUSTOM_noscar/myresults_complete.vtk",
-                "--resExcel",   "D:/Paper3/Simulations/invivo/mi/la/results_vol_askcjbas.xlsx",
+                "--meshPath",   "F:/Paper3/Simulations/invivo/he/sample1/results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_meijbord/results_anterior_view.vtu",
+                "--resExcel",   "F:/Paper3/Simulations/invivo/results_epi_review.xlsx",
             ],
         },
 
+        {
+            "name": "runParaviewScriptOnResults",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/runParaviewScriptOnResults.py",
+            "console": "externalTerminal",
+            "justMyCode": true,
+            "args": [
+                "--resultsFolderPath",   "F:/Paper3/Simulations/invivo/he/sample1/results_fib_standard_cs_intra_gaur_rv_septum_lv_down_CL769_meijbord_APDSHT3/results_anterior_view.vtu",
+                "--paraviewScriptPath",  "F:/Paper3/Simulations/invivo/he/sample1/getAntResultsReview.py",
+            ],
+        },
 
         {
             "name": "cleanElectraResults",
@@ -1095,7 +1107,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--inDatFile", "D:/Paper3/ComparisonGaur/gaur_base/Trace_0.dat",
+                "--inDatFile", "D:/Paper4/Cell_sims/gaur_600CL_1200s/opencarp/Trace_0.dat",
 
             ],
         },
@@ -1146,6 +1158,39 @@
             ],
         },
 
+        {
+            "name": "getResultsFromOmapResults_Review",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/getResultsFromOmapResults_Review.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--folderPath",                "G:/Data/OM_PigHeart/Control/20201006_Brave_pig6",
+                "--videoNumber",               "15_revision",
+                "--roisName",                  "anterior_view_specific_15",
+                "--shouldNotHaveAllPoints",    
+                "--cleanProcess",              "2",
+                "--blockDown",                 "0",
+                "--blockUp",                   "46",
+                "--pixRes",                    "0.1015",
+                "--maxDist",                   "3",
+                "--maxCV",                     "300",
+                "--cvCalcMethod",              "vanilla",
+                "--scaleVectors",              "1",
+                "--startFrame",                "1250",
+                "--endFrame",                  "6350",
+                "--oneCycleSamples",           "481",
+                "--apdtype",                   "90",
+                "--fps",                       "500",
+                "--reverse",                   
+                "--stimFreq",                  "1000",
+                "--stimType",                  "RS",
+                "--faceView",                  "AV",
+                "--pigNumber",                 "6"
+            ],
+        },
+
         // ---------------------------AIDA AUTOMATIC APD ----------------------------------------
         {
             "name": "Aida_getScaffoldMask",
@@ -1188,32 +1233,37 @@
             "justMyCode": true,
             "args": [
                 "--filePaths", 
-                "D:/Paper3/Cell_sims/final/he/Gaur/transmural_gaur/meijbord/898CL/gaur_mid_mid_898CL_1796s_Vm.mat",
-                "D:/Paper3/Cell_sims/final/mi/CL898/gaur_bz_gk1_312_898CL_1796s_Vm.mat",
-                "D:/Paper3/Cell_sims/final/mi/CL898/gaur_bz_onlyGK1_312_898CL_1796s_Vm.mat",
-                "D:/Paper3/Cell_sims/final/mi/CL898/gaur_bz_onlyINA_898CL_1796s_Vm.mat",
+                "F:/Paper3/Cell_sims/final/review/gaur_he_midmid_1000CL_2000s_Vm.mat",
+                "F:/Paper3/Cell_sims/final/review/gaur_mi_gKr289_1000CL_2000s_Vm.mat",
+                "F:/Paper3/Cell_sims/final/review/gaur_mi_gKs289_1000CL_2000s_Vm.mat",
+                "F:/Paper3/Cell_sims/final/review/gaur_mi_gKrs289_1000CL_2000s_Vm.mat",
+                "F:/Paper3/Cell_sims/final/review/gaur_mi_gK1289_1000CL_2000s_Vm.mat",
+                "F:/Paper3/Cell_sims/final/review/gaur_mi_gKrs289_gNa38_1000CL_2000s_Vm.mat",
 
 
                 "--starts",    //en ms
-                "1795000",
-                "1795000",
-                "1795000",
-                "1795000",
+                "1999000",
+                "1999000",
+                "1999000",
+                "1999000",
+                "1999000",
+                "1999000",
                 
 
                 "--ends",    //en ms
-                "1796000",
-                "1796000",
-                "1796000",
-                "1796000",
-
+                "2000000",
+                "2000000",
+                "2000000",
+                "2000000",
+                "2000000",
+                "2000000",
 
                 "--dt", "0.01",
                 "--apdType", "90",
 
-                "--names", "he", "gNa 42 & gk1 31.2", "only gk1", "only gNa",
+                "--names", "he", "gKr", "gKs", "gKr & gKs", "gK1", "gKr & gKs & gNa",
 
-                "--outPath",  "D:/Paper3/Cell_sims/final/mi/last_beats_MI_sample6.png"
+                "--outPath",  "F:/Paper3/Cell_sims/final/review/plot.pdf"
             ],
         },
 
@@ -1416,8 +1466,8 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--resultsFolderPath",  "D:/Paper4/Simulations/invivo/mi/sample4/S2_265/results_mi_CL600_1800ms_stimAHA1_S2_265_total",
-                "--paraviewScriptPath", "D:/Paper4/Simulations/invivo/mi/sample4/S2_265/make_cs_tissue_video.py",
+                "--resultsFolderPath",  "G:/Data/RM/Erica/DTI126V2/myresults/Simulations/results_he",
+                "--paraviewScriptPath", "G:/Data/RM/Erica/DTI126V2/myresults/Simulations/make_cs_tissue_video.py",
             ],
         },
 
@@ -1443,8 +1493,8 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "--videoPath",     "D:/Paper4/Simulations/invivo/mi_EHT2/sample4/S2_295/results_mi_CL600_1800ms_stimAHA4_S2_295/video_fps5ms.mp4",
-                "--videoOutPath",  "D:/Paper4/Simulations/invivo/mi_EHT2/sample4/S2_295/results_mi_CL600_1800ms_stimAHA4_S2_295/video_fps5ms_10fps.mp4",
+                "--videoPath",     "G:/Data/RM/Erica/DTI126V2/myresults/Simulations/results_mi_noscar_rand1/video.mp4",
+                "--videoOutPath",  "G:/Data/RM/Erica/DTI126V2/myresults/Simulations/results_mi_noscar_rand1/video_10fps.mp4",
                 "--fps",           "10"
             ],
         },
@@ -1563,21 +1613,96 @@
             "justMyCode": true,
             "args": [
                 "--excelFile",          "D:/Paper4/Main_Info.xlsx",
-                "--outPath",            "D:/Paper4/Results"
+                "--outPath",            "D:/Paper4/Results/review"
+            ],
+        },
+
+
+        {
+            "name": "anterogradeRetrogadePMJ",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/anterogradeRetrogadePMJ.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--csMeshPath",       "G:/Paper4/Simulations/invivo/mi/sample6_x/S2_295/results_mi_CL600_1800ms_stimAHA13_S2_295/cs_ats.vtk",
+                "--tissueMeshPath",   "G:/Paper4/Simulations/invivo/mi/sample6_x/S2_295/results_mi_CL600_1800ms_stimAHA13_S2_295/biv_ats.vtk",
+                "--pmjRatio",         "1",
+
+                // "--csMeshPath",       "F:/Paper3/Simulations/invivo/mi/cx/sample6_x/results_mi_CL898_2694ms_AVERAGE_noscar_BASE/cs_myresults.vtk",
+                // "--tissueMeshPath",   "F:/Paper3/Simulations/invivo/mi/cx/sample6_x/results_mi_CL898_2694ms_AVERAGE_noscar_BASE/myresults.vtk",
+                // "--pmjRatio",         "0.5",
             ],
         },
 
 
         
-        //  ---------------------------------------------END Paper4 -----------------------------
+        {
+            "name": "plotVmTraces",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmTraces.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath",       "G:/Paper4/Simulations/invivo/mi/sample6_x/S2_295/results_mi_CL600_1800ms_stimAHA3_S2_295/tissue",
+                "--pointIdxs",      "2260389",	"2280483",	"1498539",	"1076117",
+                "--vlines",         "390", "440", "520", "740", "840",
+                "--timeStart",      "10",
+                "--timeEnd",        "1305",
+                "--dt",             "1",
+                "--nDigits",        "4",
+                "--soluName",       "tissue_solution",
+                "--outPath",        "C:/Maxi/Documents/PhD_Main/Papers/Paper4/images/figure7/pig6/vm_traces_2260389_2280483_1498539_1076117.pdf"
+            ],
+        },
 
 
-                {
+        {
+            "name": "plotVmTracesOnlyPlot",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmTracesOnlyPlot.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--dataPath",       "C:/Maxi/Documents/PhD_Main/Papers/Paper4/images/figure8/tissue_vm_traces_1576842_576376_withCS.pkl",
+                                    "C:/Maxi/Documents/PhD_Main/Papers/Paper4/images/figure8/cs_vm_traces_5873_withCS.pkl",
+                                    "C:/Maxi/Documents/PhD_Main/Papers/Paper4/images/figure8/tissue_vm_traces_1576842_576376_withoutCS.pkl",
+                "--vlines",         "290", "300", "310", "320", "330",
+                "--timeStart",      "0",
+                "--timeEnd",        "600",
+                "--dt",             "1",
+                "--nSignals",       "5",
+                "--outPath",        "C:/Maxi/Documents/PhD_Main/Papers/Paper4/images/figure8/tissue_cs_vm_traces_1576842_576376_5873.pdf"
+            ],
+        },
+
+
+        {
+            "name": "checkAHAPointsOnPMJ",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/checkAHAPointsOnPMJ.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--csMeshPath",       "F:/Paper3/Models/invivo/mi/cx/sample6_x/stim/cs/final/cs_subendo_intramyo.vtk",
+                "--tissueMeshPath",   "E:/Paper3/Models/invivo/mi/cx/sample6_x/aha_segments/mesh_no_scar.vtk",
+                "--pmjRatio",         "1",
+                "--segAHA",           "1",
+
+            ],
+        },
+
+
+        {
             "name": "plotVmFromElectraCell_paper4",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/plotVmFromElectraCell.py",
-            "console": "externalTerminal",
+            "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
                 "--filePaths", 
@@ -1659,6 +1784,165 @@
                 "--outPath",  "D:/Paper4/Cell_sims/all_cells.png"
             ],
         },
+
+
+        {
+            "name": "plotVmFromElectraCell_paper4_2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmFromElectraCell.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePaths", 
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/opencarp/038GNa_0289GK1_standardstim_600beats_600CL/Trace_0.dat",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/gaur_bz_gk1_289_600CL_1200s_Vm.mat",
+
+                "--starts",    //en ms
+                "359400",
+                "359400",
+
+                "--ends",    //en ms
+                "360000",
+                "360000",
+
+                "--dt", "1", "0.01",
+                "--apdType", "90",
+                "--names", "BZ_opencarp", "BZ_electra",
+                "--outPath",  "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/opencarp/BZ_CL600_600beats_opencarp_electra_lastbeat.png"
+            ],
+        },
+
+
+        {
+            "name": "plotVmFromElectraCell_paper4_3_1",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmFromElectraCell.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePaths", 
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_09GNa_0289GK1_400CL_40s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_09GNa_0289GK1_500CL_50s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_09GNa_0289GK1_600CL_60s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_09GNa_0289GK1_700CL_70s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_09GNa_0289GK1_800CL_80s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_09GNa_0289GK1_900CL_90s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_09GNa_0289GK1_1000CL_100s_Vm.txt",
+
+                "--starts",    //en ms
+                "39600",
+                "49500",
+                "59400",
+                "69300",
+                "79200",
+                "89100",
+                "99000",
+
+                "--ends",    //en ms
+                "40000",
+                "50000",
+                "60000",
+                "70000",
+                "80000",
+                "90000",
+                "100000",
+
+                "--dt", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01",
+                "--apdType", "90",
+                "--names", "CL 400", "CL 500", "CL 600", "CL 700", "CL 800", "CL 900", "CL 1000",
+                "--outPath",  "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/BZ_09GNa_CLs_100beatsNOSTABLEAPD_electra_lastbeat4each.png"
+            ],
+        },
+
+        {
+            "name": "plotVmFromElectraCell_paper4_3_2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmFromElectraCell.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePaths", 
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_038GNa_400CL_40s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_038GNa_500CL_50s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_038GNa_600CL_60s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_038GNa_700CL_70s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_038GNa_800CL_80s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_038GNa_900CL_90s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_038GNa_1000CL_100s_Vm.txt",
+
+                "--starts",    //en ms
+                "39600",
+                "49500",
+                "59400",
+                "69300",
+                "79200",
+                "89100",
+                "99000",
+
+                "--ends",    //en ms
+                "40000",
+                "50000",
+                "60000",
+                "70000",
+                "80000",
+                "90000",
+                "100000",
+
+                "--dt", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01",
+                "--apdType", "90",
+                "--names", "CL 400", "CL 500", "CL 600", "CL 700", "CL 800", "CL 900", "CL 1000",
+                "--outPath",  "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/GNa_CLs_100beatsNOSTABLEAPD_electra_lastbeat4each.png"
+            ],
+        },
+
+
+                {
+            "name": "plotVmFromElectraCell_paper4_3_3",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/plotVmFromElectraCell.py",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--filePaths", 
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_0289GK1_400CL_40s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_0289GK1_500CL_50s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_0289GK1_600CL_60s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_0289GK1_700CL_70s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_0289GK1_800CL_80s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_0289GK1_900CL_90s_Vm.txt",
+                "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/gaur_0289GK1_1000CL_100s_Vm.txt",
+
+                "--starts",    //en ms
+                "39600",
+                "49500",
+                "59400",
+                "69300",
+                "79200",
+                "89100",
+                "99000",
+
+                "--ends",    //en ms
+                "40000",
+                "50000",
+                "60000",
+                "70000",
+                "80000",
+                "90000",
+                "100000",
+
+                "--dt", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01", "0.01",
+                "--apdType", "90",
+                "--names", "CL 400", "CL 500", "CL 600", "CL 700", "CL 800", "CL 900", "CL 1000",
+                "--outPath",  "D:/Paper4/Cell_sims/gaur_600CL_1200s/BZ_issue/GK1_CLs_100beatsNOSTABLEAPD_electra_lastbeat4each.png"
+            ],
+        },
+
+        //  ---------------------------------------------END Paper4 -----------------------------
+
 
 
     ]

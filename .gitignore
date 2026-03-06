@@ -6,4 +6,5 @@
 __pycache__/
 examples/
 pECG/stable/
-scripts/
+scripts/Erica/*
+scripts/ManuPerth/*
